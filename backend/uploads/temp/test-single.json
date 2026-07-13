@@ -1,0 +1,15 @@
+{
+  "name": "Test Product G (Single)",
+  "sku": "TST-SNG-G-007",
+  "category": "Testing",
+  "brand": "TestBrand",
+  "unit": "pcs",
+  "description": "Imported from single object format",
+  "mrp": 999,
+  "selling_price": 899,
+  "purchase_price": 699,
+  "gst_rate": 18,
+  "quantity": 10,
+  "min_stock": 2,
+  "image_url": "https://picsum.photos/seed/prod7/200/200"
+}

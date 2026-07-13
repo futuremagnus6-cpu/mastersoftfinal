@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Welcome To Riyansh Multitrade Pvt. Ltd.</title>
+<meta name="keywords" content="">
+<meta name="description" content="">
+<meta name="author" content="">
+<!-- Favicon -->
+<link rel="apple-touch-icon" sizes="180x180" href="images/riyansh_fev.png">
+<link rel="icon" type="image/png" sizes="32x32" href="images/riyansh_fev.png">
+
+<!-- Plugins CSS File -->
+<link href="font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+<link rel="stylesheet" href="assets/css/plugins/owl-carousel/owl.carousel.css">
+<link rel="stylesheet" href="assets/css/plugins/magnific-popup/magnific-popup.css">
+<!-- Main CSS File -->
+<link rel="stylesheet" href="assets/css/style.css">
+
+
+<link href="assets/css/gstatic.css" rel="stylesheet">
+<link href="assets/css/noto_sans_font.css" rel="stylesheet">
+<link href="assets/css/noto_sans_two.css" rel="stylesheet">
+<link href="assets/css/dancing_script.css" rel="stylesheet">
+<link rel='stylesheet' id='ahortcodes-css'  href='products_scroll/css/shortcodes.css' type='text/css' media='all' />
+<script type='text/javascript' src='products_scroll/js/jquery/jquery.js'></script>
+
+
+ <style>
+        /* CSS for logo display */
+        #logo {
+            display: block;
+            /*margin: 0 auto;  Centers the logo horizontally */
+						margin: 65px 60px 65px 85px; /* Centers the logo horizontally */
+           /* background-color: #ffffff;*/
+		        border-radius: 100px;
+					
+        }
+				
+				#logo-container
+				{
+					position:absolute;
+					/*background: rgba(253, 254, 253, 1);*/
+				}
+				#bodycontent
+				{
+					background: rgba(130, 130, 130, 0.1);
+				}
+    </style>
+
+</head>
+
+<body>
+<div class="page-wrapper">
+  <header class="header">
+    <div class="header-middle sticky-header">
+      <div class="container">
+        <div class="header-left">
+          <button class="mobile-menu-toggler"> <span class="sr-only">Toggle mobile menu</span> <i class="icon-bars"></i> </button>
+          <a href="index.php" class="logo"> <img src="images/logo.png" alt=""> </a>
+          <nav class="main-nav">
+            <ul class="menu sf-arrows">
+              <li ><a href="index.php">Home</a></li>
+              <li> <a href="#" class="sf-with-ul">About&nbsp;Riyansh</a>
+                <ul>
+                  <li><a href="chairman_message.php">Chairman Message</a></li>
+                   <li><a href="visionmission.php">Vision Mission</a></li>
+                  <li><a href="compliance_documents.php">Compliance</a></li>
+                  <li><a href="banking.php">Banking Partner</a></li>
+                </ul>
+              </li>
+               
+              <li  class="active" ><a href="products.php">Products</a></li>
+              <li ><a href="businessplan.php">Business&nbsp;Plan</a></li>
+              <li ><a href="download.php">Download</a></li>
+               <li ><a href="contactus.php">Contact&nbsp;Us</a></li>
+              <!--<li><a href="../distributor/login.php"  target="_blank"><button class="bn632-hover bn23">Login</button></a></li>-->
+               <!--<li><a href="../distributor/login.php" target="_blank">Login</a></li>-->
+            </ul>
+            <!-- End .menu -->
+          </nav>
+          <!-- End .main-nav -->
+        </div>
+        
+        <!-- End .header-left -->
+        <div class="header-right">
+                <div class="dropdown cart-dropdown"> 
+                <button class="button_login" role="button"><a href="../distributor/login.php" target="_blank">Login</a></button>
+               <!-- <button class="button-85" role="button"><a href="../distributor/login.php" target="_blank">Login</a></button>-->
+                <!--<a href="../distributor/login.php" target="_blank" class="glowing-button">LOGIN</a>-->        
+               </div>
+        </div>
+        <!-- End .header-right -->
+      </div>
+      
+      <!--<div id="logo-container" style="width:100%">
+        <img id="logo" src="images/preloader.gif" alt="logo" style="width:150px" height="150px">
+    </div>-->
+      <!-- End .container -->
+    </div>
+    <!-- End .header-middle -->
+  </header>
+  <!-- End .header -->
+
+<link href="gallery/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="gallery/gallery/css/bootstrap.min.css">
+<link rel="stylesheet" href="gallery/gallery/css/baguetteBox.min.css">
+<link rel="stylesheet" href="gallery/gallery/css/fluid-gallery.css">
+
+<div class="page-header page-header-big text-center" style="background-image: url('assets/images/products_bg.jpg'); margin-bottom: 0px; ">
+  <h2 class="all_sub_titles">Our Products</h2>
+</div>
+
+<div class="container gallery-container">
+    <div class="tz-gallery">
+      <div class="row"><br /><br />
+      
+      <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a href="#."><img src="gallery/gallery/img/33.jpg" /></a>
+                  
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Pileorhoids Capsule</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                        
+                                          <td>MRP</td>
+                                            <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>1850</td> 
+                                          <td>1032</td>
+                                          <td>30</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+      
+         <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                  <a href="#."><img src="gallery/gallery/img/1.jpg" /></a>
+                  
+                      <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Amrit Juice</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                        <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                          
+                                           <td>SP</td>                                                          
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>1850</td> 
+                                          <td>1032</td>
+                                          
+                                          <td>30</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+       
+         
+           
+           <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/2.jpg" /></a>
+                <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Daibo G</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td>
+                                          <td>DP</td>
+                                          <td>SP</td>                                                          
+                                          </tr>
+                                        
+                                          <tr>
+                                           <td>1850</td> 
+                                           <td>1032</td>
+                                          <td>30</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/3.jpg" /></a>
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Artho G</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                        
+                                          </tr>
+                                        
+                                          <tr>
+                                           <td>1850</td> 
+                                           <td>1032</td>
+                                           <td>30</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/5.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Lady Life Care</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                          
+                                          </tr>
+                                        
+                                          <tr>
+                                           <td>1850</td> 
+                                           <td>1032</td>
+                                          <td>30</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+           <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/6.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh <br />Power Booster</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td>
+                                           <td>DP</td> 
+                                           <td>SP</td>                                                     
+                                          </tr>
+                                        
+                                          <tr>
+                                           <td>1850</td> 
+                                           <td>1032</td>
+                                          <td>30</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                  <a  href="#."><img src="gallery/gallery/img/7.jpg" /></a>
+                  
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br /> Amrit Capsule</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td>
+                                           <td>DP</td> 
+                                           <td>SP</td>                                                    
+                                          </tr>
+                                        
+                                          <tr>
+                                           <td>1780</td> 
+                                           <td>979</td>
+                                          <td>30</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+     	     </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/8.jpg" /></a>
+                  
+                   <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Add<br />Action Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td>
+                                           <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>467</td> 
+                                          <td>346</td>
+                                          <td>5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+           <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/9.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh NeemTulse<br /> & Alovera Soap</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td>
+                                           <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>69</td> 
+                                          <td>62</td>
+                                          <td>0.5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+                 
+              </div>
+        	 </div>
+           
+           <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/10.jpg" /></a>
+                  
+                   <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Rose Petal<br /> & Milk Soap</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          
+                                          <td>69</td> 
+                                          <td>62</td>
+                                          <td>0.5</td>                                                     
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/11.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh <br />Painolin Oil</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>467</td> 
+                                           <td>375</td>
+                                          <td>5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+             <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/12.jpg" /></a>
+                 
+                 <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Acity<br />Care Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                         
+                                          <td>MRP</td>
+                                           <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                         
+                                          <td>467</td>
+                                           <td>346</td> 
+                                          <td>5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+             <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/13.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Amrit<br />Alkyn Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>649</td>
+                                          <td>515</td> 
+                                          <td>8</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/14.jpg" /></a>
+                 
+                 <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh 3 In1 Face<br /> Wash + Scrub + Mask</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td>
+                                          <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>449</td> 
+                                          <td>399</td>
+                                          <td>5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/15.jpg" /></a>
+                
+                      <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Multivitamin<br /> Spray 30 Ml</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>439</td> 
+                                          <td>356</td>
+                                          <td>5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+           <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/16.jpg" /></a>
+                
+                 <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br /> Kesh Shampoo</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td>
+                                          <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>467</td> 
+                                           <td>375</td>
+                                          <td>4</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/17.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh <br />Dentolin Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td>
+                                          <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>279</td> 
+                                          <td>234</td>
+                                          <td>2</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/18.jpg" /></a>
+                 
+                 <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Minral Fresh<br /> 18 Herbs Hair Oil W</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>329</td>
+                                           <td>293</td> 
+                                          <td>3</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+             <div class="col-md-4 col-sm-4 col-lg-4">
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/19.jpg" /></a>
+                  
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh <br />Sanitary Napkin</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>129</td>
+                                           <td>109</td> 
+                                          <td>1</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/20.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Herbal <br />ToothPaste 150 Gm</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>194</td>
+                                           <td>178</td> 
+                                          <td>1.5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/21.jpg" /></a>
+                  
+                    <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Noni <br />ToothPaste 150 Gm</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>266</td>
+                                           <td>204</td> 
+                                          <td>1.5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/22.jpg" /></a>
+                  
+                   <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Rose Petals<br /> Face & Body Scrub</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>499</td> 
+                                          <td>399</td>
+                                          <td>5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/23.jpg" /></a>
+                  
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Foam<br /> Facewash - Sea Bucthorn</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td>
+                                          <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>499</td>
+                                           <td>419</td> 
+                                          <td>5</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/24.jpg" /></a>
+                 
+                 <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Golden Facial<br /> Glow Kit 50 Gm 5</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td>
+                                          <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>999</td> 
+                                           <td>799</td>
+                                          <td>11</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+           <div class="col-md-4 col-sm-4 col-lg-4">
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/25.jpg" /></a>
+                  
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br />Black Jaguar </p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          
+                                          <td>MRP</td>
+                                          <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                           
+                                          <td>999</td> 
+                                          <td>799</td>
+                                          <td>11</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/26.jpg" /></a>
+                  
+                   <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br /> Pink Jaguar</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                         <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>999</td>
+                                          <td>799</td> 
+                                          <td>11</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+           
+             <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/27.jpg" /></a>
+                  
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh Agri<br />Jackpot 500ml</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          
+                                          <td>MRP</td>
+                                          <td>DP</td> 
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>999</td> 
+                                          <td>799</td>
+                                          <td>20</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+                  
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/28.jpg" /></a>
+                  
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh <br />Stonex Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          
+                                          <td>MRP</td> 
+                                          <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>699</td> 
+                                          <td>609</td>
+                                          <td>15</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+           <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/34.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh <br />I - Clear Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>89</td> 
+                                          <td>80</td>
+                                          <td>1</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/35.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br /> Noni Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>699</td> 
+                                          <td>588</td>
+                                          <td>15</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+             <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/36.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br /> Moringa Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>699</td> 
+                                          <td>588</td>
+                                          <td>15</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+             <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/37.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br />Iroliv Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>699</td> 
+                                          <td>588</td>
+                                          <td>15</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/38.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh <br />Ear - ex Drop</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>89</td> 
+                                          <td>80</td>
+                                          <td>1</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/39.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br />Diaveda Capsule</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>1850</td> 
+                                          <td>1032</td>
+                                          <td>30 (Combo)</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/40.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br />Punarnava Plus</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>1850</td> 
+                                          <td>1032</td>
+                                          <td>30 (Combo)</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+            <div class="col-md-4 col-sm-4 col-lg-4"> 
+              <div class="productdiv">
+                 <a  href="#."><img src="gallery/gallery/img/41.jpg" /></a>
+                 
+                  <div class="product-body">
+                          <div class="product-price-table">
+                              <p class="product_name">Riyansh<br />Tensore Life</p>
+                                  <table cellspacing="0" cellpadding="0" class="table table-bordered table-hover">
+                                          <tr class="bg_tr">
+                                          <td>MRP</td> 
+                                           <td>DP</td>
+                                           <td>SP</td>                                                           
+                                          </tr>
+                                        
+                                          <tr>
+                                          <td>1850</td> 
+                                          <td>1032</td>
+                                          <td>30 (Combo)</td>                                                      
+                                          </tr>
+                                  </table>
+                          </div>                                               
+                      </div>
+              </div>
+        	 </div>
+           
+           
+      </div>
+    </div>
+  </div><br /><br />
+        
+
+  <footer class="footer footer-dark">
+    <div class="footer-middle">
+      <div class="container">
+        <div class="row">
+        
+          <div class="col-sm-6 col-lg-4 col-md-4">
+            <div class="widget">
+              <h4 class="widget-title">Contact Us !</h4>
+             
+              <ul class="widget-list">
+                <li><a href="#."><i class="fa fa-map-marker" aria-hidden="true"></i> Address :<br />  Sr. No. 108/5/1, 5<sup>th</sup> Floor, Gala No. 501, Jijamata Pride, Near Jilha Satra Nyayala, Ghulewadi, Sangamner, Dist. Ahmednagar  Pin - 422608, Maharashtra (INDIA)</a></li><br>
+                <li><a href="tel:+918686595977"><i class="fa fa-phone" aria-hidden="true"></i> Customer Care No. : +91 8686 595977</a></li>
+                <li><a href="mailto:riyanshinformation@gmail.com"><i class="fa fa-envelope" aria-hidden="true"></i> Email Id : riyanshinformation@gmail.com</a></li>
+                <li><a href="#"><i class="fa fa-link" aria-hidden="true"></i> Website : www.myriyansh.com</a></li>
+              </ul>
+            
+            </div>
+          </div>
+         
+         
+          <div class="col-sm-6 col-lg-2 col-md-2">
+            <div class="widget">
+              <h4 class="widget-title">Useful Links</h4>
+              <ul class="widget-list">
+                  <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="index.php"> Home</a></li>
+                  <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="chairman_message.php"> Chairman Message</a></li>
+                  <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="visionmission.php"> Vision Mission</a></li>
+                  <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="products.php"> Products</a></li>
+                  <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="businessplan.php"> Business Plan</a></li>
+                  <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="banking.php"> Banking Details</a></li>
+                 <!-- <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="legal.php"> Compliance</a></li>-->
+                  <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="gallery.php"> Gallery</a></li>
+                  <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="download.php"> Download</a></li>
+                   <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="compliance_documents.php"> Compliance</a></li>
+                <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="contactus.php"> Contact Us</a></li>
+              </ul>
+            </div>
+          </div>
+       
+         <div class="col-sm-6 col-lg-2 col-md-2">
+            <div class="widget">
+              <h4 class="widget-title">Quick Links</h4>
+             
+              <ul class="widget-list">
+                <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="../distributor/login.php" target="_blank"> Login</a></li>
+                <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="../repurchase/" target="_blank">Franchise Login</a></li>
+                <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="terms_conditions.php"> Terms & Conditions</a></li>
+                <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="privacy_policy.php"> Privacy Policy</a></li>
+                <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="grievance.php"> Grievance</a></li>
+                
+                <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="cancellation_policy.php"> Cancellation Policy</a></li>
+                <li><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="refund_returns.php"> Refund and<br /> Returns Policy</a></li>
+                 
+                 <li style="text-align:left;"><i class="fa fa-angle-double-right" style="font-size:16px"></i> <a href="service_request.php">Create Service Request</a></li>
+              </ul>
+            
+            </div>
+         
+          </div>
+        
+        
+           <div class="col-sm-6 col-lg-4 col-md-4">
+            <div class="widget widget-about"> <img src="images/footer_logo.png" class="footer-logo" alt="">
+             
+              <!--<div class="social-icons"> 
+                  <a href="#" class="social-icon" title="Facebook" target="_blank"><img src="images/social/facebook.png" title="Facebook"></a> 
+                  <a href="#" class="social-icon" title="Twitter" target="_blank"><i class="icon-twitter"></i></a> 
+                  <a href="#" class="social-icon" title="Instagram" target="_blank"><i class="icon-instagram"></i></a> 
+                  <a href="#" class="social-icon" title="Youtube" target="_blank"><i class="icon-youtube"></i></a> 
+              </div>-->
+              <!-- End .soial-icons -->
+            </div>
+          </div>
+          
+        </div>
+     
+      </div>
+    
+    </div>
+    <!-- End .footer-middle -->
+    
+    <div class="footer-bottom">
+      <div class="container">
+         <p style="font-size:15px;"><span style="color:#ffffff;float:left">Copyright © 2024 Riyansh Multitrade Pvt. Ltd. All Rights Reserved.</span> 
+       <!--<span style="float:right;color:#00d0ff">&nbsp; Powered by : <a href="http://www.infosoftsystems.co.in/" target="_blank">
+       <span style="color:#00d0ff">InfoSoft Systems</span></a></span>--></p>
+      </div>
+      <!-- End .container -->
+    </div>
+    <!-- End .footer-bottom -->
+  </footer>
+  <!-- End .footer -->
+</div>
+<!-- End .page-wrapper -->
+<button id="scroll-top" title="Back to Top"><i class="icon-arrow-up"></i></button>
+<!-- Mobile Menu -->
+<div class="mobile-menu-overlay"></div>
+<!-- End .mobil-menu-overlay -->
+<div class="mobile-menu-container">
+  <div class="mobile-menu-wrapper"> <span class="mobile-menu-close"><i class="icon-close"></i></span>
+    <nav class="mobile-nav">
+      <ul class="mobile-menu">
+		        <li> <a href="index.php">Home</a></li>
+              <li> <a href="#." class="sf-with-ul">About&nbsp;Riyansh</a>
+                <ul>
+                  <li><a href="chairman_message.php">Chairman Message</a></li>
+                   <li><a href="visionmission.php">Vision Mission</a></li>
+                  <li><a href="compliance_documents.php">Compliance Documents</a></li>
+                  <li><a href="banking.php">Banking Partner</a></li>
+                </ul>
+              </li>
+              <li><a href="products.php">Products</a></li>
+              <li><a href="images/riyansh_multitrade_business_brochure.pdf" target="_blank">Business&nbsp;Plan</a></li>
+              <li><a href="download.php">Downloads</a></li>
+               <li><a href="../distributor/login.php" target="_blank">Login</a></li>
+              <li><a href="contactus.php">Contact Us</a></li>
+        </ul>
+      <!-- End .menu -->
+    </nav>
+    <!-- End .mobile-nav -->
+   <!-- <div class="social-icons"> <a href="#" class="social-icon" target="_blank" title="Facebook"><i class="icon-facebook-f"></i></a> <a href="#" class="social-icon" target="_blank" title="Twitter"><i class="icon-twitter"></i></a> <a href="#" class="social-icon" target="_blank" title="Instagram"><i class="icon-instagram"></i></a> <a href="#" class="social-icon" target="_blank" title="Youtube"><i class="icon-youtube"></i></a> </div>-->
+    <!-- End .social-icons -->
+  </div>
+  <!-- End .mobile-menu-wrapper -->
+</div>
+<!-- End .mobile-menu-container -->
+<!-- Sign in / Register Modal -->
+
+<!-- End .modal -->
+
+<!--<div id="fixed-social">
+  <div>
+    <a href="#." class="fixed-facebook" target="_parent"><i class="fa fa-facebook"></i> <span>Facebook</span></a>
+  </div>
+ <div>
+    <a href="#." class="fixed-twitter" target="_parent"><i class="fa fa-twitter"></i> <span>Twitter</span></a>
+  </div>
+  <div>
+    <a href="#." class="fixed-gplus" target="_parent"><i class="fa fa-youtube"></i> <span>Youtube</span></a>
+  </div>
+  <div>
+    <a href="#." class="fixed-linkedin" target="_parent"><i class="fa fa-linkedin"></i> <span>LinkedIn</span></a>
+  </div>
+  <div>
+    <a href="#." class="fixed-instagrem" target="_parent"><i class="fa fa-instagram"></i> <span>Instagram</span></a>
+  </div>
+</div>-->
+
+<div class="buy-now"><a href="https://wa.link/lcd0s8" target="blank" class="buy-now-btn"><i class="fa fa-whatsapp" aria-hidden="true"></i></a>
+    <div class="ripple"></div>
+  </div>
+
+<!-- Plugins JS File -->
+
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/jquery.hoverIntent.min.js"></script>
+<script src="assets/js/jquery.waypoints.min.js"></script>
+<script src="assets/js/superfish.min.js"></script>
+<script src="assets/js/owl.carousel.min.js"></script>
+<script src="assets/js/jquery.magnific-popup.min.js"></script>
+<!-- Main JS File -->
+<script src="assets/js/main.js"></script>
+
+<script>
+        // JavaScript for displaying logo for 30 seconds and then reloading the page
+        document.addEventListener('DOMContentLoaded', function() {
+            var logoContainer = document.getElementById('logo-container');
+            var logo = document.getElementById('logo');
+            var bodycontent = document.getElementById('bodycontent');
+						
+            // Show logo for 30 seconds
+            setTimeout(function() {
+                logoContainer.style.display = 'none'; // Hide logo container
+								bodycontent.style.background ='none'; // remove opacity
+                // Reload the page after 30 seconds
+                setTimeout(function() {
+                    window.location.reload();
+                }, 900000); // 1000ms = 1 second
+            }, 6000); // 30000ms = 30 seconds
+        });
+    </script>
+    
+     <script type="text/javascript">
+    jQuery(function($){
+
+			$('.logos-slides').imagesLoaded(function(){
+					$('.logos-slides').carouFredSel({
+							auto: true,
+							width: '100%',
+							prev: '.logos-slider .prev',
+							next: '.logos-slider .next',
+							swipe: {
+									onTouch: true
+							},
+							scroll : {
+									items     : 1,
+									duration  :	500				}
+					});
+			});
+	
+			$('.bwWrapper').BlackAndWhite({
+					hoverEffect : true, // default true
+					// set the path to BnWWorker.js for a superfast implementation
+					webworkerPath : false,
+					// for the images with a fluid width and height
+					responsive:true,
+					speed: { //this property could also be just speed: value for both fadeIn and fadeOut
+							fadeIn: 200, // 200ms for fadeIn animations
+							fadeOut: 300 // 800ms for fadeOut animations
+					}
+			});
+	
+			$("a.bwWrapper[href='#']").click(function(){ return false })
+
+    });
+</script>
+    
+<script type='text/javascript' src='products_scroll/js/jquery/jquery.masonry.min.js'></script>
+<script type='text/javascript' src='products_scroll/js/jquery.carouFredSel-6.1.0-packed.js'></script>
+
+
+
+</body>
+</html>
+
+<script src="gallery/gallery/js/gallery.js"></script>
+  <script>
+    baguetteBox.run('.tz-gallery');
+  </script>

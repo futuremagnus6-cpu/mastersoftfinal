@@ -1,0 +1,21 @@
+{
+  "name": "future-magnus-bos",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Future Magnus Business OS — Monorepo root",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c yellow,cyan \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start": "concurrently -n backend,frontend -c yellow,cyan \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run preview",
+    "seed": "cd backend && npm run seed:super-admin",
+    "build": "cd frontend && npm run build",
+    "postinstall": "cd backend && npm install && cd ../frontend && npm install"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.0",
+    "motion": "^12.40.0"
+  }
+}

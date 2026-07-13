@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Test Product A (Array)",
+    "sku": "TST-ARR-A-001",
+    "category": "Testing",
+    "brand": "TestBrand",
+    "unit": "pcs",
+    "description": "Imported from JSON array format",
+    "mrp": 150,
+    "selling_price": 120,
+    "purchase_price": 80,
+    "gst_rate": 18,
+    "quantity": 100,
+    "min_stock": 10,
+    "image_url": "https://picsum.photos/seed/prod1/200/200"
+  },
+  {
+    "name": "Test Product B (Array)",
+    "sku": "TST-ARR-B-002",
+    "category": "Testing",
+    "brand": "TestBrand",
+    "unit": "kg",
+    "description": "Second product from JSON array",
+    "mrp": 250,
+    "selling_price": 220,
+    "purchase_price": 180,
+    "gst_rate": 12,
+    "quantity": 50,
+    "min_stock": 5,
+    "image_url": "https://picsum.photos/seed/prod2/200/200"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "name": "DIAG Import Test Alpha",
+    "sku": "DIAG-ALPHA-" + Date.now(),
+    "category": "Diagnostics",
+    "brand": "TestBrand",
+    "unit": "pcs",
+    "description": "Diagnostic import test - should appear in product list",
+    "mrp": 100,
+    "selling_price": 90,
+    "purchase_price": 70,
+    "gst_rate": 5,
+    "quantity": 50,
+    "min_stock": 5,
+    "image_url": "https://picsum.photos/seed/diag1/200/200"
+  },
+  {
+    "name": "DIAG Import Test Beta",
+    "sku": "DIAG-BETA-" + Date.now(),
+    "category": "Diagnostics",
+    "brand": "TestBrand",
+    "unit": "box",
+    "description": "Second diagnostic import test",
+    "mrp": 200,
+    "selling_price": 180,
+    "purchase_price": 140,
+    "gst_rate": 12,
+    "quantity": 25,
+    "min_stock": 3,
+    "image_url": "https://picsum.photos/seed/diag2/200/200"
+  }
+]

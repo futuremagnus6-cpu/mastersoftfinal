@@ -1,0 +1,1 @@
+const t=/^(?:[a-z][a-z\d+.-]*:)?\/\//i,r=/^(?:data|blob):/i,i=i=>{if(!i||"string"!=typeof i)return"";const n=i.trim();return n?(r.test(n)||t.test(n)||n.startsWith("/"),n):""},n=(t=[])=>{if(!Array.isArray(t)||0===t.length)return"";const r=t.find(t=>null==t?void 0:t.isMain)||t[0];return i(null==r?void 0:r.url)};export{i as a,n as g};

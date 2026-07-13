@@ -1,0 +1,34 @@
+{
+  "products": [
+    {
+      "name": "Test Product E (Wrapped)",
+      "sku": "TST-WRP-E-005",
+      "category": "Testing",
+      "brand": "TestBrand",
+      "unit": "pcs",
+      "description": "Imported from wrapped format",
+      "mrp": 600,
+      "selling_price": 540,
+      "purchase_price": 400,
+      "gst_rate": 12,
+      "quantity": 40,
+      "min_stock": 8,
+      "image_url": "https://picsum.photos/seed/prod5/200/200"
+    },
+    {
+      "name": "Test Product F (Wrapped)",
+      "sku": "TST-WRP-F-006",
+      "category": "Testing",
+      "brand": "TestBrand",
+      "unit": "l",
+      "description": "Second product from wrapped",
+      "mrp": 120,
+      "selling_price": 100,
+      "purchase_price": 70,
+      "gst_rate": 5,
+      "quantity": 200,
+      "min_stock": 20,
+      "image_url": "https://picsum.photos/seed/prod6/200/200"
+    }
+  ]
+}

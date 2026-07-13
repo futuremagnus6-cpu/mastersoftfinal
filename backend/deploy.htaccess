@@ -1,0 +1,58 @@
+# ════════════════════════════════════════════════════════════════
+# .htaccess — Hostinger Apache Config
+# ════════════════════════════════════════════════════════════════
+# Place this in: /home/{username}/domains/{domain}/public_html/
+#
+# ⚠️  IMPORTANT: Hostinger Managed Node.js hosting handles routing
+#    internally. Do NOT upload this file if using Managed Node.js —
+#    it can conflict with the internal proxy. This file is ONLY
+#    needed for Hostinger Shared hosting (non-Managed Node.js).
+# ════════════════════════════════════════════════════════════════
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # ─── Force HTTPS ───
+  # RewriteCond %{HTTPS} off
+  # RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+  # ─── API Proxy (Shared hosting with backend on same server) ───
+  # Only uncomment if Node.js backend runs on the same server on port 5000
+  # RewriteCond %{REQUEST_URI} ^/api/ [OR]
+  # RewriteCond %{REQUEST_URI} ^/uploads/ [OR]
+  # RewriteCond %{REQUEST_URI} ^/socket.io/
+  # RewriteRule ^(.*)$ http://127.0.0.1:5000/$1 [P,L]
+
+  # ─── SPA Fallback (Shared hosting only) ───
+  # ⚠️  COMMENT THIS OUT if using Managed Node.js
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ /index.html [L]
+</IfModule>
+
+# ─── Security Headers ───
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ─── Cache Static Assets ───
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# ─── Gzip ───
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json
+</IfModule>
+
+# ─── Block Sensitive Files ───
+<FilesMatch "\.(env|json|md|log|lock)$">
+  Require all denied
+</FilesMatch>
