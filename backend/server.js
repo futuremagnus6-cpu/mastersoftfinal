@@ -8,7 +8,6 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const {
   createAuthIpLimiter,
-  createAuthAccountLimiter,
   createPublicLimiter,
   createApiLimiter,
 } = require('./src/middleware/rateLimiter');
@@ -85,9 +84,8 @@ app.use(cors({
 
 // ─── Rate Limiting ───
 
-// Auth routes: per-IP + per-account with exponential backoff
+// Auth routes: per-IP rate limiting only (no per-account lockout)
 const authIpLimiter = createAuthIpLimiter();
-const authAccountLimiter = createAuthAccountLimiter();
 
 // Public endpoints: moderate limits
 const publicLimiter = createPublicLimiter();
@@ -95,11 +93,11 @@ const publicLimiter = createPublicLimiter();
 // Authenticated API routes: looser limits
 const apiLimiter = createApiLimiter();
 
-app.use('/api/auth/login', authIpLimiter, authAccountLimiter);
-app.use('/api/auth/register', authIpLimiter, authAccountLimiter);
-app.use('/api/auth/forgot-password', authIpLimiter, authAccountLimiter);
-app.use('/api/auth/reset-password', authIpLimiter, authAccountLimiter);
-app.use('/api/auth/verify-2fa', authIpLimiter, authAccountLimiter);
+app.use('/api/auth/login', authIpLimiter);
+app.use('/api/auth/register', authIpLimiter);
+app.use('/api/auth/forgot-password', authIpLimiter);
+app.use('/api/auth/reset-password', authIpLimiter);
+app.use('/api/auth/verify-2fa', authIpLimiter);
 
 // Public routes (health check, contact, etc.)
 app.use('/api/health', publicLimiter);

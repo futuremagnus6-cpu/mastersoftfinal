@@ -17,21 +17,6 @@ const SHOP_STATUSES = ['active', 'inactive', 'suspended', 'disabled'];
 const SUB_STATUSES = ['active', 'trial', 'expired', 'suspended', 'cancelled'];
 
 const registerShopValidator = [
-  requiredString('shopName', { min: 2, max: 200 }),
-  requiredEnum('businessType', BUSINESS_TYPES),
-  optionalString('customBusinessType', { max: 100 }),
-  gstin().optional({ values: 'null' }),
-  pan().optional({ values: 'null' }),
-  requiredString('address', { max: 500 }),
-  optionalString('addressLine2', { max: 500 }),
-  requiredString('city', { max: 100 }),
-  requiredString('state', { max: 100 }),
-  pincode('pincode').notEmpty().withMessage('Pincode is required'),
-  requiredString('country', { max: 100 }),
-  requiredPhone('phone'),
-  requiredEmail('email'),
-  optionalUrl('website'),
-  requiredString('name', { min: 2, max: 100 }),
   password(),
   validate,
 ];

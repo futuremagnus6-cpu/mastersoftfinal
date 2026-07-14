@@ -500,7 +500,7 @@ exports.getShopAdmin = async (req, res, next) => {
 exports.registerShop = async (req, res, next) => {
   try {
     const {
-      name, businessType, customBusinessType, gstin, pan,
+      name, businessType, customBusinessType,
       address, contact, settings, features, limits,
       adminName, adminEmail, password,
     } = req.body;
@@ -527,8 +527,6 @@ exports.registerShop = async (req, res, next) => {
       name,
       businessType,
       customBusinessType,
-      gstin,
-      pan,
       address,
       contact,
       settings: { ...settings },

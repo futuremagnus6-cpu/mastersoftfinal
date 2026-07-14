@@ -1,7 +1,7 @@
 import React, { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import toast from 'react-hot-toast';
+
 import { getMe } from './store/slices/authSlice';
 
 // Lazy-loaded pages for code splitting
@@ -63,28 +63,6 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   return children;
 };
 
-// Shop Route: role + feature-based protection for shop-level routes.
-// Redirects to dashboard if the feature is not enabled in the subscription plan.
-const ShopRoute = ({ children, allowedRoles = [], requiredFeature }) => {
-  const { user, shopFeatures } = useSelector((state) => state.auth);
-
-  // Role check
-  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
-    toast.error('You do not have access to this page');
-    return <Navigate to="/" replace />;
-  }
-
-  // Feature check (only for shop admin / non-super-admin users)
-  if (requiredFeature && shopFeatures && shopFeatures.features) {
-    if (shopFeatures.features[requiredFeature] !== true) {
-      toast.error('This feature is not included in your subscription plan');
-      return <Navigate to="/" replace />;
-    }
-  }
-
-  return children;
-};
-
 // ─── Root Route ───
 // Shows the public LandingPage for unauthenticated users, 
 // and the protected AppLayout for authenticated users.
@@ -109,12 +87,14 @@ export default function App() {
   const dispatch = useDispatch();
   const { isAuthenticated, token } = useSelector((state) => state.auth);
 
-  // Fetch current user on mount if token exists
+  // Fetch current user on mount if token exists (but not right after login, since the
+  // login thunk already populated user data — avoids a race where a failed getMe()
+  // would overwrite the successful login auth state and "log out" the user).
   useEffect(() => {
-    if (token) {
+    if (token && !isAuthenticated) {
       dispatch(getMe());
     }
-  }, [dispatch, token]);
+  }, [dispatch, token, isAuthenticated]);
 
   // Apply saved theme on mount
   useEffect(() => {
@@ -138,25 +118,25 @@ export default function App() {
         <Route path="/" element={<RootRoute />}>
           {/* These child routes only work when RootRoute renders AppLayout (authenticated) */}
           <Route index element={<ShopAdminDashboard />} />
-          <Route path="pos" element={<ShopRoute requiredFeature="pos"><POSTerminal /></ShopRoute>} />
+          <Route path="pos" element={<POSTerminal />} />
           <Route path="products" element={<ProductsPage />} />
           <Route path="products/:id" element={<ProductsPage />} />
-          <Route path="customers" element={<ShopRoute requiredFeature="crm"><CustomersPage /></ShopRoute>} />
+          <Route path="customers" element={<CustomersPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrdersPage />} />
-          <Route path="inventory" element={<ShopRoute allowedRoles={['shop_admin', 'manager']} requiredFeature="inventory"><InventoryPage /></ShopRoute>} />
-          <Route path="purchases" element={<ShopRoute allowedRoles={['shop_admin', 'manager']} requiredFeature="purchases"><PurchasesPage /></ShopRoute>} />
-          <Route path="expenses" element={<ShopRoute allowedRoles={['shop_admin', 'manager']} requiredFeature="expenses"><ExpensesPage /></ShopRoute>} />
-          <Route path="team" element={<ShopRoute allowedRoles={['shop_admin']} requiredFeature="employees"><TeamPage /></ShopRoute>} />
-          <Route path="employees" element={<ShopRoute allowedRoles={['shop_admin']} requiredFeature="employees"><EmployeesPage /></ShopRoute>} />
-          <Route path="loyalty" element={<ShopRoute allowedRoles={['shop_admin']} requiredFeature="loyalty"><LoyaltyPage /></ShopRoute>} />
-          <Route path="suppliers" element={<ShopRoute allowedRoles={['shop_admin', 'manager']} requiredFeature="suppliers"><SuppliersPage /></ShopRoute>} />
-          <Route path="alerts" element={<ShopRoute allowedRoles={['shop_admin', 'manager']}><AlertsPage /></ShopRoute>} />
-          <Route path="crm" element={<ShopRoute requiredFeature="crm"><CrmPage /></ShopRoute>} />
-          <Route path="ecommerce" element={<ShopRoute requiredFeature="ecommerce"><EcommercePage /></ShopRoute>} />
-          <Route path="support" element={<ShopRoute requiredFeature="customerSupport"><SupportPage /></ShopRoute>} />
-          <Route path="reports" element={<ShopRoute allowedRoles={['shop_admin', 'manager']}><ReportsPage /></ShopRoute>} />
-          <Route path="settings" element={<ShopRoute allowedRoles={['shop_admin']}><SettingsPage /></ShopRoute>} />
+          <Route path="inventory" element={<InventoryPage />} />
+          <Route path="purchases" element={<PurchasesPage />} />
+          <Route path="expenses" element={<ExpensesPage />} />
+          <Route path="team" element={<TeamPage />} />
+          <Route path="employees" element={<EmployeesPage />} />
+          <Route path="loyalty" element={<LoyaltyPage />} />
+          <Route path="suppliers" element={<SuppliersPage />} />
+          <Route path="alerts" element={<AlertsPage />} />
+          <Route path="crm" element={<CrmPage />} />
+          <Route path="ecommerce" element={<EcommercePage />} />
+          <Route path="support" element={<SupportPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
           <Route path="billing" element={<ShopBillingPage />} />
         </Route>
 

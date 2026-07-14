@@ -117,17 +117,14 @@ exports.login = async (req, res, next) => {
       throw new AppError('Invalid email or password', 401);
     }
 
-    if (user.isLocked()) {
-      throw new AppError('Account is locked. Try again after 7 minutes.', 423);
+    if (!user.isActive) {
+      throw new AppError('Your account has been deactivated. Please contact your administrator.', 403);
     }
 
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
-      await user.incrementLoginAttempts();
-      throw new AppError(`Invalid email or password. ${5 - user.loginAttempts} attempts remaining.`, 401);
+      throw new AppError('Invalid email or password.', 401);
     }
-
-    await user.resetLoginAttempts();
 
     // Check 2FA
     if (user.twoFactorEnabled) {

@@ -52,8 +52,7 @@ export default function SignupPage() {
     name: '',
     businessType: 'grocery_store',
     customBusinessType: '',
-    gstin: '',
-    pan: '',
+
     contact: {
       email: '',
       phone: '',
@@ -81,27 +80,13 @@ export default function SignupPage() {
   };
 
   const validateStep1 = () => {
-    if (!form.adminName.trim()) { toast.error('Please enter your name'); return false; }
-    if (!form.adminEmail.trim() || !/\S+@\S+\.\S+/.test(form.adminEmail)) { toast.error('Please enter a valid admin email'); return false; }
     if (!form.password || form.password.length < 6) { toast.error('Password must be at least 6 characters'); return false; }
     if (form.password !== form.confirmPassword) { toast.error('Passwords do not match'); return false; }
     return true;
   };
 
-  const validateStep2 = () => {
-    if (!form.name.trim()) { toast.error('Please enter shop name'); return false; }
-    if (form.businessType === 'custom' && !form.customBusinessType.trim()) { toast.error('Please enter custom business type'); return false; }
-    if (!form.contact.email.trim() || !/\S+@\S+\.\S+/.test(form.contact.email)) { toast.error('Please enter a valid contact email'); return false; }
-    if (!form.contact.phone.trim()) { toast.error('Please enter phone number'); return false; }
-    if (!form.address.line1.trim()) { toast.error('Please enter address'); return false; }
-    if (!form.address.city.trim()) { toast.error('Please enter city'); return false; }
-    if (!form.address.pincode.trim() || form.address.pincode.length < 6) { toast.error('Please enter a valid 6-digit pincode'); return false; }
-    return true;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateStep2()) return;
 
     setLoading(true);
     try {
@@ -109,8 +94,7 @@ export default function SignupPage() {
         name: form.name,
         businessType: form.businessType,
         customBusinessType: form.customBusinessType,
-        gstin: form.gstin,
-        pan: form.pan,
+
         adminName: form.adminName,
         adminEmail: form.adminEmail,
         password: form.password,
@@ -229,7 +213,6 @@ export default function SignupPage() {
                       onChange={(e) => handleChange('adminName', e.target.value)}
                       className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                       placeholder="Rajesh Kumar"
-                      required
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -240,7 +223,6 @@ export default function SignupPage() {
                       onChange={(e) => handleChange('adminEmail', e.target.value)}
                       className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                       placeholder="rajesh@example.com"
-                      required
                     />
                   </div>
                   <div>
@@ -307,7 +289,6 @@ export default function SignupPage() {
                         onChange={(e) => handleChange('name', e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         placeholder="My Shop"
-                        required
                       />
                     </div>
                     <div>
@@ -331,30 +312,10 @@ export default function SignupPage() {
                           onChange={(e) => handleChange('customBusinessType', e.target.value)}
                           className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                           placeholder="e.g. Restaurant"
-                          required
                         />
                       </div>
                     )}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">GSTIN</label>
-                      <input
-                        type="text"
-                        value={form.gstin}
-                        onChange={(e) => handleChange('gstin', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
-                        placeholder="22AAAAA0000A1Z5"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">PAN</label>
-                      <input
-                        type="text"
-                        value={form.pan}
-                        onChange={(e) => handleChange('pan', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
-                        placeholder="AAAAA0000A"
-                      />
-                    </div>
+
                   </div>
                 </div>
 
@@ -373,7 +334,6 @@ export default function SignupPage() {
                         onChange={(e) => handleNestedChange('contact', 'email', e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         placeholder="shop@example.com"
-                        required
                       />
                     </div>
                     <div>
@@ -384,7 +344,6 @@ export default function SignupPage() {
                         onChange={(e) => handleNestedChange('contact', 'phone', e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         placeholder="+919999999999"
-                        required
                       />
                     </div>
                     <div className="sm:col-span-2">
@@ -415,7 +374,6 @@ export default function SignupPage() {
                         onChange={(e) => handleNestedChange('address', 'line1', e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         placeholder="Shop no, building"
-                        required
                       />
                     </div>
                     <div className="sm:col-span-2">
@@ -436,7 +394,6 @@ export default function SignupPage() {
                         onChange={(e) => handleNestedChange('address', 'city', e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         placeholder="Mumbai"
-                        required
                       />
                     </div>
                     <div>
@@ -459,7 +416,6 @@ export default function SignupPage() {
                         onChange={(e) => handleNestedChange('address', 'pincode', e.target.value)}
                         className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
                         placeholder="400001"
-                        required
                         maxLength={6}
                       />
                     </div>

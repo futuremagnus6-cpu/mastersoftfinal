@@ -87,9 +87,17 @@ api.interceptors.response.use(
       }
     }
 
-    // Handle 403 - Permission denied
+    // Handle 403 - Permission denied / Account deactivated
     if (error.response?.status === 403) {
-      console.error('Access denied:', error.response?.data?.message);
+      const message = error.response?.data?.message || '';
+      console.error('Access denied:', message);
+      // If the account was deactivated, force logout
+      if (message.toLowerCase().includes('deactivated')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
     }
 
     // Handle 423 - Account locked
