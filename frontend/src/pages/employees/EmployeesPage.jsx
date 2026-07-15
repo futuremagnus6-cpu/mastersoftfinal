@@ -50,7 +50,6 @@ function EmployeeModal({ isOpen, onClose, employee, onSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.mobile) { toast.error('Name and mobile required'); return; }
     if (form.hasLogin && !form.loginEmail) { toast.error('Login email is required when login is enabled'); return; }
     setSaving(true);
     try {
@@ -75,9 +74,9 @@ function EmployeeModal({ isOpen, onClose, employee, onSaved }) {
           {/* Basic Info */}
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Basic Information</h4>
           <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2"><label className="block text-xs font-medium mb-1">Name *</label><input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input-field text-sm" required /></div>
+            <div className="col-span-2"><label className="block text-xs font-medium mb-1">Name</label><input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input-field text-sm" /></div>
             <div><label className="block text-xs font-medium mb-1">Employee Code</label><input type="text" value={form.employeeCode} onChange={e => setForm(f => ({ ...f, employeeCode: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="block text-xs font-medium mb-1">Mobile *</label><input type="text" value={form.mobile} onChange={e => setForm(f => ({ ...f, mobile: e.target.value }))} className="input-field text-sm" required /></div>
+            <div><label className="block text-xs font-medium mb-1">Mobile</label><input type="text" value={form.mobile} onChange={e => setForm(f => ({ ...f, mobile: e.target.value }))} className="input-field text-sm" /></div>
             <div><label className="block text-xs font-medium mb-1">Email</label><input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="input-field text-sm" /></div>
             <div><label className="block text-xs font-medium mb-1">Department</label>
               <select value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} className="input-field text-sm">

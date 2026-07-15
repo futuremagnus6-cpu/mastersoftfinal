@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
@@ -6,21 +6,53 @@ import Navbar from './Navbar';
 export default function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  // Refs for swipe gesture tracking
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
-  };
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed(prev => !prev);
+  }, []);
 
-  const toggleMobileSidebar = () => {
-    setMobileSidebarOpen(!mobileSidebarOpen);
-  };
+  const toggleMobileSidebar = useCallback(() => {
+    setMobileSidebarOpen(prev => !prev);
+  }, []);
 
-  const closeMobileSidebar = () => {
+  const closeMobileSidebar = useCallback(() => {
     setMobileSidebarOpen(false);
-  };
+  }, []);
+
+  const handleTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const deltaX = endX - touchStartX.current;
+    const deltaY = endY - touchStartY.current;
+
+    // Only trigger if it's a horizontal swipe (not vertical scrolling)
+    if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5 && Math.abs(deltaX) > 50) {
+      if (deltaX > 0 && !mobileSidebarOpen) {
+        // Swipe right on the page edge → open sidebar
+        if (touchStartX.current < 40) {
+          setMobileSidebarOpen(true);
+        }
+      } else if (deltaX < 0 && mobileSidebarOpen) {
+        // Swipe left → close sidebar
+        setMobileSidebarOpen(false);
+      }
+    }
+  }, [mobileSidebarOpen]);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div
+      className="min-h-screen bg-gray-50 dark:bg-gray-900"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Mobile Sidebar Overlay */}
       {mobileSidebarOpen && (
         <div
