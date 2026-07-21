@@ -17,6 +17,7 @@ const PlansPage = lazy(() => import('./pages/super-admin/PlansPage'));
 const AnalyticsPage = lazy(() => import('./pages/super-admin/AnalyticsPage'));
 const SuperAdminSettings = lazy(() => import('./pages/super-admin/SettingsPage'));
 const RecycleBinPage = lazy(() => import('./pages/super-admin/RecycleBinPage'));
+const SuperAdminExpensesPage = lazy(() => import('./pages/super-admin/ExpensesPage'));
 const ShopAdminDashboard = lazy(() => import('./pages/shop-admin/DashboardPage'));
 const POSTerminal = lazy(() => import('./pages/pos/POSTerminal'));
 const ProductsPage = lazy(() => import('./pages/products/ProductsPage'));
@@ -155,6 +156,7 @@ export default function App() {
           <Route path="analytics" element={<AnalyticsPage />} />
           <Route path="settings" element={<SuperAdminSettings />} />
           <Route path="recycle-bin" element={<RecycleBinPage />} />
+          <Route path="expenses" element={<SuperAdminExpensesPage />} />
           <Route path="chat" element={<ChatPage />} />
         </Route>
 

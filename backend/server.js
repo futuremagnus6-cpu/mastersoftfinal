@@ -11,6 +11,7 @@ const {
   createPublicLimiter,
   createApiLimiter,
 } = require('./src/middleware/rateLimiter');
+const { optionalAuth } = require('./src/middleware/auth');
 const path = require('path');
 
 const config = require('./src/config');
@@ -105,7 +106,9 @@ app.use('/api/health', publicLimiter);
 app.use('/api/contact', publicLimiter);
 
 // All other API routes get the standard API limiter
-app.use('/api/', apiLimiter);
+// optionalAuth runs first to populate req.userId for authenticated users,
+// so the limiter can grant higher limits to logged-in users.
+app.use('/api/', optionalAuth, apiLimiter);
 
 // Razorpay webhook signatures require the exact raw request body.
 app.use('/api/payments/razorpay/webhook', express.raw({ type: 'application/json', limit: '2mb' }));

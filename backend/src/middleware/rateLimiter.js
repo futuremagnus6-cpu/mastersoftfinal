@@ -42,17 +42,17 @@ const PlatformConfig = require('../models/PlatformConfig');
 
 const DEFAULTS = Object.freeze({
   // Auth — IP
-  authIpMax: 10,
+  authIpMax: 30,
   authIpWindowMs: 15 * 60 * 1000, // 15 minutes
   // Auth — Account
-  authAccountBaseMax: 5,
+  authAccountBaseMax: 10,
   authAccountBackoffFactor: 2,
   authAccountWindowMs: 15 * 60 * 1000, // 15 minutes
   // Public
-  publicMax: 30,
+  publicMax: 200,
   publicWindowMs: 15 * 60 * 1000,
   // API (authenticated)
-  apiMax: 100,
+  apiMax: 3000,
   apiWindowMs: 15 * 60 * 1000,
 });
 
@@ -297,38 +297,65 @@ function createPublicLimiter() {
  * Automatically skips auth routes (/api/auth/*), health check
  * (/api/health), and contact (/api/contact) since those have
  * dedicated limiters.
+ *
+ * Uses a dynamic windowMs by re-creating the instance whenever
+ * the cached config changes (checked every request via skip).
+ * For the windowMs, we rebuild the middleware if the window from
+ * config differs from the current one.
  */
 function createApiLimiter() {
-  return rateLimit({
-    windowMs: DEFAULTS.apiWindowMs,
-    max: async (req) => {
-      // If the user is authenticated, give them a higher limit
-      if (req.userId) {
-        return (await getConfig()).apiMax;
-      }
-      // Unauthenticated requests get a lower limit
-      return Math.max(20, Math.floor((await getConfig()).apiMax / 2));
-    },
-    message: {
-      success: false,
-      message: 'Too many API requests. Please slow down.',
-      code: 'API_RATE_LIMITED',
-    },
-    standardHeaders: true,
-    legacyHeaders: false,
-    keyGenerator: (req) =>
-      req.userId?.toString() || req.ip || req.connection.remoteAddress || 'unknown',
-    skip: (req) => {
-      const path = req.path || req.url || '';
-      return (
-        path.startsWith('/auth/') ||
-        path === '/health' ||
-        path.startsWith('/contact') ||
-        path.startsWith('/payments/') ||
-        path.startsWith('/notifications')
-      );
-    },
-  });
+  // Build a fresh limiter each time the window changes
+  let currentWindowMs = DEFAULTS.apiWindowMs;
+  let instance = null;
+
+  const buildInstance = async () => {
+    const cfg = await getConfig();
+    if (instance && cfg.apiWindowMs === currentWindowMs) {
+      return instance;
+    }
+    currentWindowMs = cfg.apiWindowMs;
+    instance = rateLimit({
+      windowMs: currentWindowMs,
+      max: async (req) => {
+        const c = await getConfig();
+        // If the user is authenticated, give them a higher limit
+        if (req.userId) {
+          return c.apiMax;
+        }
+        // Unauthenticated requests get a lower limit
+        return Math.max(20, Math.floor(c.apiMax / 2));
+      },
+      message: {
+        success: false,
+        message: 'Too many API requests. Please slow down.',
+        code: 'API_RATE_LIMITED',
+      },
+      standardHeaders: true,
+      legacyHeaders: false,
+      keyGenerator: (req) =>
+        req.userId?.toString() || req.ip || req.connection.remoteAddress || 'unknown',
+      skip: (req) => {
+        const path = req.path || req.url || '';
+        return (
+          path.startsWith('/auth/') ||
+          path === '/health' ||
+          path.startsWith('/contact') ||
+          path.startsWith('/payments/') ||
+          path.startsWith('/notifications') ||
+          path.startsWith('/chat/')
+        );
+      },
+    });
+    return instance;
+  };
+
+  // Warm up immediately
+  buildInstance();
+
+  return async (req, res, next) => {
+    const limiter = await buildInstance();
+    limiter(req, res, next);
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════

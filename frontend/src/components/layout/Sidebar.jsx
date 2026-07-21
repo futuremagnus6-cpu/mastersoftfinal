@@ -39,6 +39,7 @@ const superAdminMenuItems = [
   { path: '/super-admin', icon: FiGrid, label: 'Dashboard', roles: ['super_admin'] },
   { path: '/super-admin/shops', icon: FiShoppingBag, label: 'Shops', roles: ['super_admin'] },
   { path: '/super-admin/pre-shops', icon: FiClock, label: 'Pre-Shops', roles: ['super_admin'] },
+  { path: '/super-admin/expenses', icon: FiDollarSign, label: 'Expenses', roles: ['super_admin'] },
   { path: '/super-admin/recycle-bin', icon: FiTrash2, label: 'Recycle Bin', roles: ['super_admin'] },
   { path: '/super-admin/plans', icon: FiTrendingUp, label: 'Plans', roles: ['super_admin'] },
   { path: '/super-admin/analytics', icon: FiBarChart2, label: 'Analytics', roles: ['super_admin'] },

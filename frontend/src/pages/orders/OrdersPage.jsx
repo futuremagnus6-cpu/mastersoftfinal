@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { FiSearch, FiEye, FiX, FiPackage, FiRefreshCw, FiDownload, FiEdit2, FiAlertCircle, FiCheck, FiUser, FiPlus, FiTrash2, FiDollarSign, FiSmartphone, FiCreditCard, FiUsers, FiCalendar, FiSave, FiFileText, FiMail } from 'react-icons/fi';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { FiSearch, FiEye, FiX, FiPackage, FiRefreshCw, FiDownload, FiEdit2, FiAlertCircle, FiCheck, FiUser, FiPlus, FiTrash2, FiDollarSign, FiSmartphone, FiCreditCard, FiUsers, FiCalendar, FiSave, FiFileText, FiMail, FiShare2 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -222,6 +222,86 @@ function EditOrderModal({ isOpen, onClose, order }) {
   );
 }
 
+// ─── Share Dropdown Menu ───
+function ShareOrderDropdown({ order }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getOrderText = () => {
+    if (!order) return '';
+    let text = `*Order Receipt - ${order.orderNumber || ''}*\n`;
+    text += `Date: ${new Date(order.createdAt).toLocaleString('en-IN')}\n`;
+    text += `Customer: ${order.customerName || 'Walk-in'}\n`;
+    text += `${'─'.repeat(30)}\n`;
+    (order.items || []).forEach(item => {
+      text += `${item.productName} × ${item.quantity}  ₹${(item.total || 0).toFixed(2)}\n`;
+    });
+    text += `${'─'.repeat(30)}\n`;
+    text += `Subtotal: ₹${(order.subtotal || 0).toFixed(2)}\n`;
+    if (order.totalDiscount > 0) text += `Discount: -₹${(order.totalDiscount || 0).toFixed(2)}\n`;
+    if (order.totalCgst) text += `CGST: ₹${(order.totalCgst || 0).toFixed(2)}\n`;
+    if (order.totalSgst) text += `SGST: ₹${(order.totalSgst || 0).toFixed(2)}\n`;
+    text += `*Grand Total: ₹${(order.grandTotal || 0).toFixed(2)}*\n`;
+    text += `${'─'.repeat(30)}\n`;
+    text += `Payment: ${order.paymentStatus || 'N/A'}\n`;
+    text += `*Thank you for your business!*`;
+    return text;
+  };
+
+  const shareWhatsApp = () => {
+    const encoded = encodeURIComponent(getOrderText());
+    window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer');
+    setOpen(false);
+  };
+
+  const shareTelegram = () => {
+    const encoded = encodeURIComponent(getOrderText());
+    window.open(`https://t.me/share/url?url=&text=${encoded}`, '_blank', 'noopener,noreferrer');
+    setOpen(false);
+  };
+
+  const shareGmail = () => {
+    const subject = encodeURIComponent(`Order Receipt - ${order.orderNumber || ''}`);
+    const body = encodeURIComponent(getOrderText());
+    window.open(`https://mail.google.com/mail/?view=cm&fs=1&su=${subject}&body=${body}`, '_blank', 'noopener,noreferrer');
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1"
+        title="Share receipt"
+      >
+        <FiShare2 className="w-3.5 h-3.5" />
+        Share
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-xl z-50 py-1 animate-fade-in">
+          <button onClick={shareWhatsApp} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <span className="text-lg">💬</span> WhatsApp
+          </button>
+          <button onClick={shareTelegram} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <span className="text-lg">✈️</span> Telegram
+          </button>
+          <button onClick={shareGmail} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <span className="text-lg">📧</span> Gmail
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Order Detail Modal ───
 function OrderDetailModal({ isOpen, onClose, orderId, onEdit }) {
   const [order, setOrder] = useState(null);
@@ -271,6 +351,7 @@ function OrderDetailModal({ isOpen, onClose, orderId, onEdit }) {
                   <FiFileText className="w-3.5 h-3.5" />
                   {invoiceLoading ? 'Generating...' : 'Download'}
                 </button>
+                <ShareOrderDropdown order={order} />
                 <button
                   onClick={async () => {
                     setEmailLoading(true);

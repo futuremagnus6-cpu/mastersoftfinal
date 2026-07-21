@@ -32,6 +32,6 @@ router.route('/:id')
   .put(authorizePermission('expenses', 'update'), updateExpenseValidator, expenseController.updateExpense)
   .delete(authorizePermission('expenses', 'delete'), expenseController.deleteExpense);
 
-router.put('/:id/approve', authorize('shop_admin', 'manager'), approveExpenseValidator, expenseController.approveExpense);
+router.put('/:id/approve', authorize('super_admin', 'shop_admin', 'manager'), approveExpenseValidator, expenseController.approveExpense);
 
 module.exports = router;

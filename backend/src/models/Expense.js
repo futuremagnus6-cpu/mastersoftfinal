@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema({
-  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
+  shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', default: null },
   branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', default: null },
   category: {
     type: String,

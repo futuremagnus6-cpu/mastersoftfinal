@@ -1,11 +1,21 @@
+const mongoose = require('mongoose');
 const Expense = require('../models/Expense');
 const { AppError } = require('../middleware/errorHandler');
 const { scopeQuery } = require('../middleware/multiTenant');
 
 exports.getExpenses = async (req, res, next) => {
   try {
-    const { page = 1, limit = 50, category, startDate, endDate, status, search, sort: sortParam } = req.query;
+    const { page = 1, limit = 50, category, startDate, endDate, status, search, sort: sortParam, shopId: queryShopId } = req.query;
     const query = scopeQuery({}, req);
+    // Handle explicit shopId filter (for super admin filtering platform vs shop expenses)
+    // Empty string = platform expenses (shopId: null), valid ObjectId = specific shop
+    if (queryShopId !== undefined && !req.shopId) {
+      if (queryShopId === '') {
+        query.shopId = null;
+      } else if (mongoose.Types.ObjectId.isValid(queryShopId)) {
+        query.shopId = new mongoose.Types.ObjectId(queryShopId);
+      }
+    }
     if (category) query.category = category;
     if (status) query.status = status;
     if (startDate || endDate) { query.date = {}; if (startDate) query.date.$gte = new Date(startDate); if (endDate) query.date.$lte = new Date(endDate); }
@@ -45,7 +55,11 @@ exports.getExpense = async (req, res, next) => {
 };
 exports.createExpense = async (req, res, next) => {
   try {
-    const expense = await Expense.create({ ...req.body, shopId: req.shopId, branchId: req.branchId, createdBy: req.userId });
+    const expenseData = { ...req.body, createdBy: req.userId };
+    // Only add shop/branch context if available (super admin may create platform-level expenses)
+    if (req.shopId) expenseData.shopId = req.shopId;
+    if (req.branchId) expenseData.branchId = req.branchId;
+    const expense = await Expense.create(expenseData);
     res.status(201).json({ success: true, message: 'Expense created', data: expense });
   } catch (error) { next(error); }
 };

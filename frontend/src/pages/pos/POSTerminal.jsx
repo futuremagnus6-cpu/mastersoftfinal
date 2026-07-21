@@ -6,6 +6,7 @@ import {
   FiPrinter, FiCheck, FiPercent, FiCamera, FiHash,
   FiRefreshCw, FiArrowLeft, FiGrid, FiList, FiPackage,
   FiUsers, FiCalendar, FiEdit2, FiAlertCircle,
+  FiShare2,
 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -155,7 +156,7 @@ function GstBreakup({ items }) {
 }
 
 // ─── Payment Modal ───
-function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue }) {
+function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submitting }) {
   const [payments, setPayments] = useState([{ method: 'cash', amount: total }]);
   const [method, setMethod] = useState('cash');
   const [customAmount, setCustomAmount] = useState(total);
@@ -435,16 +436,18 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue }) {
             )}
             <button
               onClick={validateAndConfirm}
-              disabled={paidTotal <= 0}
+              disabled={paidTotal <= 0 || submitting}
               className={`w-full py-3 flex items-center justify-center gap-2 rounded-xl font-semibold transition-all ${
-                paidTotal >= total
+                paidTotal >= total && !submitting
                   ? 'bg-success-600 hover:bg-success-700 text-white'
-                  : paidTotal > 0
+                  : paidTotal > 0 && !submitting
                     ? 'bg-warning-600 hover:bg-warning-700 text-white'
                     : 'bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {paidTotal >= total ? (
+              {submitting ? (
+                <><div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" /> Processing...</>
+              ) : paidTotal >= total ? (
                 <><FiCheck className="w-5 h-5" /> Complete Sale — ₹{paidTotal.toFixed(2)}</>
               ) : paidTotal > 0 ? (
                 <><FiAlertCircle className="w-5 h-5" /> Confirm Partial — ₹{paidTotal.toFixed(2)}</>
@@ -455,6 +458,138 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Receipt Text Helper ───
+function getReceiptText(order) {
+  const items = Array.isArray(order.items) ? order.items : [];
+  const payments = Array.isArray(order.payments) ? order.payments : [];
+  const line = '──────────────────────────────';
+  let text = '';
+  text += `🧾 *SALE RECEIPT*\n`;
+  text += `${order.orderNumber || 'N/A'}\n`;
+  text += `${order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : ''}\n`;
+  text += `${line}\n`;
+  if (order.customerName) text += `Customer: ${order.customerName}\n`;
+  if (order.customerMobile) text += `Phone: ${order.customerMobile}\n`;
+  if (order.customerGstin) text += `GST: ${order.customerGstin}\n`;
+  text += `${line}\n\n`;
+  items.forEach(item => {
+    const name = item.productName || 'Item';
+    const qty = item.quantity || 0;
+    const price = item.sellingPrice || 0;
+    const total = item.total || (qty * price);
+    text += `${name}\n`;
+    text += `  ${qty} x ₹${price.toFixed(2)} = ₹${total.toFixed(2)}\n`;
+  });
+  text += `\n${line}\n`;
+  text += `Subtotal:       ₹${(order.subtotal || 0).toFixed(2)}\n`;
+  if (order.totalDiscount > 0) text += `Discount:       -₹${order.totalDiscount.toFixed(2)}\n`;
+  text += `CGST (50%):     ₹${(order.totalCgst || 0).toFixed(2)}\n`;
+  text += `SGST (50%):     ₹${(order.totalSgst || 0).toFixed(2)}\n`;
+  text += `${line}\n`;
+  text += `TOTAL:          ₹${(order.grandTotal || 0).toFixed(2)}\n`;
+  text += `${line}\n\n`;
+  if (payments.length > 0) {
+    text += `Payments:\n`;
+    payments.forEach(p => {
+      text += `  ${(p.method || 'N/A').toUpperCase()}: ₹${(p.amount || 0).toFixed(2)}\n`;
+    });
+  }
+  text += `\nThank you for your purchase!\n`;
+  text += `Future Magnus Business OS\n`;
+  return text;
+}
+
+// ─── Share Dropdown ───
+function ShareDropdown({ order }) {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const receiptText = getReceiptText(order);
+  const encodedText = encodeURIComponent(receiptText);
+  const subject = `Sale Receipt - ${order.orderNumber || ''}`;
+  const encodedSubject = encodeURIComponent(subject);
+
+  const shareOptions = [
+    {
+      id: 'whatsapp',
+      label: 'WhatsApp',
+      icon: '💬',
+      action: () => {
+        window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        setOpen(false);
+      },
+    },
+    {
+      id: 'email',
+      label: 'Email',
+      icon: '✉️',
+      action: () => {
+        window.open(`mailto:?subject=${encodedSubject}&body=${encodedText}`, '_blank');
+        setOpen(false);
+      },
+    },
+    {
+      id: 'telegram',
+      label: 'Telegram',
+      icon: '✈️',
+      action: () => {
+        window.open(`https://t.me/share/url?url=&text=${encodedText}`, '_blank');
+        setOpen(false);
+      },
+    },
+    {
+      id: 'system',
+      label: 'More...',
+      icon: '📤',
+      action: () => {
+        if (navigator.share) {
+          navigator.share({ title: subject, text: receiptText }).catch(() => {});
+        } else {
+          navigator.clipboard.writeText(receiptText).then(() => {
+            toast.success('Receipt copied to clipboard!');
+          }).catch(() => {
+            toast.error('Failed to copy receipt');
+          });
+        }
+        setOpen(false);
+      },
+    },
+  ];
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="btn-secondary flex-1 flex items-center justify-center gap-2"
+      >
+        <FiShare2 className="w-4 h-4" /> Share
+      </button>
+      {open && (
+        <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-xl shadow-lg z-20 overflow-hidden animate-slide-up">
+          {shareOptions.map((option) => (
+            <button
+              key={option.id}
+              onClick={option.action}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              <span className="text-base">{option.icon}</span>
+              <span>{option.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -575,7 +710,8 @@ function ReceiptModal({ isOpen, onClose, order }) {
         </div>
 
         {/* Actions */}
-        <div className="p-4 border-t dark:border-gray-700 flex gap-3">
+        <div className="p-4 border-t dark:border-gray-700 flex gap-2">
+          <ShareDropdown order={safeOrder} />
           <button onClick={() => window.print()} className="btn-secondary flex-1 flex items-center justify-center gap-2">
             <FiPrinter className="w-4 h-4" /> Print
           </button>
@@ -623,6 +759,8 @@ export default function POSTerminal() {
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
   const [taxToggle, setTaxToggle] = useState(true); // true = inclusive
+  const [submitting, setSubmitting] = useState(false);
+  const processingRef = useRef(false); // Synchronous guard against double-click
 
   // ─── Load products ───
   const loadProducts = useCallback(async (search) => {
@@ -778,6 +916,10 @@ export default function POSTerminal() {
 
   // ─── Place Order ───
   const placeOrder = async (payments) => {
+    // Prevent double-click from creating duplicate orders
+    if (processingRef.current) return;
+    processingRef.current = true;
+    setSubmitting(true);
     try {
       const orderData = {
         items: cart.map(item => ({
@@ -821,6 +963,8 @@ export default function POSTerminal() {
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || 'Failed to create order');
     } finally {
+      processingRef.current = false;
+      setSubmitting(false);
       setShowPayment(false);
     }
   };
@@ -1176,6 +1320,7 @@ export default function POSTerminal() {
         onConfirm={placeOrder}
         total={grandTotal}
         balanceDue={grandTotal}
+        submitting={submitting}
       />
 
       {/* ─── Receipt Modal ─── */}
