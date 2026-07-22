@@ -218,15 +218,15 @@ function LandingNavbar({ onGetStarted }) {
               >
                 {item.label}
               </motion.a>
-            ))}              <motion.a
-                href="/signup"
+            ))}              <motion.button
+                onClick={onGetStarted}
                 className="btn-primary flex items-center gap-2"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 Get Started
                 <FiArrowRight className="w-4 h-4" />
-              </motion.a>
+              </motion.button>
           </div>
 
           {/* Mobile Toggle */}
@@ -465,7 +465,7 @@ export default function LandingPage() {
       <ScrollToTop />
 
       {/* ─── Navigation ─── */}
-      <LandingNavbar onGetStarted={() => navigate('/login')} />
+      <LandingNavbar onGetStarted={() => navigate('/get-started')} />
 
       {/* ─── Hero Section ─── */}
       <motion.section
@@ -521,7 +521,7 @@ export default function LandingPage() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <motion.button
-              onClick={() => navigate('/signup')}
+              onClick={() => navigate('/get-started')}
               className="btn-primary px-8 py-3.5 text-base flex items-center gap-2 shadow-xl shadow-primary-500/25"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
@@ -652,7 +652,7 @@ export default function LandingPage() {
             className="text-center mt-12"
           >
             <motion.button
-              onClick={() => navigate('/signup')}
+              onClick={() => navigate('/get-started')}
               className="btn-primary px-8 py-3.5 text-base flex items-center gap-2 mx-auto shadow-lg shadow-primary-500/25"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}

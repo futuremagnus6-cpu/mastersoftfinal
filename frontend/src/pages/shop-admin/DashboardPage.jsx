@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
@@ -353,6 +353,8 @@ export default function ShopAdminDashboard() {
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [salesTrend, setSalesTrend] = useState([]);
   const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const intervalRef = useRef(null);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -377,10 +379,24 @@ export default function ShopAdminDashboard() {
       setError('Failed to load dashboard. Using demo data.');
     } finally {
       setLoading(false);
+      setLastUpdated(new Date());
     }
   }, []);
 
   useEffect(() => { loadDashboard(); }, [loadDashboard]);
+
+  // Auto-refresh every 30 seconds for real-time data
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      loadDashboard();
+    }, 30000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [loadDashboard]);
+
+
 
   // Format today's revenue
   const todayRevenue = dashboard?.todayRevenue || 0;
@@ -399,30 +415,58 @@ export default function ShopAdminDashboard() {
 
   return (
     <div className="page-container">
-      {/* Page Header Card */}
-      <div className="card p-5 mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-            <FiBarChart2 className="w-6 h-6 text-white" />
+      {/* Page Header Card */}        <div className="card p-5 mb-6">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
+              <FiBarChart2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                Welcome, {user?.name?.split(' ')[0] || 'User'} 👋
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                Here's what's happening with your business today.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-              Welcome, {user?.name?.split(' ')[0] || 'User'} 👋
-            </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-              Here's what's happening with your business today.
-            </p>
+          <div className="flex items-center gap-3">
+            {/* Live indicator */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success-500"></span>
+              </span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {lastUpdated
+                  ? `Updated ${lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
+                  : 'Loading...'
+                }
+              </span>
+            </div>
+            <button onClick={loadDashboard} disabled={loading} className="btn-secondary flex items-center gap-2">
+              <FiRefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+            <Link to="/pos" className="btn-primary flex items-center gap-2">
+              <FiShoppingCart className="w-4 h-4" />
+              Open POS
+            </Link>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={loadDashboard} disabled={loading} className="btn-secondary flex items-center gap-2">
-            <FiRefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-          <Link to="/pos" className="btn-primary flex items-center gap-2">
-            <FiShoppingCart className="w-4 h-4" />
-            Open POS
-          </Link>
+        {/* Mobile live indicator */}
+        <div className="sm:hidden flex items-center gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500"></span>
+          </span>
+          <span className="text-xs text-gray-400">
+            {lastUpdated
+              ? `Last updated: ${lastUpdated.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`
+              : 'Updating...'
+            }
+            <span className="ml-1 text-gray-500">· Auto-refreshes every 30s</span>
+          </span>
         </div>
       </div>
 

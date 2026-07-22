@@ -39,6 +39,7 @@ const ShopBillingPage = lazy(() => import('./pages/shop-admin/ShopBillingPage'))
 const ChatPage = lazy(() => import('./pages/chat/ChatPage'));
 const TeamPage = lazy(() => import('./pages/team/TeamPage'));
 const SignupPage = lazy(() => import('./pages/auth/SignupPage'));
+const GetStartedPage = lazy(() => import('./pages/auth/GetStartedPage'));
 
 // Layouts
 const AppLayout = lazy(() => import('./components/layout/AppLayout'));
@@ -111,6 +112,7 @@ export default function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/get-started" element={<GetStartedPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login/2fa" element={<TwoFactorPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
