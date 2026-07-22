@@ -6,11 +6,12 @@ import {
   FiPrinter, FiCheck, FiPercent, FiCamera, FiHash,
   FiRefreshCw, FiArrowLeft, FiGrid, FiList, FiPackage,
   FiUsers, FiCalendar, FiEdit2, FiAlertCircle,
-  FiShare2,
+  FiShare2, FiFileText,
 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
 import { getMainImageUrl } from '../../utils/assets';
+import { thermalPrint, standardBillPrint } from '../../utils/printUtils';
 
 // ─── Constants ───
 const GST_RATES = [0, 5, 12, 18, 28];
@@ -595,7 +596,7 @@ function ShareDropdown({ order }) {
 }
 
 // ─── Receipt Modal ───
-function ReceiptModal({ isOpen, onClose, order }) {
+function ReceiptModal({ isOpen, onClose, order, shopInfo }) {
   if (!isOpen || !order) return null;
 
   // Guard against malformed order data (prevents blank page crashes)
@@ -710,10 +711,19 @@ function ReceiptModal({ isOpen, onClose, order }) {
         </div>
 
         {/* Actions */}
-        <div className="p-4 border-t dark:border-gray-700 flex gap-2">
+        <div className="p-4 border-t dark:border-gray-700 flex gap-2 flex-wrap">
           <ShareDropdown order={safeOrder} />
-          <button onClick={() => window.print()} className="btn-secondary flex-1 flex items-center justify-center gap-2">
-            <FiPrinter className="w-4 h-4" /> Print
+          <button
+            onClick={() => thermalPrint(safeOrder, shopInfo, printConfig)}
+            className="btn-secondary flex-1 flex items-center justify-center gap-2 text-xs"
+          >
+            <FiPrinter className="w-3.5 h-3.5" /> Thermal
+          </button>
+          <button
+            onClick={() => standardBillPrint(safeOrder, shopInfo, printConfig)}
+            className="btn-secondary flex-1 flex items-center justify-center gap-2 text-xs"
+          >
+            <FiFileText className="w-3.5 h-3.5" /> Standard Bill
           </button>
           <button onClick={() => { onClose(); }} className="btn-primary flex-1">New Sale</button>
         </div>
@@ -761,6 +771,32 @@ export default function POSTerminal() {
   const [taxToggle, setTaxToggle] = useState(true); // true = inclusive
   const [submitting, setSubmitting] = useState(false);
   const processingRef = useRef(false); // Synchronous guard against double-click
+
+  // Shop info & print config for printing
+  const [shopInfo, setShopInfo] = useState(null);
+  const [printConfig, setPrintConfig] = useState(null);
+
+  useEffect(() => {
+    apiService.getShopDashboard()
+      .then(res => {
+        const data = res.data?.data || res.data;
+        setShopInfo({
+          name: data?.shopName || '',
+          address: data?.shopAddress || '',
+          gstin: data?.gstin || '',
+          phone: data?.phone || '',
+          email: data?.email || '',
+        });
+      })
+      .catch(() => {});
+    // Load print config
+    apiService.getShopSettings()
+      .then(res => {
+        const s = res.data?.data || res.data || {};
+        if (s.printConfig) setPrintConfig(s.printConfig);
+      })
+      .catch(() => {});
+  }, []);
 
   // ─── Load products ───
   const loadProducts = useCallback(async (search) => {
@@ -1328,6 +1364,7 @@ export default function POSTerminal() {
         isOpen={showReceipt}
         onClose={() => setShowReceipt(false)}
         order={lastOrder}
+        shopInfo={shopInfo}
       />
     </div>
   );

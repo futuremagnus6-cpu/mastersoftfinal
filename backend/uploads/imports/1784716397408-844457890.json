@@ -1,0 +1,1390 @@
+[{
+  "_id": {
+    "$oid": "6a1171ba1362d4d7ded50e35"
+  },
+  "name": "Riyansh Pileorhoids Capsule",
+  "slug": "riyansh-pileorhoids-capsule-mpi53jfe",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/33.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528122906",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:02.907Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:02.912Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:02.912Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e36"
+  },
+  "name": "Riyansh Amrit Juice",
+  "slug": "riyansh-amrit-juice-mpwh0wgn",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/1.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123053",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 1800,
+  "sellingPrice": 1032,
+  "stockQuantity": 96,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 6,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.058Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-02T14:59:37.669Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e37"
+  },
+  "name": "Riyansh Daibo G",
+  "slug": "riyansh-daibo-g-mpwh04xg",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/2.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123067",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 1800,
+  "sellingPrice": 1032,
+  "stockQuantity": 98,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 2,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.074Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-02T15:27:43.311Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e38"
+  },
+  "name": "Riyansh Artho G",
+  "slug": "riyansh-artho-g-mpwh0ph8",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/3.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123084",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 1800,
+  "sellingPrice": 1032,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.085Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T12:19:32.541Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e39"
+  },
+  "name": "Riyansh Power Booster Puls",
+  "slug": "riyansh-power-booster-puls-mpi53jkn",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/4.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123095",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.095Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.097Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.097Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e3a"
+  },
+  "name": "Riyansh Lady Life Care",
+  "slug": "riyansh-lady-life-care-mpwipys8",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/5.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123106",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 1850,
+  "sellingPrice": 1032,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.107Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-02T10:52:10.717Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e3b"
+  },
+  "name": "Riyansh Power Booster",
+  "slug": "riyansh-power-booster-mpi53jl7",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/6.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123115",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.115Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.116Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-25T07:03:49.494Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e3c"
+  },
+  "name": "Riyansh Amrit Capsule",
+  "slug": "riyansh-amrit-capsule-mpwir10a",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/7.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123126",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 1780,
+  "sellingPrice": 979,
+  "stockQuantity": 98,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 2,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.127Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T11:53:08.718Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e3d"
+  },
+  "name": "Riyansh Anti Addication Drop Ovel Botte",
+  "slug": "riyansh-anti-addication-drop-ovel-botte-mpwirkvg",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/8.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123137",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 467,
+  "sellingPrice": 346,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.138Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-02T10:53:26.000Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e3e"
+  },
+  "name": "Riyansh NeemTulse & Alovera Soap",
+  "slug": "riyansh-neemtulse-and-alovera-soap-mpi53jm4",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/9.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123148",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.148Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.149Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T08:56:03.092Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e3f"
+  },
+  "name": "Riyansh Rose Petal & Milk Soap",
+  "slug": "riyansh-rose-petal-and-milk-soap-mpi53jme",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/10.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123158",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.158Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 101,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": -1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.159Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-26T11:32:38.249Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e40"
+  },
+  "name": "Riyansh Anti Pain Oil 100 Ml",
+  "slug": "riyansh-anti-pain-oil-100-ml-mpwis1qs",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/11.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123167",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 467,
+  "sellingPrice": 375,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.168Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-02T10:53:47.865Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e41"
+  },
+  "name": "Riyansh Acidity Care Drop Ovel Bottel 50",
+  "slug": "riyansh-acidity-care-drop-ovel-bottel-50-mpi53jmx",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/12.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123177",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.177Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.179Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.179Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e42"
+  },
+  "name": "Riyansh Amrit Alkaline Drop Ovel Bottel",
+  "slug": "riyansh-amrit-alkaline-drop-ovel-bottel-mpwits4d",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/13.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123187",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 649,
+  "sellingPrice": 515,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.189Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-02T10:55:08.705Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e43"
+  },
+  "name": "Riyansh 3 In1 Face Wash + Scrub + Mask",
+  "slug": "riyansh-3-in1-face-wash-scrub-mask-mpi53jni",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/14.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123198",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.198Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.199Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.199Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e44"
+  },
+  "name": "Riyansh Multivitamin Spray 30 Ml",
+  "slug": "riyansh-multivitamin-spray-30-ml-mpi53job",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/15.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123227",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.227Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.228Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.228Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e45"
+  },
+  "name": "Riyansh Kesh Shampoo",
+  "slug": "riyansh-kesh-shampoo-mpi53jol",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/16.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123237",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.237Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.238Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.238Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e46"
+  },
+  "name": "Riyansh Danta Care Drop Pump Bottel 30 M",
+  "slug": "riyansh-danta-care-drop-pump-bottel-30-m-mpwiuc01",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/17.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123248",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 289,
+  "sellingPrice": 234,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.249Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-02T10:55:34.469Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e47"
+  },
+  "name": "Riyansh Minral Fresh 18 Herbs Hair Oil W",
+  "slug": "riyansh-minral-fresh-18-herbs-hair-oil-w-mpi53jp6",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/18.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123258",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.258Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.259Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.259Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e48"
+  },
+  "name": "Riyansh Sanitary Napkin",
+  "slug": "riyansh-sanitary-napkin-mpi53jpf",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/19.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123267",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.267Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 98,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 2,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.268Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-31T09:04:22.358Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e49"
+  },
+  "name": "Herbal ToothPaste 150 Gm",
+  "slug": "herbal-toothpaste-150-gm-mpi53jpo",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/20.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123276",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.276Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.277Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.277Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e4a"
+  },
+  "name": "Noni ToothPaste 150 Gm",
+  "slug": "noni-toothpaste-150-gm-mpi53jpx",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/21.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123285",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.285Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.286Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T12:23:57.602Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e4b"
+  },
+  "name": "Riyansh Rose Petals Face & Body Scrub",
+  "slug": "riyansh-rose-petals-face-and-body-scrub-mpi53jq8",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/22.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123296",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.296Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.297Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.297Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e4c"
+  },
+  "name": "Riyansh Foam Facewash - Sea Bucthorn",
+  "slug": "riyansh-foam-facewash-sea-bucthorn-mpi53jqh",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/23.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123305",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.305Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.307Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-01T12:51:13.773Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e4d"
+  },
+  "name": "Riyansh Golden Facial Glow Kit 50 Gm 5",
+  "slug": "riyansh-golden-facial-glow-kit-50-gm-5-mpi53jqr",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/24.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123315",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.315Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.316Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.316Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e4e"
+  },
+  "name": "RiyanshBlack Jaguar",
+  "slug": "riyanshblack-jaguar-mpi53jr1",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/25.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123325",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.325Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.326Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-31T08:42:08.024Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e4f"
+  },
+  "name": "Riyansh Pink Jaguar",
+  "slug": "riyansh-pink-jaguar-mpi53jra",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/26.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123334",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.334Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.335Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T12:01:16.098Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e50"
+  },
+  "name": "Riyansh AgriJackpot 500ml",
+  "slug": "riyansh-agrijackpot-500ml-mpi53jrj",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/27.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123343",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.343Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 96,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 4,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.344Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T09:04:21.566Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e51"
+  },
+  "name": "Riyansh Kidney Stone Relief Drop 50ml",
+  "slug": "riyansh-kidney-stone-relief-drop-50ml-mpi53jrr",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/28.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123352",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.352Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.353Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T09:19:20.723Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e52"
+  },
+  "name": "Riyansh Eye Care Drop",
+  "slug": "riyansh-eye-care-drop-mpi53js2",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/34.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123362",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.362Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 98,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 2,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.365Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-01T12:49:03.617Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e53"
+  },
+  "name": "Riyansh Noni Drop",
+  "slug": "riyansh-noni-drop-mpi53jse",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/35.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123374",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.374Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.375Z"
+  },
+  "updatedAt": {
+    "$date": "2026-05-23T09:22:03.375Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e54"
+  },
+  "name": "Riyansh Moringa Drop",
+  "slug": "riyansh-moringa-drop-mpi53jsq",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/36.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123386",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T09:22:03.386Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 97,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 3,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.386Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-01T12:48:35.436Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e55"
+  },
+  "name": "Riyansh Iron Drop",
+  "slug": "riyansh-iron-drop-mpwimt8n",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/37.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123397",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 699,
+  "sellingPrice": 609,
+  "stockQuantity": 99,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 1,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.398Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T12:23:57.541Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e56"
+  },
+  "name": "Riyansh Ear Drop",
+  "slug": "riyansh-ear-drop-mpwioxah",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/38.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123409",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 699,
+  "sellingPrice": 609,
+  "stockQuantity": 100,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 0,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.410Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T09:04:26.151Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e57"
+  },
+  "name": "Riyansh D- Control Capsules",
+  "slug": "riyansh-d-control-capsules-mpi5wo35",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/39.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123418",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 94,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 6,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.419Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-08T11:06:03.182Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e58"
+  },
+  "name": "Riyansh Punarnava Plus",
+  "slug": "riyansh-punarnava-plus-mpi5wgn4",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/40.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123429",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 50,
+  "stockQuantity": 96,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 4,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.430Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T12:00:57.122Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+},
+{
+  "_id": {
+    "$oid": "6a1171bb1362d4d7ded50e59"
+  },
+  "name": "Riyansh Tensore Life",
+  "slug": "riyansh-tensore-life-mpwrqpq3",
+  "images": [
+    "https://myriyansh.com/site/gallery/gallery/img/41.jpg"
+  ],
+  "category": {
+    "$oid": "6a1171ba1362d4d7ded50e34"
+  },
+  "batchNumber": "IMP-1779528123438",
+  "barcode": "",
+  "expiryDate": {
+    "$date": "2027-05-23T00:00:00.000Z"
+  },
+  "mrp": 70,
+  "sellingPrice": 5,
+  "stockQuantity": 47,
+  "lowStockThreshold": 10,
+  "prescriptionRequired": false,
+  "description": "",
+  "dosage": "",
+  "manufacturer": "",
+  "gst": 0,
+  "isActive": true,
+  "isFeatured": false,
+  "totalSold": 4,
+  "createdAt": {
+    "$date": "2026-05-23T09:22:03.441Z"
+  },
+  "updatedAt": {
+    "$date": "2026-06-07T12:44:19.303Z"
+  },
+  "__v": 0,
+  "isLowStock": false
+}]

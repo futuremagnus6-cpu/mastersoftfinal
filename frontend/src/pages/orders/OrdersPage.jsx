@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { FiSearch, FiEye, FiX, FiPackage, FiRefreshCw, FiDownload, FiEdit2, FiAlertCircle, FiCheck, FiUser, FiPlus, FiTrash2, FiDollarSign, FiSmartphone, FiCreditCard, FiUsers, FiCalendar, FiSave, FiFileText, FiMail, FiShare2 } from 'react-icons/fi';
+import { FiSearch, FiEye, FiX, FiPackage, FiRefreshCw, FiDownload, FiEdit2, FiAlertCircle, FiCheck, FiUser, FiPlus, FiTrash2, FiDollarSign, FiSmartphone, FiCreditCard, FiUsers, FiCalendar, FiSave, FiFileText, FiMail, FiShare2, FiPrinter } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
+import { thermalPrint, standardBillPrint } from '../../utils/printUtils';
 
 const statusColors = { completed: 'badge-success', pending: 'badge-warning', cancelled: 'badge-danger', returned: 'badge-info' };
 const paymentColors = { completed: 'badge-success', pending: 'badge-warning', partial: 'badge-info', refunded: 'badge-danger' };
@@ -308,6 +309,33 @@ function OrderDetailModal({ isOpen, onClose, orderId, onEdit }) {
   const [loading, setLoading] = useState(true);
   const [invoiceLoading, setInvoiceLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
+  const [shopPrintInfo, setShopPrintInfo] = useState(null);
+  const [printConfig, setPrintConfig] = useState(null);
+
+  // Fetch shop info & print config once when modal opens for printing
+  useEffect(() => {
+    if (isOpen && !shopPrintInfo) {
+      apiService.getShopDashboard()
+        .then(res => {
+          const data = res.data?.data || res.data;
+          setShopPrintInfo({
+            name: data?.shopName || '',
+            address: data?.shopAddress || '',
+            gstin: data?.gstin || '',
+            phone: data?.phone || '',
+            email: data?.email || '',
+          });
+        })
+        .catch(() => {});
+      // Load print config
+      apiService.getShopSettings()
+        .then(res => {
+          const s = res.data?.data || res.data || {};
+          if (s.printConfig) setPrintConfig(s.printConfig);
+        })
+        .catch(() => {});
+    }
+  }, [isOpen, shopPrintInfo]);
 
   useEffect(() => {
     if (!isOpen || !orderId) return;
@@ -347,8 +375,24 @@ function OrderDetailModal({ isOpen, onClose, orderId, onEdit }) {
           <div className="flex items-center gap-2">
             {order && !['cancelled', 'returned'].includes(order.status) && (
               <>
-                <button onClick={() => handleDownloadInvoice(order._id)} className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1" disabled={invoiceLoading}>
+                <button
+                  onClick={() => thermalPrint(order, shopPrintInfo, printConfig)}
+                  className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1"
+                  title="Thermal Receipt"
+                >
+                  <FiPrinter className="w-3.5 h-3.5" />
+                  Thermal
+                </button>
+                <button
+                  onClick={() => standardBillPrint(order, shopPrintInfo, printConfig)}
+                  className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1"
+                  title="Standard A4 Bill"
+                >
                   <FiFileText className="w-3.5 h-3.5" />
+                  Standard Bill
+                </button>
+                <button onClick={() => handleDownloadInvoice(order._id)} className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1" disabled={invoiceLoading}>
+                  <FiDownload className="w-3.5 h-3.5" />
                   {invoiceLoading ? 'Generating...' : 'Download'}
                 </button>
                 <ShareOrderDropdown order={order} />

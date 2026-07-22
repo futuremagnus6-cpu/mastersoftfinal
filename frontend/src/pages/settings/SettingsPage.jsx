@@ -4,13 +4,14 @@ import {
   FiGlobe, FiTrash2, FiPlus,
   FiRefreshCw, FiAlertCircle, FiCheckCircle,
   FiMail, FiSmartphone, FiClock,
-  FiPercent, FiMapPin
+  FiPercent, FiMapPin, FiPrinter, FiFileText
 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 
 const SETTINGS_TABS = [
   { id: 'general', label: 'General', icon: FiSettings },
   { id: 'notifications', label: 'Notifications', icon: FiBell },
+  { id: 'printing', label: 'Printing', icon: FiPrinter },
   { id: 'security', label: 'Security', icon: FiShield },
   { id: 'localization', label: 'Localization', icon: FiGlobe },
 ];
@@ -129,6 +130,36 @@ export default function SettingsPage() {
     backupReminders: true,
   });
 
+  // Print config state
+  const [printConfig, setPrintConfig] = useState({
+    thermal: {
+      paperWidth: '80mm',
+      showGstin: true,
+      showCustomer: true,
+      showPayments: true,
+      showDiscount: true,
+      footerMessage: 'Thank you for your purchase!',
+    },
+    standard: {
+      invoiceTitle: 'Tax Invoice',
+      showTerms: true,
+      termsText: '1. Goods once sold will not be taken back.\n2. This is a computer-generated invoice.\n3. Subject to local jurisdiction.',
+      showSignature: true,
+      showGstSummary: true,
+      showAmountInWords: true,
+      showDiscountDetails: true,
+      footerMessage: '',
+    },
+  });
+
+  const updateThermal = (key, value) => {
+    setPrintConfig(prev => ({ ...prev, thermal: { ...prev.thermal, [key]: value } }));
+  };
+
+  const updateStandard = (key, value) => {
+    setPrintConfig(prev => ({ ...prev, standard: { ...prev.standard, [key]: value } }));
+  };
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -154,6 +185,12 @@ export default function SettingsPage() {
       });
       if (s.features) setFeatures(s.features);
       if (s.alertConfig) setAlertConfig(s.alertConfig);
+      if (s.printConfig) {
+        setPrintConfig(prev => ({
+          thermal: { ...prev.thermal, ...(s.printConfig.thermal || {}) },
+          standard: { ...prev.standard, ...(s.printConfig.standard || {}) },
+        }));
+      }
     } catch (err) {
       setError('Failed to load settings');
       // Demo data
@@ -217,6 +254,18 @@ export default function SettingsPage() {
       showSuccess('Alert configuration saved');
     } catch (err) {
       setError('Failed to save alerts');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSavePrint = async () => {
+    setSaving(true);
+    try {
+      await apiService.updateShopSettings({ printConfig });
+      showSuccess('Printer settings saved');
+    } catch (err) {
+      setError('Failed to save printer settings');
     } finally {
       setSaving(false);
     }
@@ -415,6 +464,125 @@ export default function SettingsPage() {
     </div>
   );
 
+  const renderPrintingTab = () => (
+    <div className="space-y-6">
+      {/* ── THERMAL PRINTER SETTINGS ── */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+            <FiPrinter className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Thermal Printer</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Compact receipt printer settings (e.g. Epson TM-T20, Star SP700)</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Paper Width</label>
+            <select
+              value={printConfig.thermal.paperWidth}
+              onChange={(e) => updateThermal('paperWidth', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+            >
+              <option value="58mm">58 mm (2.25")</option>
+              <option value="80mm">80 mm (3.125")</option>
+            </select>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Select the paper width of your thermal printer</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Footer Message</label>
+            <input
+              type="text"
+              value={printConfig.thermal.footerMessage}
+              onChange={(e) => updateThermal('footerMessage', e.target.value)}
+              placeholder="Thank you for your purchase!"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+            />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Shown at the bottom of the thermal receipt</p>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Display Options</h4>
+          <Toggle label="Show GSTIN" description="Display GST registration number on receipts" enabled={printConfig.thermal.showGstin} onChange={(v) => updateThermal('showGstin', v)} />
+          <Toggle label="Show Customer Details" description="Display customer name, phone and GSTIN" enabled={printConfig.thermal.showCustomer} onChange={(v) => updateThermal('showCustomer', v)} />
+          <Toggle label="Show Payment Details" description="Display payment method and amounts" enabled={printConfig.thermal.showPayments} onChange={(v) => updateThermal('showPayments', v)} />
+          <Toggle label="Show Discount Details" description="Itemize discounts on thermal receipts" enabled={printConfig.thermal.showDiscount} onChange={(v) => updateThermal('showDiscount', v)} />
+        </div>
+      </div>
+
+      {/* ── STANDARD BILL SETTINGS ── */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <FiFileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Standard A4 Bill</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Full-page invoice/standard bill settings</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Invoice Title</label>
+            <input
+              type="text"
+              value={printConfig.standard.invoiceTitle}
+              onChange={(e) => updateStandard('invoiceTitle', e.target.value)}
+              placeholder="Tax Invoice"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+            />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Appears at the top of the bill (e.g. Tax Invoice, Proforma Invoice)</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Footer Message</label>
+            <input
+              type="text"
+              value={printConfig.standard.footerMessage}
+              onChange={(e) => updateStandard('footerMessage', e.target.value)}
+              placeholder="Optional footer text..."
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Terms & Conditions</label>
+          <textarea
+            value={printConfig.standard.termsText}
+            onChange={(e) => updateStandard('termsText', e.target.value)}
+            rows={3}
+            placeholder="Enter terms and conditions..."
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
+          />
+        </div>
+
+        <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
+          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Display Options</h4>
+          <Toggle label="Show Terms & Conditions" description="Display T&amp;C at the bottom of the bill" enabled={printConfig.standard.showTerms} onChange={(v) => updateStandard('showTerms', v)} />
+          <Toggle label="Show Authorized Signature" description="Display signature area" enabled={printConfig.standard.showSignature} onChange={(v) => updateStandard('showSignature', v)} />
+          <Toggle label="Show GST Summary" description="Display GST rate-wise breakup table" enabled={printConfig.standard.showGstSummary} onChange={(v) => updateStandard('showGstSummary', v)} />
+          <Toggle label="Show Amount in Words" description="Display grand total in words" enabled={printConfig.standard.showAmountInWords} onChange={(v) => updateStandard('showAmountInWords', v)} />
+          <Toggle label="Show Discount Details" description="Itemize discounts on the bill" enabled={printConfig.standard.showDiscountDetails} onChange={(v) => updateStandard('showDiscountDetails', v)} />
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          onClick={handleSavePrint}
+          disabled={saving}
+          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+        >
+          <FiSave className="w-4 h-4" />
+          {saving ? 'Saving...' : 'Save Printer Settings'}
+        </button>
+      </div>
+    </div>
+  );
+
   const renderLocalizationTab = () => (
     <div className="space-y-6">
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -501,6 +669,7 @@ export default function SettingsPage() {
       {/* Tab Content */}
       {activeTab === 'general' && renderGeneralTab()}
       {activeTab === 'notifications' && renderNotificationsTab()}
+      {activeTab === 'printing' && renderPrintingTab()}
       {activeTab === 'security' && renderSecurityTab()}
       {activeTab === 'localization' && renderLocalizationTab()}
     </div>
