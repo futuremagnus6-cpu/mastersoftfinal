@@ -18,7 +18,7 @@ router.get('/', async (req, res, next) => {
     if (!req.shopId) throw new AppError('No shop context', 403);
 
     const shop = await Shop.findById(req.shopId)
-      .select('name businessType gstin pan address contact logo branding settings features limits');
+      .select('name businessType gstin pan address contact logo branding settings features limits printConfig');
 
     if (!shop) throw new AppError('Shop not found', 404);
 
@@ -55,6 +55,11 @@ router.get('/', async (req, res, next) => {
       // Pass the raw settings too for any advanced use
       settings: shop.settings || {},
     };
+
+    // Include printConfig in the response
+    if (shop.printConfig) {
+      data.printConfig = shop.printConfig;
+    }
 
     res.json({ success: true, data });
   } catch (error) { next(error); }
@@ -124,6 +129,28 @@ router.put('/', authorize('shop_admin'), updateShopSettingsValidator, async (req
           shop.settings[key] = value;
         }
       });
+    }
+
+    // Print config (deep merge)
+    if (body.printConfig && typeof body.printConfig === 'object') {
+      if (!shop.printConfig) shop.printConfig = {};
+      if (body.printConfig.thermal && typeof body.printConfig.thermal === 'object') {
+        if (!shop.printConfig.thermal) shop.printConfig.thermal = {};
+        Object.assign(shop.printConfig.thermal, body.printConfig.thermal);
+      }
+      if (body.printConfig.standard && typeof body.printConfig.standard === 'object') {
+        if (!shop.printConfig.standard) shop.printConfig.standard = {};
+        Object.assign(shop.printConfig.standard, body.printConfig.standard);
+        // Handle nested productColumns
+        if (body.printConfig.standard.productColumns && typeof body.printConfig.standard.productColumns === 'object') {
+          if (!shop.printConfig.standard.productColumns) shop.printConfig.standard.productColumns = {};
+          Object.assign(shop.printConfig.standard.productColumns, body.printConfig.standard.productColumns);
+        }
+      }
+      if (body.printConfig.pdf && typeof body.printConfig.pdf === 'object') {
+        if (!shop.printConfig.pdf) shop.printConfig.pdf = {};
+        Object.assign(shop.printConfig.pdf, body.printConfig.pdf);
+      }
     }
 
     shop.updatedBy = req.userId;

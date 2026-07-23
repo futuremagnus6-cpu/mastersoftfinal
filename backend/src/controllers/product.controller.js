@@ -787,3 +787,161 @@ exports.exportProducts = async (req, res, next) => {
     next(error);
   }
 };
+
+// ─── AI Product Import ───
+
+// @desc    Upload and AI-extract products from PDF/image
+// @route   POST /api/products/ai-import
+exports.aiImportUpload = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      throw new AppError('Please upload a PDF invoice, price list, or product image', 400);
+    }
+
+    const { processImportFile } = require('../services/aiImportService');
+    const result = await processImportFile(req.file.path, req.file.mimetype);
+
+    // Check for existing products by barcode
+    const barcodes = result.products.filter(p => p.barcode).map(p => p.barcode);
+    const existingProducts = barcodes.length > 0 ? await Product.find({
+      shopId: req.shopId,
+      barcode: { $in: barcodes },
+    }).select('name sku barcode pricing.sellingPrice inventory.quantity').lean() : [];
+
+    const existingBarcodes = new Set(existingProducts.map(p => p.barcode).filter(Boolean));
+
+    // Mark duplicates
+    const productsWithDupes = result.products.map(p => ({
+      ...p,
+      _duplicate: p.barcode ? existingBarcodes.has(p.barcode) : false,
+      _selected: true,
+      _errors: [],
+    }));
+
+    // Clean up uploaded file
+    try { fs.unlinkSync(req.file.path); } catch (e) { /* ignore */ }
+
+    res.json({
+      success: true,
+      data: {
+        products: productsWithDupes,
+        rawText: result.rawText,
+        totalExtracted: result.totalExtracted,
+        existingCount: existingProducts.length,
+        fileName: req.file.originalname,
+      },
+    });
+  } catch (error) {
+    // Clean up on error too
+    if (req.file) try { fs.unlinkSync(req.file.path); } catch (e) {}
+    next(error);
+  }
+};
+
+// @desc    Confirm and save AI-extracted products
+// @route   POST /api/products/ai-import/confirm
+exports.aiImportConfirm = async (req, res, next) => {
+  try {
+    let { products, updateExisting } = req.body;
+
+    if (!Array.isArray(products) || products.length === 0) {
+      throw new AppError('No products provided to import', 400);
+    }
+
+    let imported = 0, updated = 0, skipped = 0, errors = [];
+
+    for (let i = 0; i < products.length; i++) {
+      const p = products[i];
+
+      if (!p._selected) {
+        skipped++;
+        continue;
+      }
+
+      try {
+        if (!p.name || !String(p.name).trim()) {
+          errors.push({ row: i + 1, name: p.name || 'Unknown', error: 'Product name is required' });
+          skipped++;
+          continue;
+        }
+
+        const name = String(p.name).trim().substring(0, 200);
+        const sku = p.sku || `AI-${Date.now().toString(36).toUpperCase()}-${i}`;
+        const category = p.category || 'Uncategorized';
+        const gstRate = [0, 5, 12, 18, 28].includes(Number(p.gstRate)) ? Number(p.gstRate) : 18;
+
+        const productData = {
+          name,
+          sku: String(sku).trim(),
+          barcode: p.barcode || undefined,
+          category,
+          brand: p.brand || undefined,
+          unit: ['pcs','kg','g','l','ml','m','box','pack','dozen','carton'].includes(p.unit) ? p.unit : 'pcs',
+          pricing: {
+            mrp: Math.max(0, Number(p.mrp) || Number(p.sellingPrice) || 0),
+            sellingPrice: Math.max(0, Number(p.sellingPrice) || Number(p.mrp) || 0),
+            purchasePrice: Math.max(0, Number(p.purchasePrice) || 0),
+            gstRate,
+          },
+          tax: { hsnCode: p.hsnCode || '' },
+          inventory: {
+            quantity: Math.max(0, Math.round(Number(p.quantity) || 0)),
+            minStockLevel: 10,
+          },
+          shopId: req.shopId,
+          createdBy: req.userId,
+        };
+
+        // Find existing product
+        const orClauses = [];
+        if (productData.barcode) orClauses.push({ barcode: productData.barcode });
+        if (productData.sku) orClauses.push({ sku: productData.sku });
+
+        let existing = null;
+        if (orClauses.length > 0) {
+          existing = await Product.findOne({ shopId: req.shopId, $or: orClauses });
+        }
+
+        if (existing && (updateExisting || p._duplicate)) {
+          // Update existing: add stock, update pricing
+          const currentInv = existing.inventory || { quantity: 0, minStockLevel: 10 };
+          existing.set({
+            name: productData.name,
+            category: productData.category || existing.category,
+            brand: productData.brand || existing.brand,
+            pricing: {
+              mrp: productData.pricing.mrp || existing.pricing?.mrp || 0,
+              sellingPrice: productData.pricing.sellingPrice || existing.pricing?.sellingPrice || 0,
+              purchasePrice: productData.pricing.purchasePrice || existing.pricing?.purchasePrice || 0,
+              gstRate: productData.pricing.gstRate || existing.pricing?.gstRate || 18,
+            },
+            tax: { hsnCode: productData.tax.hsnCode || existing.tax?.hsnCode || '' },
+            inventory: {
+              ...currentInv.toObject ? currentInv.toObject() : currentInv,
+              quantity: (currentInv.quantity || 0) + productData.inventory.quantity,
+            },
+            updatedBy: req.userId,
+          });
+          await existing.save();
+          updated++;
+        } else if (!existing) {
+          await Product.create(productData);
+          imported++;
+        } else {
+          skipped++;
+        }
+      } catch (err) {
+        errors.push({ row: i + 1, name: p.name || 'Unknown', error: err.message });
+        skipped++;
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Imported ${imported}, updated ${updated}, skipped ${skipped}.`,
+      data: { imported, updated, skipped, errors: errors.slice(0, 20) },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

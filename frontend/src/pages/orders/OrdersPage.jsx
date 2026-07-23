@@ -313,24 +313,19 @@ function OrderDetailModal({ isOpen, onClose, orderId, onEdit }) {
   const [printConfig, setPrintConfig] = useState(null);
 
   // Fetch shop info & print config once when modal opens for printing
+  // (getShopDashboard does NOT return shop name/address/GSTIN/phone)
   useEffect(() => {
     if (isOpen && !shopPrintInfo) {
-      apiService.getShopDashboard()
-        .then(res => {
-          const data = res.data?.data || res.data;
-          setShopPrintInfo({
-            name: data?.shopName || '',
-            address: data?.shopAddress || '',
-            gstin: data?.gstin || '',
-            phone: data?.phone || '',
-            email: data?.email || '',
-          });
-        })
-        .catch(() => {});
-      // Load print config
       apiService.getShopSettings()
         .then(res => {
           const s = res.data?.data || res.data || {};
+          setShopPrintInfo({
+            name: s.shopName || '',
+            address: s.address ? `${s.address}${s.city ? `, ${s.city}` : ''}${s.state ? `, ${s.state}` : ''}${s.pincode ? ` - ${s.pincode}` : ''}` : '',
+            gstin: s.gstin || '',
+            phone: s.phone || '',
+            email: s.email || '',
+          });
           if (s.printConfig) setPrintConfig(s.printConfig);
         })
         .catch(() => {});

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiBox, FiDownload, FiUpload, FiX, FiFilter, FiGlobe, FiLink, FiCheckSquare, FiSquare } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiBox, FiDownload, FiUpload, FiX, FiFilter, FiGlobe, FiLink, FiCheckSquare, FiSquare, FiCpu } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
 import { getAssetUrl, getMainImageUrl } from '../../utils/assets';
+import AiImportModal from './AiImportModal';
 
 const GST_RATES = [0, 5, 12, 18, 28];
 
@@ -197,6 +198,7 @@ export default function ProductsPage() {
   const [showImportUrl, setShowImportUrl] = useState(false);
   const [importUrl, setImportUrl] = useState('');
   const [importingUrl, setImportingUrl] = useState(false);
+  const [showAiImport, setShowAiImport] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const limit = 25;
@@ -318,6 +320,7 @@ export default function ProductsPage() {
           }} />
           <label htmlFor="importCsv" className="btn-secondary flex items-center gap-2 cursor-pointer"><FiUpload className="w-4 h-4" />Import</label>
           <button onClick={() => setShowImportUrl(true)} className="btn-secondary flex items-center gap-2"><FiGlobe className="w-4 h-4" />Import URL</button>
+          <button onClick={() => setShowAiImport(true)} className="btn-secondary flex items-center gap-2 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800 hover:bg-violet-50 dark:hover:bg-violet-900/20"><FiCpu className="w-4 h-4" />AI Import</button>
           <button onClick={() => { setEditingProduct(null); setModalOpen(true); }} className="btn-primary flex items-center gap-2"><FiPlus className="w-4 h-4" />Add Product</button>
         </div>
       </div>
@@ -436,6 +439,7 @@ export default function ProductsPage() {
       )}
 
       <ProductModal isOpen={modalOpen} onClose={() => setModalOpen(false)} product={editingProduct} onSave={loadProducts} />
+      <AiImportModal isOpen={showAiImport} onClose={() => setShowAiImport(false)} onImported={loadProducts} />
 
       {/* Import via URL Modal */}
       {showImportUrl && (

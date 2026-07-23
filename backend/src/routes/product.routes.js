@@ -32,6 +32,10 @@ router.get('/export', authorizePermission('products', 'read'), productController
 
 router.post('/import', authorizePermission('products', 'create'), uploadSingle('import'), productController.importProducts);
 
+// AI Product Import - OCR based extraction from PDFs, images, price lists
+router.post('/ai-import', authorizePermission('products', 'create'), uploadSingle('file'), productController.aiImportUpload);
+router.post('/ai-import/confirm', authorizePermission('products', 'create'), productController.aiImportConfirm);
+
 router.post('/bulk-delete', authorizePermission('products', 'delete'), bulkDeleteValidator, productController.bulkDeleteProducts);
 router.delete('/all', authorizePermission('products', 'delete'), productController.deleteAllProducts);
 

@@ -290,6 +290,16 @@ const apiService = {
   // File Upload
   uploadFile: (formData) => api.post('/upload', formData),
 
+  // AI Product Import
+  aiImport: (formData, config) => api.post('/products/ai-import', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 120000,
+    ...config,
+  }),
+  aiImportConfirm: (data) => api.post('/products/ai-import/confirm', data, {
+    timeout: 60000,
+  }),
+
   // Announcement (Super Admin)
   sendAnnouncement: (data) => api.post('/shops/send-announcement', data),
 

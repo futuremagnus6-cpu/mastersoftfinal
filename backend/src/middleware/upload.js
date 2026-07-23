@@ -60,6 +60,13 @@ const fileFilter = (req, file, cb) => {
     } else {
       cb(new AppError('Import files must be xlsx, xls, csv, json, or xml', 400), false);
     }
+  } else if (file.fieldname === 'file') {
+    // General file upload - accept everything for AI import (PDF, images, etc.)
+    if (file.originalname.match(/\.(pdf|jpg|jpeg|png|gif|webp|bmp|tiff|tif)$/i)) {
+      cb(null, true);
+    } else {
+      cb(new AppError('AI Import accepts PDF invoices, price lists, or product images (jpg, png, webp)', 400), false);
+    }
   } else if (file.fieldname === 'productImage' || file.fieldname === 'images' || file.fieldname === 'logo') {
     if (file.originalname.match(allowedImages)) {
       cb(null, true);

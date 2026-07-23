@@ -11,7 +11,7 @@ import {
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
 import { getMainImageUrl } from '../../utils/assets';
-import { thermalPrint, standardBillPrint } from '../../utils/printUtils';
+import { thermalPrint, standardBillPrint, downloadPdf } from '../../utils/printUtils';
 
 // ─── Constants ───
 const GST_RATES = [0, 5, 12, 18, 28];
@@ -463,6 +463,126 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
   );
 }
 
+// ─── Helper: amount in words (Indian numbering) ───
+function numberToWords(num) {
+  const single = ['Zero','One','Two','Three','Four','Five','Six','Seven','Eight','Nine'];
+  const double = ['Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  const convertBelow1000 = (n) => {
+    let s = '';
+    if (n >= 100) { s += single[Math.floor(n / 100)] + ' Hundred '; n %= 100; }
+    if (n >= 20) { s += tens[Math.floor(n / 10)] + ' '; n %= 10; }
+    else if (n >= 10) { s += double[n - 10] + ' '; n = 0; }
+    if (n > 0) s += single[n] + ' ';
+    return s.trim();
+  };
+  let words = '', crore = Math.floor(num / 10000000);
+  num %= 10000000;
+  let lakh = Math.floor(num / 100000);
+  num %= 100000;
+  let thousand = Math.floor(num / 1000);
+  num %= 1000;
+  if (crore) words += convertBelow1000(crore) + ' Crore ';
+  if (lakh) words += convertBelow1000(lakh) + ' Lakh ';
+  if (thousand) words += convertBelow1000(thousand) + ' Thousand ';
+  if (num) words += convertBelow1000(num);
+  return words.trim() + ' Rupees Only';
+}
+
+// ─── Invoice Text Helper (Standard Bill format) ───
+function getInvoiceText(order) {
+  const items = Array.isArray(order.items) ? order.items : [];
+  const payments = Array.isArray(order.payments) ? order.payments : [];
+  const line = '════════════════════════════════════';
+  const dash = '────────────────────────────────────';
+  let text = '';
+  
+  // Header
+  text += `                         TAX INVOICE\n`;
+  text += `${line}\n`;
+  text += `Invoice #: ${order.invoiceNumber || order.orderNumber || 'N/A'}\n`;
+  text += `Order #:   ${order.orderNumber || 'N/A'}\n`;
+  text += `Date:      ${order.createdAt ? new Date(order.createdAt).toLocaleString('en-IN') : ''}\n`;
+  
+  // Customer info
+  text += `${dash}\n`;
+  text += `Bill To: ${order.customerName || 'Walk-in Customer'}\n`;
+  if (order.customerMobile) text += `Phone:    ${order.customerMobile}\n`;
+  if (order.customerGstin) text += `GSTIN:    ${order.customerGstin}\n`;
+  if (order.customerId) text += `ID:       ${order.customerId}\n`;
+  
+  // Items
+  text += `${line}\n`;
+  text += `#  HSN       Item                   Qty   Rate    Taxable   CGST   SGST    Total\n`;
+  text += `${dash}\n`;
+  items.forEach((item, i) => {
+    const qty = item.quantity || 1;
+    const taxable = (item.taxableAmount || 0) * qty;
+    const cgst = ((item.gstAmount || 0) / 2) * qty;
+    const sgst = ((item.gstAmount || 0) / 2) * qty;
+    const name = (item.productName || 'Item').substring(0, 18);
+    const hsn = (item.hsnCode || '-').substring(0, 8);
+    text += `${(i+1).toString().padStart(2)}  ${hsn.padEnd(8)} ${name.padEnd(18)} ${qty.toString().padStart(3)}  ${(item.sellingPrice||0).toFixed(2).padStart(7)} ${taxable.toFixed(2).padStart(8)} ${cgst.toFixed(2).padStart(6)} ${sgst.toFixed(2).padStart(6)} ${(item.total||taxable+cgst+sgst).toFixed(2).padStart(8)}\n`;
+    if (item.discountPercent > 0) {
+      text += `                                      Disc: ${item.discountPercent}%\n`;
+    }
+  });
+  
+  // Totals
+  text += `${line}\n`;
+  const totalTaxable = items.reduce((s, i) => s + ((i.taxableAmount || 0) * (i.quantity || 1)), 0);
+  const totalCgst = items.reduce((s, i) => s + ((i.gstAmount || 0) / 2) * (i.quantity || 1), 0);
+  const totalSgst = items.reduce((s, i) => s + ((i.gstAmount || 0) / 2) * (i.quantity || 1), 0);
+  text += `Subtotal:         ${(order.subtotal || 0).toFixed(2).padStart(37)}\n`;
+  if ((order.totalDiscount || 0) > 0) text += `Discount:        -${order.totalDiscount.toFixed(2).padStart(35)}\n`;
+  text += `Total Taxable:    ${totalTaxable.toFixed(2).padStart(37)}\n`;
+  text += `Total CGST:       ${totalCgst.toFixed(2).padStart(37)}\n`;
+  text += `Total SGST:       ${totalSgst.toFixed(2).padStart(37)}\n`;
+  text += `${line}\n`;
+  text += `GRAND TOTAL:      ${(order.grandTotal || 0).toFixed(2).padStart(37)}\n`;
+  text += `${line}\n`;
+  
+  // Amount in words
+  text += `Amount in Words: ${numberToWords(Math.round(order.grandTotal || 0))}\n`;
+  
+  // GST summary
+  const gstSummary = {};
+  items.forEach(item => {
+    const rate = item.gstRate || 0;
+    if (!gstSummary[rate]) gstSummary[rate] = { rate, taxable: 0, cgst: 0, sgst: 0 };
+    gstSummary[rate].taxable += (item.taxableAmount || 0) * (item.quantity || 1);
+    gstSummary[rate].cgst += ((item.gstAmount || 0) / 2) * (item.quantity || 1);
+    gstSummary[rate].sgst += ((item.gstAmount || 0) / 2) * (item.quantity || 1);
+  });
+  if (Object.values(gstSummary).length > 0) {
+    text += `\nGST Summary:\n`;
+    text += `${dash}\n`;
+    Object.values(gstSummary).forEach(g => {
+      text += `  ${g.rate}%  | Taxable: ${g.taxable.toFixed(2)}  | CGST: ${g.cgst.toFixed(2)}  | SGST: ${g.sgst.toFixed(2)}  | Total: ${(g.cgst+g.sgst).toFixed(2)}\n`;
+    });
+  }
+  
+  // Payments
+  if (payments.length > 0) {
+    text += `\nPayments:\n`;
+    text += `${dash}\n`;
+    payments.forEach(p => {
+      let detail = `${(p.method || '').toUpperCase()}: ₹${(p.amount || 0).toFixed(2)}`;
+      if (p.transactionId) detail += ` (${p.transactionMethod || ''}: ${p.transactionId})`;
+      if (p.companyOrderNumber) detail += ` (PO: ${p.companyOrderNumber})`;
+      text += `  ${detail}\n`;
+    });
+    if ((order.balanceDue || 0) > 0) {
+      text += `  Balance Due: ₹${(order.balanceDue || 0).toFixed(2)}\n`;
+    }
+  }
+  
+  text += `\n${line}\n`;
+  text += `                     Thank you for your purchase!\n`;
+  text += `                         Future Magnus Business OS\n`;
+  return text;
+}
+
 // ─── Receipt Text Helper ───
 function getReceiptText(order) {
   const items = Array.isArray(order.items) ? order.items : [];
@@ -505,7 +625,7 @@ function getReceiptText(order) {
 }
 
 // ─── Share Dropdown ───
-function ShareDropdown({ order }) {
+function ShareDropdown({ order, shopInfo, printConfig }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -518,8 +638,10 @@ function ShareDropdown({ order }) {
   }, []);
 
   const receiptText = getReceiptText(order);
+  const invoiceText = getInvoiceText(order);
+  const encodedInvoiceText = encodeURIComponent(invoiceText);
   const encodedText = encodeURIComponent(receiptText);
-  const subject = `Sale Receipt - ${order.orderNumber || ''}`;
+  const subject = `Tax Invoice - ${order.orderNumber || ''}`;
   const encodedSubject = encodeURIComponent(subject);
 
   const shareOptions = [
@@ -528,7 +650,7 @@ function ShareDropdown({ order }) {
       label: 'WhatsApp',
       icon: '💬',
       action: () => {
-        window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        window.open(`https://wa.me/?text=${encodedInvoiceText}`, '_blank');
         setOpen(false);
       },
     },
@@ -537,7 +659,7 @@ function ShareDropdown({ order }) {
       label: 'Email',
       icon: '✉️',
       action: () => {
-        window.open(`mailto:?subject=${encodedSubject}&body=${encodedText}`, '_blank');
+        window.open(`mailto:?subject=${encodedSubject}&body=${encodedInvoiceText}`, '_blank');
         setOpen(false);
       },
     },
@@ -546,7 +668,16 @@ function ShareDropdown({ order }) {
       label: 'Telegram',
       icon: '✈️',
       action: () => {
-        window.open(`https://t.me/share/url?url=&text=${encodedText}`, '_blank');
+        window.open(`https://t.me/share/url?url=&text=${encodedInvoiceText}`, '_blank');
+        setOpen(false);
+      },
+    },
+    {
+      id: 'pdf',
+      label: 'PDF',
+      icon: '📄',
+      action: () => {
+        downloadPdf(order, shopInfo, printConfig);
         setOpen(false);
       },
     },
@@ -596,7 +727,7 @@ function ShareDropdown({ order }) {
 }
 
 // ─── Receipt Modal ───
-function ReceiptModal({ isOpen, onClose, order, shopInfo }) {
+function ReceiptModal({ isOpen, onClose, order, shopInfo, printConfig }) {
   if (!isOpen || !order) return null;
 
   // Guard against malformed order data (prevents blank page crashes)
@@ -712,7 +843,7 @@ function ReceiptModal({ isOpen, onClose, order, shopInfo }) {
 
         {/* Actions */}
         <div className="p-4 border-t dark:border-gray-700 flex gap-2 flex-wrap">
-          <ShareDropdown order={safeOrder} />
+          <ShareDropdown order={safeOrder} shopInfo={shopInfo} printConfig={printConfig} />
           <button
             onClick={() => thermalPrint(safeOrder, shopInfo, printConfig)}
             className="btn-secondary flex-1 flex items-center justify-center gap-2 text-xs"
@@ -777,22 +908,18 @@ export default function POSTerminal() {
   const [printConfig, setPrintConfig] = useState(null);
 
   useEffect(() => {
-    apiService.getShopDashboard()
-      .then(res => {
-        const data = res.data?.data || res.data;
-        setShopInfo({
-          name: data?.shopName || '',
-          address: data?.shopAddress || '',
-          gstin: data?.gstin || '',
-          phone: data?.phone || '',
-          email: data?.email || '',
-        });
-      })
-      .catch(() => {});
-    // Load print config
+    // Load shop info & print config from the settings API
+    // (getShopDashboard does NOT return shop name/address/GSTIN/phone)
     apiService.getShopSettings()
       .then(res => {
         const s = res.data?.data || res.data || {};
+        setShopInfo({
+          name: s.shopName || '',
+          address: s.address ? `${s.address}${s.city ? `, ${s.city}` : ''}${s.state ? `, ${s.state}` : ''}${s.pincode ? ` - ${s.pincode}` : ''}` : '',
+          gstin: s.gstin || '',
+          phone: s.phone || '',
+          email: s.email || '',
+        });
         if (s.printConfig) setPrintConfig(s.printConfig);
       })
       .catch(() => {});
@@ -1365,6 +1492,7 @@ export default function POSTerminal() {
         onClose={() => setShowReceipt(false)}
         order={lastOrder}
         shopInfo={shopInfo}
+        printConfig={printConfig}
       />
     </div>
   );
