@@ -275,9 +275,133 @@ export default function ReportsPage() {
 
   const handleExport = async (format = 'excel') => {
     try {
-      toast('Export feature will be available soon');
+      const reportData = data;
+      if (!reportData) {
+        toast.error('No data to export');
+        return;
+      }
+
+      if (format === 'excel') {
+        // Generate CSV from current report data
+        let csvContent = '';
+        const reportName = activeTab.toUpperCase() + '_Report';
+
+        switch (activeTab) {
+          case 'sales': {
+            const chartData = reportData.chartData || [];
+            csvContent = 'Label,Revenue (₹)\n';
+            chartData.forEach(row => {
+              csvContent += `"${(row.label || '').replace(/"/g, '""')}",${row.revenue || 0}\n`;
+            });
+            const stats = reportData.stats || {};
+            csvContent += '\nSummary\n';
+            csvContent += `Total Sales,"${stats.totalSales || '₹0'}"\n`;
+            csvContent += `Total Orders,${stats.totalOrders || 0}\n`;
+            csvContent += `Avg Order Value,"${stats.averageOrder || '₹0'}"\n`;
+            break;
+          }
+          case 'inventory': {
+            const chartData = reportData.chartData || [];
+            csvContent = 'Category,Stock\n';
+            chartData.forEach(row => {
+              csvContent += `"${(row.label || '').replace(/"/g, '""')}",${row.stock || 0}\n`;
+            });
+            const stats = reportData.stats || {};
+            csvContent += '\nSummary\n';
+            csvContent += `Total Products,${stats.totalProducts || 0}\n`;
+            csvContent += `Stock Value,"${stats.totalValue || '₹0'}"\n`;
+            csvContent += `Low Stock Items,${stats.lowStock || 0}\n`;
+            csvContent += `Out of Stock,${stats.outOfStock || 0}\n`;
+            break;
+          }
+          case 'gst': {
+            const breakdown = reportData.gstBreakdown || [];
+            csvContent = 'GST Rate (%),Taxable Value (₹),CGST (₹),SGST (₹),Total Tax (₹)\n';
+            breakdown.forEach(row => {
+              csvContent += `${row.rate || 0},${row.taxableValue || 0},${row.cgst || 0},${row.sgst || 0},${row.totalTax || 0}\n`;
+            });
+            const stats = reportData.stats || {};
+            csvContent += '\nSummary\n';
+            csvContent += `Total Taxable,"${stats.totalTaxable || '₹0'}"\n`;
+            csvContent += `Total GST,"${stats.totalGst || '₹0'}"\n`;
+            csvContent += `CGST,"${stats.cgst || '₹0'}"\n`;
+            csvContent += `SGST,"${stats.sgst || '₹0'}"\n`;
+            csvContent += `IGST,"${stats.igst || '₹0'}"\n`;
+            break;
+          }
+          case 'pnl': {
+            const chartData = reportData.chartData || [];
+            csvContent = 'Period,Revenue (₹),Expenses (₹),Net Profit (₹)\n';
+            chartData.forEach(row => {
+              csvContent += `"${(row.label || '').replace(/"/g, '""')}",${row.revenue || 0},${row.expenses || 0},${row.profit || 0}\n`;
+            });
+            const stats = reportData.stats || {};
+            csvContent += '\nSummary\n';
+            csvContent += `Revenue,"${stats.revenue || '₹0'}"\n`;
+            csvContent += `Expenses,"${stats.expenses || '₹0'}"\n`;
+            csvContent += `Gross Profit,"${stats.grossProfit || '₹0'}"\n`;
+            csvContent += `Net Profit,"${stats.netProfit || '₹0'}"\n`;
+            csvContent += `Profit Margin,"${stats.margin || '0%'}"\n`;
+            break;
+          }
+          default:
+            csvContent = 'No data available';
+        }
+
+        // Download CSV file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${reportName}_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+        toast.success(`${reportName} exported as CSV`);
+      } else if (format === 'pdf') {
+        // Generate PDF using html2pdf
+        toast.loading('Generating PDF...');
+        const element = document.getElementById('report-content-area');
+        if (!element) {
+          toast.dismiss();
+          toast.error('Report content not found');
+          return;
+        }
+
+        try {
+          const html2pdfModule = await import('html2pdf.js');
+          const html2pdf = html2pdfModule.default || html2pdfModule;
+
+          const opt = {
+            margin: [10, 10],
+            filename: `${activeTab.toUpperCase()}_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+              scale: 2,
+              useCORS: true,
+              letterRendering: true,
+              scrollY: 0,
+            },
+            jsPDF: {
+              unit: 'mm',
+              format: 'a4',
+              orientation: 'portrait',
+            },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+          };
+
+          await html2pdf().set(opt).from(element).save();
+          toast.dismiss();
+          toast.success('PDF exported successfully');
+        } catch (pdfErr) {
+          toast.dismiss();
+          console.error('PDF generation error:', pdfErr);
+          toast.error('Failed to generate PDF. Try CSV export instead.');
+        }
+      }
     } catch (err) {
       console.error('Export error:', err);
+      toast.error('Export failed. Please try again.');
     }
   };
 
@@ -657,7 +781,7 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
+    <div id="report-content-area" className="p-4 md:p-6 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

@@ -404,9 +404,7 @@ export default function ShopBillingPage() {
       const data = res.data?.data;
       setSubscription(data?.subscription);
       const allPlans = data?.availablePlans || [];
-      // Only show Business Plan and Business Pro Plan on the billing page
-      const billingPlans = allPlans.filter(p => /^business\s+(pro\s+)?plan$/i.test(p.name));
-      setAvailablePlans(billingPlans.length > 0 ? billingPlans : allPlans);
+      setAvailablePlans(allPlans);
       setShopInfo({ name: data?.shopName || '', email: data?.shopEmail || '' });
       if (data?.availablePlans?.length > 0) {
         // Pre-select a non-current plan, or first plan
