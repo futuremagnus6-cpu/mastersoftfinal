@@ -31,9 +31,11 @@ router.route('/')
 
 router.route('/:id')
   .get(authorizePermission('orders', 'read'), orderController.getOrder)
-  .put(authorizePermission('orders', 'update'), updateOrderValidator, orderController.updateOrder);
+  .put(authorizePermission('orders', 'update'), updateOrderValidator, orderController.updateOrder)
+  .delete(authorizePermission('orders', 'delete'), orderController.deleteOrder);
 
 router.put('/:id/cancel', authorizePermission('orders', 'update'), cancelOrderValidator, orderController.cancelOrder);
+router.put('/:id/record-payment', authorizePermission('orders', 'update'), orderController.recordPayment);
 router.post('/:id/generate-invoice', authorizePermission('orders', 'read'), orderController.generateInvoice);
 router.post('/:id/send-invoice-email', authorizePermission('orders', 'read'), orderController.sendInvoiceEmail);
 

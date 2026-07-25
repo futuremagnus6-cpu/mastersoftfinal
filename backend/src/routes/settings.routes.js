@@ -50,8 +50,26 @@ router.get('/', async (req, res, next) => {
       darkMode: shop.settings?.darkMode || false,
       autoBackup: shop.settings?.autoBackup || false,
       defaultDiscount: shop.settings?.defaultDiscount ?? 0,
+      invoicePrefix: shop.settings?.invoicePrefix || 'INV-',
+      orderPrefix: shop.settings?.orderPrefix || 'ORD-',
+      invoiceTerms: shop.settings?.invoiceTerms || '',
+      payment: shop.settings?.payment || {},
+      customer: shop.settings?.customer || {},
+      inventory: shop.settings?.inventory || {},
+      pos: shop.settings?.pos || {},
+      communication: shop.settings?.communication || {},
       features: shop.features || {},
       limits: shop.limits || {},
+      alertConfig: shop.settings?.alertConfig || {
+        lowStockThreshold: 10,
+        expiryWarningDays: 30,
+        dailySalesReport: true,
+        weeklyReport: true,
+        monthlyReport: false,
+        paymentReminders: false,
+        backupReminders: true,
+      },
+      backupRetentionDays: shop.settings?.backupRetentionDays ?? 30,
       // Pass the raw settings too for any advanced use
       settings: shop.settings || {},
     };
@@ -83,11 +101,13 @@ router.put('/', authorize('shop_admin'), updateShopSettingsValidator, async (req
     if (body.logo !== undefined) shop.logo = body.logo;
 
     // Contact fields
+    if (!shop.contact) shop.contact = {};
     if (body.phone !== undefined) shop.contact.phone = body.phone;
     if (body.email !== undefined) shop.contact.email = body.email;
     if (body.website !== undefined) shop.contact.website = body.website;
 
     // Address fields
+    if (!shop.address) shop.address = {};
     if (body.address !== undefined) shop.address.line1 = body.address;
     if (body.addressLine2 !== undefined) shop.address.line2 = body.addressLine2;
     if (body.city !== undefined) shop.address.city = body.city;
@@ -96,6 +116,7 @@ router.put('/', authorize('shop_admin'), updateShopSettingsValidator, async (req
     if (body.country !== undefined) shop.address.country = body.country;
 
     // Settings fields
+    if (!shop.settings) shop.settings = {};
     if (body.currency !== undefined) shop.settings.currency = body.currency;
     if (body.timezone !== undefined) shop.settings.timezone = body.timezone;
     if (body.dateFormat !== undefined) shop.settings.dateFormat = body.dateFormat;
@@ -106,19 +127,70 @@ router.put('/', authorize('shop_admin'), updateShopSettingsValidator, async (req
     if (body.offlinePos !== undefined) shop.settings.offlinePos = body.offlinePos;
     if (body.darkMode !== undefined) shop.settings.darkMode = body.darkMode;
     if (body.autoBackup !== undefined) shop.settings.autoBackup = body.autoBackup;
+    if (body.lang !== undefined) shop.settings.language = body.lang;
+    if (body.backupRetentionDays !== undefined) shop.settings.backupRetentionDays = Number(body.backupRetentionDays);
+    if (body.invoicePrefix !== undefined) shop.settings.invoicePrefix = body.invoicePrefix;
+    if (body.orderPrefix !== undefined) shop.settings.orderPrefix = body.orderPrefix;
+    if (body.invoiceTerms !== undefined) shop.settings.invoiceTerms = body.invoiceTerms;
+
+    // Payment config
+    if (body.payment && typeof body.payment === 'object') {
+      if (!shop.settings.payment) shop.settings.payment = {};
+      Object.assign(shop.settings.payment, body.payment);
+      shop.markModified('settings');
+    }
+
+    // Customer settings
+    if (body.customer && typeof body.customer === 'object') {
+      if (!shop.settings.customer) shop.settings.customer = {};
+      Object.assign(shop.settings.customer, body.customer);
+      shop.markModified('settings');
+    }
+
+    // Inventory settings
+    if (body.inventory && typeof body.inventory === 'object') {
+      if (!shop.settings.inventory) shop.settings.inventory = {};
+      Object.assign(shop.settings.inventory, body.inventory);
+      shop.markModified('settings');
+    }
+
+    // POS settings
+    if (body.pos && typeof body.pos === 'object') {
+      if (!shop.settings.pos) shop.settings.pos = {};
+      Object.assign(shop.settings.pos, body.pos);
+      shop.markModified('settings');
+    }
+
+    // Communication settings
+    if (body.communication && typeof body.communication === 'object') {
+      if (!shop.settings.communication) shop.settings.communication = {};
+      Object.assign(shop.settings.communication, body.communication);
+      shop.markModified('settings');
+    }
 
     // Branding (nested object — merge)
     if (body.branding && typeof body.branding === 'object') {
+      if (!shop.branding) shop.branding = {};
       Object.assign(shop.branding, body.branding);
     }
 
     // Features (nested object — merge)
     if (body.features && typeof body.features === 'object') {
+      if (!shop.features) shop.features = {};
       Object.assign(shop.features, body.features);
+      shop.markModified('features');
+    }
+
+    // Alert Config (nested in shop.settings)
+    if (body.alertConfig && typeof body.alertConfig === 'object') {
+      if (!shop.settings.alertConfig) shop.settings.alertConfig = {};
+      Object.assign(shop.settings.alertConfig, body.alertConfig);
+      shop.markModified('settings');
     }
 
     // Limits (nested object — merge, super admin only)
     if (body.limits && typeof body.limits === 'object') {
+      if (!shop.limits) shop.limits = {};
       Object.assign(shop.limits, body.limits);
     }
 
@@ -129,6 +201,7 @@ router.put('/', authorize('shop_admin'), updateShopSettingsValidator, async (req
           shop.settings[key] = value;
         }
       });
+      shop.markModified('settings');
     }
 
     // Print config (deep merge)
@@ -151,6 +224,7 @@ router.put('/', authorize('shop_admin'), updateShopSettingsValidator, async (req
         if (!shop.printConfig.pdf) shop.printConfig.pdf = {};
         Object.assign(shop.printConfig.pdf, body.printConfig.pdf);
       }
+      shop.markModified('printConfig');
     }
 
     shop.updatedBy = req.userId;

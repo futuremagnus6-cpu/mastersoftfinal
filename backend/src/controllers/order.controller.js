@@ -539,6 +539,142 @@ exports.cancelOrder = async (req, res, next) => {
   }
 };
 
+// @desc    Record additional payment on an order (pay balance due)
+// @route   PUT /api/orders/:id/record-payment
+exports.recordPayment = async (req, res, next) => {
+  try {
+    const query = scopeQuery({ _id: req.params.id }, req);
+    const order = await Order.findOne(query);
+
+    if (!order) throw new AppError('Order not found', 404);
+    if (order.status === 'cancelled' || order.status === 'returned') {
+      throw new AppError('Cannot add payment to cancelled or returned order', 400);
+    }
+    if (order.paymentStatus === 'completed') {
+      throw new AppError('Order payment is already completed', 400);
+    }
+
+    const { method, amount, transactionMethod, transactionId, companyOrderNumber, companyOrderDate, companyNote } = req.body;
+
+    if (!method) throw new AppError('Payment method is required', 400);
+    if (!amount || amount <= 0) throw new AppError('Payment amount must be greater than 0', 400);
+    if (amount > order.balanceDue) {
+      throw new AppError(`Payment amount (₹${amount}) exceeds balance due (₹${order.balanceDue})`, 400);
+    }
+
+    // Add payment to the payments array
+    order.payments.push({
+      method,
+      amount,
+      transactionMethod: transactionMethod || undefined,
+      transactionId: transactionId || undefined,
+      companyOrderNumber: companyOrderNumber || undefined,
+      companyOrderDate: companyOrderDate || undefined,
+      companyNote: companyNote || undefined,
+      status: 'completed',
+    });
+
+    // Recalculate totals
+    order.paidAmount = (order.paidAmount || 0) + amount;
+    order.balanceDue = Math.max(0, (order.grandTotal || 0) - order.paidAmount);
+    order.paymentStatus = order.paidAmount >= order.grandTotal ? 'completed' : (order.paidAmount > 0 ? 'partial' : 'pending');
+    order.isPartialPayment = order.paymentStatus === 'partial';
+
+    order.updatedBy = req.userId;
+    await order.save();
+
+    // Create notification
+    await Notification.create({
+      shopId: req.shopId,
+      branchId: req.branchId,
+      type: 'payment_received',
+      title: 'Payment Received',
+      message: `₹${amount} payment received for order ${order.orderNumber}. Status: ${order.paymentStatus}`,
+      channel: 'dashboard',
+      createdBy: req.userId,
+    });
+
+    // Real-time update via Socket.io
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`shop:${req.shopId}`).emit('order:updated', order);
+    }
+
+    res.json({ success: true, message: 'Payment recorded successfully', data: order });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete order (permanently) and restore stock
+// @route   DELETE /api/orders/:id
+exports.deleteOrder = async (req, res, next) => {
+  try {
+    const query = scopeQuery({ _id: req.params.id }, req);
+    const order = await Order.findOne(query);
+
+    if (!order) throw new AppError('Order not found', 404);
+
+    // Only restore stock if the order wasn't already cancelled/returned
+    // (cancelled/returned orders already had their stock restored)
+    if (order.status !== 'cancelled' && order.status !== 'returned') {
+      for (const item of order.items) {
+        const product = await Product.findOne(scopeQuery({ _id: item.product }, req));
+        if (product) {
+          const prevStock = product.inventory.quantity;
+          product.inventory.quantity += item.quantity;
+          product.updatedBy = req.userId;
+          await product.save();
+
+          await InventoryLog.create({
+            shopId: req.shopId,
+            branchId: req.branchId,
+            product: product._id,
+            type: 'sale_return',
+            quantity: item.quantity,
+            previousStock: prevStock,
+            newStock: product.inventory.quantity,
+            reference: `Deleted Order: ${order.orderNumber}`,
+            createdBy: req.userId,
+          });
+        }
+      }
+
+      // Update customer stats if customer exists (only for non-cancelled orders)
+      if (order.customer) {
+        const Customer = require('../models/Customer');
+        const customerDoc = await Customer.findOne(scopeQuery({ _id: order.customer }, req));
+        if (customerDoc) {
+          customerDoc.totalOrders = Math.max(0, (customerDoc.totalOrders || 0) - 1);
+          customerDoc.totalSpent = Math.max(0, (customerDoc.totalSpent || 0) - (order.grandTotal || 0));
+          customerDoc.totalPurchases = Math.max(0, (customerDoc.totalPurchases || 0) - (order.grandTotal || 0));
+          await customerDoc.save();
+        }
+      }
+    }
+
+    // Delete notifications related to this order
+    await Notification.deleteMany({
+      shopId: req.shopId,
+      type: 'order_created',
+      message: { $regex: order.orderNumber, $options: 'i' },
+    });
+
+    // Permanently delete the order
+    await Order.deleteOne({ _id: order._id });
+
+    // Real-time update via Socket.io
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`shop:${req.shopId}`).emit('order:deleted', { id: req.params.id });
+    }
+
+    res.json({ success: true, message: `Order ${order.orderNumber} deleted successfully. Stock restored.` });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get today's orders summary
 // @route   GET /api/orders/today/summary
 exports.getTodaySummary = async (req, res, next) => {

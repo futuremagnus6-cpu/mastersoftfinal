@@ -5,15 +5,27 @@ import {
   FiRefreshCw, FiAlertCircle, FiCheckCircle,
   FiMail, FiSmartphone, FiClock,
   FiPercent, FiMapPin, FiPrinter, FiFileText,
-  FiTag, FiEye, FiEyeOff, FiDownload,
+  FiTag, FiEye, FiEyeOff, FiDownload, FiSliders,
+  FiDroplet, FiMonitor, FiCreditCard, FiUsers,
+  FiMessageSquare, FiLayout, FiDatabase,
+  FiBriefcase, FiShoppingBag, FiSend, FiBox, FiKey,
 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import { thermalPrint, standardBillPrint } from '../../utils/printUtils';
 
 const SETTINGS_TABS = [
   { id: 'general', label: 'General', icon: FiSettings },
+  { id: 'branding', label: 'Branding', icon: FiDroplet },
+  { id: 'features', label: 'Features', icon: FiSliders },
+  { id: 'pos', label: 'POS', icon: FiMonitor },
+  { id: 'tax', label: 'Tax & Invoice', icon: FiFileText },
+  { id: 'payment', label: 'Payment', icon: FiCreditCard },
+  { id: 'customer', label: 'Customer', icon: FiUsers },
+  { id: 'inventory', label: 'Inventory', icon: FiBox },
   { id: 'notifications', label: 'Notifications', icon: FiBell },
+  { id: 'communication', label: 'Communication', icon: FiMessageSquare },
   { id: 'printing', label: 'Printing', icon: FiPrinter },
+  { id: 'backup', label: 'Backup', icon: FiDatabase },
   { id: 'security', label: 'Security', icon: FiShield },
   { id: 'localization', label: 'Localization', icon: FiGlobe },
 ];
@@ -142,15 +154,19 @@ function ThermalPreview({ config, shop }) {
   return (
     <div className={`${width} mx-auto bg-white dark:bg-gray-900 shadow-lg rounded-lg overflow-hidden border dark:border-gray-700`}>
       <div className={`${align} p-3 font-mono text-[10px] leading-tight text-gray-900 dark:text-white`}>
-        <div className="font-bold text-xs">{shop?.shopName || 'Future Magnus Store'}</div>
+        {config.showLogo && (
+          <div className="font-bold text-xs">{config.storeName || shop?.shopName || 'Future Magnus Store'}</div>
+        )}
         {config.tagline && <div className="text-[9px] text-gray-500">{config.tagline}</div>}
+        {shop?.address && <div className="text-[8px] text-gray-500">{shop.address}</div>}
+        {shop?.phone && <div className="text-[8px] text-gray-500">{shop.phone}</div>}
+        {config.showGstin && (shop?.gstin || '27ABCDE1234F1Z5') && (
+          <div className="text-[8px] text-gray-500">GSTIN: {shop?.gstin || '27ABCDE1234F1Z5'}</div>
+        )}
         <div className="border-t border-dashed border-gray-300 my-1.5" />
         <div className="font-bold">SALE RECEIPT</div>
         <div className="text-gray-500">#INV-202607-001</div>
         <div className="text-gray-500">23 Jul 2026, 11:30 AM</div>
-        {config.showGstin && shop?.gstin && (
-          <div className="text-gray-500">GSTIN: {shop.gstin}</div>
-        )}
         {config.showCustomer && (
           <>
             <div className="border-t border-dashed border-gray-300 my-1.5" />
@@ -418,6 +434,9 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState(null);
   const [previewMode, setPreviewMode] = useState('thermal'); // 'thermal' | 'a4'
 
+  // Language state
+  const [lang, setLang] = useState('en');
+
   // General settings form
   const [generalForm, setGeneralForm] = useState({
     shopName: '', gstin: '', phone: '', email: '', address: '', city: '', state: '', pincode: '',
@@ -426,9 +445,30 @@ export default function SettingsPage() {
 
   // Features
   const [features, setFeatures] = useState({
-    pos: true, onlineStore: true, loyaltyProgram: false, multiBranch: false,
-    autoBackup: true, emailNotifications: true, smsAlerts: false, whatsappMessaging: false,
-    gstEInvoicing: true, barcodePrinting: true, expenseTracking: true, employeeManagement: false,
+    pos: true,
+    inventory: true,
+    crm: false,
+    suppliers: false,
+    purchases: false,
+    expenses: false,
+    employees: false,
+    multiBranch: false,
+    loyalty: false,
+    ecommerce: false,
+    customerPortal: false,
+    referralSystem: false,
+    aiForecasting: false,
+    barcodeScanner: false,
+    thermalPrinter: false,
+    whatsappNotifications: false,
+    emailNotifications: true,
+    lowStockAlerts: true,
+    expiryAlerts: true,
+    gstModule: true,
+    offlinePos: false,
+    autoBackup: false,
+    multiLanguage: false,
+    customerSupport: false,
   });
 
   // Alert config
@@ -436,6 +476,90 @@ export default function SettingsPage() {
     lowStockThreshold: 10, expiryWarningDays: 30,
     dailySalesReport: true, weeklyReport: true, monthlyReport: false,
     paymentReminders: false, backupReminders: true,
+  });
+
+  // Branding
+  const [branding, setBranding] = useState({
+    primaryColor: '#2563eb',
+    secondaryColor: '#1d4ed8',
+    accentColor: '#f59e0b',
+    fontFamily: 'Inter',
+    logo: '',
+    darkMode: false,
+  });
+
+  // POS Settings
+  const [posSettings, setPosSettings] = useState({
+    defaultView: 'grid',
+    showQuickKeys: true,
+    enableHoldOrder: true,
+    requireCashierSelect: false,
+    defaultCustomer: 'Walk-in Customer',
+    showRecentOrders: true,
+    productCardSize: 'medium',
+    showProductImage: true,
+    showProductSku: false,
+    enableQuickSearch: true,
+  });
+
+  // Tax & Invoice
+  const [taxSettings, setTaxSettings] = useState({
+    invoicePrefix: 'INV-',
+    orderPrefix: 'ORD-',
+    invoiceTerms: '1. Goods once sold will not be taken back.\n2. This is a computer-generated invoice.\n3. Subject to local jurisdiction.',
+    pan: '',
+    compositionScheme: false,
+    taxMode: 'inclusive',
+  });
+
+  // Payment Config
+  const [paymentConfig, setPaymentConfig] = useState({
+    upiId: '',
+    upiQrCode: '',
+    defaultPaymentMethod: 'cash',
+    autoCashDrawer: false,
+    enableCashManagement: false,
+  });
+
+  // Customer Settings
+  const [customerSettings, setCustomerSettings] = useState({
+    autoCreateOnPos: true,
+    defaultCreditLimit: 0,
+    allowCreditSales: false,
+    requireGstForB2B: true,
+    defaultDiscountPercent: 0,
+  });
+
+  // Inventory Settings
+  const [inventorySettings, setInventorySettings] = useState({
+    defaultReorderLevel: 10,
+    stockValuationMethod: 'average',
+    allowNegativeStock: false,
+    enableSerialTracking: false,
+    enableBatchTracking: false,
+  });
+
+  // Communication
+  const [communicationSettings, setCommunicationSettings] = useState({
+    whatsappBusinessPhone: '',
+    whatsappApiKey: '',
+    whatsappReceiptTemplate: '',
+    smsProvider: '',
+    smsApiKey: '',
+    smsSenderId: '',
+    emailSmtpHost: '',
+    emailSmtpPort: 587,
+    emailSmtpUser: '',
+    emailSmtpPass: '',
+    emailFromName: '',
+    emailFromAddress: '',
+  });
+
+  // Backup
+  const [backupSettings, setBackupSettings] = useState({
+    autoBackup: false,
+    backupTime: '02:00',
+    backupRetentionDays: 30,
   });
 
   // ─── Print Config State ───
@@ -549,8 +673,25 @@ export default function SettingsPage() {
         taxMode: s.taxMode || 'inclusive',
         defaultDiscount: s.defaultDiscount ?? 0,
       });
-      if (s.features) setFeatures(s.features);
+      if (s.features) setFeatures(prev => ({ ...prev, ...s.features }));
       if (s.alertConfig) setAlertConfig(s.alertConfig);
+      if (s.branding) setBranding(prev => ({ ...prev, ...s.branding }));
+      if (s.darkMode !== undefined) setBranding(prev => ({ ...prev, darkMode: s.darkMode }));
+      if (s.logo) setBranding(prev => ({ ...prev, logo: s.logo }));
+      if (s.pos) setPosSettings(prev => ({ ...prev, ...s.pos }));
+      if (s.invoicePrefix) setTaxSettings(prev => ({ ...prev, invoicePrefix: s.invoicePrefix }));
+      if (s.orderPrefix) setTaxSettings(prev => ({ ...prev, orderPrefix: s.orderPrefix }));
+      if (s.invoiceTerms) setTaxSettings(prev => ({ ...prev, invoiceTerms: s.invoiceTerms }));
+      if (s.pan) setTaxSettings(prev => ({ ...prev, pan: s.pan }));
+      if (s.compositionScheme !== undefined) setTaxSettings(prev => ({ ...prev, compositionScheme: s.compositionScheme }));
+      if (s.taxMode) setTaxSettings(prev => ({ ...prev, taxMode: s.taxMode }));
+      if (s.payment) setPaymentConfig(prev => ({ ...prev, ...s.payment }));
+      if (s.customer) setCustomerSettings(prev => ({ ...prev, ...s.customer }));
+      if (s.inventory) setInventorySettings(prev => ({ ...prev, ...s.inventory }));
+      if (s.communication) setCommunicationSettings(prev => ({ ...prev, ...s.communication }));
+      if (s.autoBackup !== undefined) setBackupSettings(prev => ({ ...prev, autoBackup: s.autoBackup }));
+      if (s.language) setLang(s.language);
+      if (s.settings?.backupTime) setBackupSettings(prev => ({ ...prev, backupTime: s.settings.backupTime }));
       if (s.printConfig) {
         setPrintConfig(prev => {
           const merge = (obj, defaults) => {
@@ -602,6 +743,13 @@ export default function SettingsPage() {
     finally { setSaving(false); }
   };
 
+  const handleSaveFeatures = async () => {
+    setSaving(true);
+    try { await apiService.updateShopSettings({ features }); showSuccess('Feature settings saved successfully'); }
+    catch (err) { setError('Failed to save feature settings'); }
+    finally { setSaving(false); }
+  };
+
   const handleSavePrint = async () => {
     setSaving(true);
     try { await apiService.updateShopSettings({ printConfig }); showSuccess('Printer settings saved'); }
@@ -613,6 +761,74 @@ export default function SettingsPage() {
     setSaving(true);
     try { await apiService.updateShopSettings({ alertConfig }); showSuccess('Alert configuration saved'); }
     catch (err) { setError('Failed to save alerts'); }
+    finally { setSaving(false); }
+  };
+
+  // ─── New Save Handlers ───
+  const handleSaveBranding = async () => {
+    setSaving(true);
+    try { await apiService.updateShopSettings({ branding, darkMode: branding.darkMode, logo: branding.logo }); showSuccess('Branding saved'); }
+    catch (err) { setError('Failed to save branding'); }
+    finally { setSaving(false); }
+  };
+
+  const handleSavePos = async () => {
+    setSaving(true);
+    try { await apiService.updateShopSettings({ pos: posSettings }); showSuccess('POS settings saved'); }
+    catch (err) { setError('Failed to save POS settings'); }
+    finally { setSaving(false); }
+  };
+
+  const handleSaveTax = async () => {
+    setSaving(true);
+    try {
+      await apiService.updateShopSettings({
+        invoicePrefix: taxSettings.invoicePrefix,
+        orderPrefix: taxSettings.orderPrefix,
+        invoiceTerms: taxSettings.invoiceTerms,
+        pan: taxSettings.pan,
+        compositionScheme: taxSettings.compositionScheme,
+        taxMode: taxSettings.taxMode,
+      });
+      showSuccess('Tax & Invoice settings saved');
+    } catch (err) { setError('Failed to save tax settings'); }
+    finally { setSaving(false); }
+  };
+
+  const handleSavePayment = async () => {
+    setSaving(true);
+    try { await apiService.updateShopSettings({ payment: paymentConfig }); showSuccess('Payment settings saved'); }
+    catch (err) { setError('Failed to save payment settings'); }
+    finally { setSaving(false); }
+  };
+
+  const handleSaveCustomer = async () => {
+    setSaving(true);
+    try { await apiService.updateShopSettings({ customer: customerSettings }); showSuccess('Customer settings saved'); }
+    catch (err) { setError('Failed to save customer settings'); }
+    finally { setSaving(false); }
+  };
+
+  const handleSaveCommunication = async () => {
+    setSaving(true);
+    try { await apiService.updateShopSettings({ communication: communicationSettings }); showSuccess('Communication settings saved'); }
+    catch (err) { setError('Failed to save communication settings'); }
+    finally { setSaving(false); }
+  };
+
+  const handleSaveBackup = async () => {
+    setSaving(true);
+    try {
+      await apiService.updateShopSettings({ autoBackup: backupSettings.autoBackup, backupRetentionDays: backupSettings.backupRetentionDays, settings: { backupTime: backupSettings.backupTime } });
+      showSuccess('Backup settings saved');
+    } catch (err) { setError('Failed to save backup settings'); }
+    finally { setSaving(false); }
+  };
+
+  const handleSaveInventory = async () => {
+    setSaving(true);
+    try { await apiService.updateShopSettings({ inventory: inventorySettings }); showSuccess('Inventory settings saved'); }
+    catch (err) { setError('Failed to save inventory settings'); }
     finally { setSaving(false); }
   };
 
@@ -803,6 +1019,135 @@ export default function SettingsPage() {
     </div>
   );
 
+  // ═══ Features Tab ═══
+  const renderFeaturesTab = () => {
+    const updateFeature = (key, val) => {
+      setFeatures(prev => ({ ...prev, [key]: val }));
+    };
+
+    const featureGroups = [
+      {
+        title: 'Core Features',
+        items: [
+          { key: 'pos', label: 'POS Terminal', description: 'Point of Sale billing and terminal operations' },
+          { key: 'inventory', label: 'Inventory Management', description: 'Stock tracking, adjustments, and low stock alerts' },
+          { key: 'crm', label: 'CRM / Customer Management', description: 'Customer directory, purchase history, and credits' },
+          { key: 'suppliers', label: 'Supplier Management', description: 'Supplier directory, purchase orders, and balances' },
+          { key: 'purchases', label: 'Purchase Management', description: 'Purchase invoices, GRN, and vendor entry' },
+          { key: 'expenses', label: 'Expense Tracking', description: 'Business expenses, categories, and payment logging' },
+          { key: 'employees', label: 'Employee Management', description: 'Staff accounts, roles, attendance, and permissions' },
+        ],
+      },
+      {
+        title: 'Advanced Features',
+        items: [
+          { key: 'multiBranch', label: 'Multi-Branch Support', description: 'Manage multiple shop branches and central sync' },
+          { key: 'loyalty', label: 'Loyalty Program', description: 'Customer reward points, tiers, and redemptions' },
+          { key: 'ecommerce', label: 'E-Commerce Integration', description: 'Online storefront and web order processing' },
+          { key: 'customerPortal', label: 'Customer Portal', description: 'Self-service online portal for customers' },
+          { key: 'referralSystem', label: 'Referral System', description: 'Customer referral codes and rewards' },
+          { key: 'aiForecasting', label: 'AI Demand Forecasting', description: 'Predictive sales & inventory demand analytics' },
+        ],
+      },
+      {
+        title: 'Integrations & Tools',
+        items: [
+          { key: 'barcodeScanner', label: 'Barcode Scanner', description: 'Barcode scanning for products & quick lookup' },
+          { key: 'thermalPrinter', label: 'Thermal Printer Support', description: 'Compact thermal slip receipt printing' },
+          { key: 'gstModule', label: 'GST Module', description: 'GST invoicing, HSN codes, and GSTR summaries' },
+          { key: 'offlinePos', label: 'Offline POS Mode', description: 'Operate POS offline when internet is unavailable' },
+          { key: 'customerSupport', label: 'Customer Support', description: 'Built-in support ticket system' },
+        ],
+      },
+      {
+        title: 'Notifications & Alerts',
+        items: [
+          { key: 'whatsappNotifications', label: 'WhatsApp Notifications', description: 'Send digital receipts and alerts via WhatsApp' },
+          { key: 'emailNotifications', label: 'Email Notifications', description: 'Send order invoices and system reports via Email' },
+          { key: 'lowStockAlerts', label: 'Low Stock Alerts', description: 'Automated warnings when items reach reorder levels' },
+          { key: 'expiryAlerts', label: 'Expiry Alerts', description: 'Warnings for products nearing expiry date' },
+        ],
+      },
+      {
+        title: 'System Settings',
+        items: [
+          { key: 'autoBackup', label: 'Auto Backup', description: 'Automatic scheduled cloud backups' },
+          { key: 'multiLanguage', label: 'Multi-Language Support', description: 'Support for multiple regional languages' },
+        ],
+      },
+    ];
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Shop Feature Modules</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Enable or disable module features for your shop navigation and workflow.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const allOn = {};
+                  featureGroups.forEach(g => g.items.forEach(i => { allOn[i.key] = true; }));
+                  setFeatures(prev => ({ ...prev, ...allOn }));
+                }}
+                className="text-xs px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 font-medium transition-colors"
+              >
+                Enable All
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const defaults = {
+                    pos: true, inventory: true, gstModule: true, emailNotifications: true, lowStockAlerts: true, expiryAlerts: true
+                  };
+                  setFeatures(prev => ({ ...prev, ...defaults }));
+                }}
+                className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 font-medium transition-colors"
+              >
+                Reset Defaults
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {featureGroups.map((group) => (
+              <div key={group.title} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50/50 dark:bg-gray-800/50">
+                <div className="px-4 py-3 bg-gray-100 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{group.title}</span>
+                  <span className="text-xs text-gray-400">{group.items.filter(i => features[i.key]).length} / {group.items.length} Enabled</span>
+                </div>
+                <div className="p-4 space-y-1 divide-y divide-gray-100 dark:divide-gray-700/50">
+                  {group.items.map((item) => (
+                    <Toggle
+                      key={item.key}
+                      label={item.label}
+                      description={item.description}
+                      enabled={!!features[item.key]}
+                      onChange={(v) => updateFeature(item.key, v)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            onClick={handleSaveFeatures}
+            disabled={saving}
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
+          >
+            <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Features'}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   // ═══ Notifications Tab ═══
   const renderNotificationsTab = () => (
     <div className="space-y-6">
@@ -863,11 +1208,352 @@ export default function SettingsPage() {
       <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Language & Region</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SelectField label="Store Language" value="en" onChange={() => {}} helpText="Display language for the POS and dashboard"
-            options={[{ value: 'en', label: 'English (EN)' }, { value: 'hi', label: 'Hindi (HI)' }, { value: 'mr', label: 'Marathi (MR)' }]} />
-          <SelectField label="Invoice Language" value="en" onChange={() => {}} helpText="Language used on printed invoices"
-            options={[{ value: 'en', label: 'English (EN)' }, { value: 'hi', label: 'Hindi (HI)' }, { value: 'mr', label: 'Marathi (MR)' }]} />
+          <SelectField label="Store Language" value={lang} onChange={(v) => setLang(v)} helpText="Display language for the POS and dashboard"
+            options={[
+              { value: 'en', label: 'English (EN)' },
+              { value: 'hi', label: 'Hindi (HI)' },
+              { value: 'mr', label: 'Marathi (MR)' },
+              { value: 'gu', label: 'Gujarati (GU)' },
+              { value: 'ta', label: 'Tamil (TA)' },
+              { value: 'te', label: 'Telugu (TE)' },
+              { value: 'kn', label: 'Kannada (KN)' },
+              { value: 'bn', label: 'Bengali (BN)' },
+            ]} />
+          <SelectField label="Invoice Language" value={lang} onChange={(v) => setLang(v)} helpText="Language used on printed invoices"
+            options={[
+              { value: 'en', label: 'English (EN)' },
+              { value: 'hi', label: 'Hindi (HI)' },
+              { value: 'mr', label: 'Marathi (MR)' },
+              { value: 'gu', label: 'Gujarati (GU)' },
+            ]} />
         </div>
+      </div>
+      <div className="flex justify-end">
+        <button
+          onClick={async () => {
+            setSaving(true);
+            try {
+              await apiService.updateShopSettings({ lang });
+              showSuccess('Language settings saved');
+            } catch { setError('Failed to save'); }
+            finally { setSaving(false); }
+          }}
+          disabled={saving}
+          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+        >
+          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Language'}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ═══ Branding Tab ═══
+  const renderBrandingTab = () => {
+    const colorPresets = [
+      { name: 'Indigo', colors: { primary: '#4f46e5', secondary: '#1e40af', accent: '#f59e0b' } },
+      { name: 'Blue', colors: { primary: '#2563eb', secondary: '#1d4ed8', accent: '#06b6d4' } },
+      { name: 'Green', colors: { primary: '#059669', secondary: '#047857', accent: '#f59e0b' } },
+      { name: 'Purple', colors: { primary: '#7c3aed', secondary: '#5b21b6', accent: '#f472b6' } },
+      { name: 'Rose', colors: { primary: '#e11d48', secondary: '#be123c', accent: '#fbbf24' } },
+      { name: 'Orange', colors: { primary: '#ea580c', secondary: '#c2410c', accent: '#65a30d' } },
+    ];
+    const fonts = ['Inter', 'Poppins', 'Roboto', 'Open Sans', 'Lato', 'Nunito', 'Montserrat', 'Lexend'];
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <SectionHeader icon={FiPalette} title="Brand Colors" subtitle="Customize your shop's appearance" color="indigo" />
+
+          <div className="mb-5">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Quick Color Presets</p>
+            <div className="flex flex-wrap gap-2">
+              {colorPresets.map((preset) => (
+                <button
+                  key={preset.name}
+                  onClick={() => setBranding(prev => ({ ...prev, ...preset.colors }))}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-400 transition-all text-xs font-medium"
+                  style={{ backgroundColor: preset.colors.primary + '15', color: preset.colors.primary }}
+                >
+                  <span className="w-3 h-3 rounded-full border border-white/50 shadow-sm" style={{ backgroundColor: preset.colors.primary }} />
+                  {preset.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Primary Color</label>
+              <div className="flex gap-2 items-center">
+                <input type="color" value={branding.primaryColor} onChange={(e) => setBranding(p => ({ ...p, primaryColor: e.target.value }))} className="w-10 h-10 rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600" />
+                <input type="text" value={branding.primaryColor} onChange={(e) => setBranding(p => ({ ...p, primaryColor: e.target.value }))} className="input-field flex-1 font-mono text-sm" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Secondary Color</label>
+              <div className="flex gap-2 items-center">
+                <input type="color" value={branding.secondaryColor} onChange={(e) => setBranding(p => ({ ...p, secondaryColor: e.target.value }))} className="w-10 h-10 rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600" />
+                <input type="text" value={branding.secondaryColor} onChange={(e) => setBranding(p => ({ ...p, secondaryColor: e.target.value }))} className="input-field flex-1 font-mono text-sm" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Accent Color</label>
+              <div className="flex gap-2 items-center">
+                <input type="color" value={branding.accentColor} onChange={(e) => setBranding(p => ({ ...p, accentColor: e.target.value }))} className="w-10 h-10 rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600" />
+                <input type="text" value={branding.accentColor} onChange={(e) => setBranding(p => ({ ...p, accentColor: e.target.value }))} className="input-field flex-1 font-mono text-sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <SectionHeader icon={FiLayout} title="Typography & Theme" subtitle="Fonts and display preferences" color="blue" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SelectField label="Font Family" value={branding.fontFamily} onChange={(v) => setBranding(p => ({ ...p, fontFamily: v }))}
+              options={fonts.map(f => ({ value: f, label: f }))} helpText="Font used in invoices and receipts" />
+            <Toggle label="Dark Mode" description="Use dark theme across the app" enabled={branding.darkMode} onChange={(v) => setBranding(p => ({ ...p, darkMode: v }))} />
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+          <SectionHeader icon={FiDownload} title="Shop Logo" subtitle="Upload your business logo" color="green" />
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900">
+              {branding.logo ? (
+                <img src={branding.logo} alt="Logo" className="w-full h-full object-contain" />
+              ) : (
+                <FiDroplet className="w-8 h-8 text-gray-300" />
+              )}
+            </div>
+            <div className="flex-1">
+              <input type="text" value={branding.logo} onChange={(e) => setBranding(p => ({ ...p, logo: e.target.value }))} placeholder="Paste image URL or upload..." className="input-field text-sm mb-2" />
+              <p className="text-xs text-gray-400">Recommended: 200x200px transparent PNG</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end">
+          <button onClick={handleSaveBranding} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
+            <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Branding'}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // ═══ POS Settings Tab ═══
+  const renderPosTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiMonitor} title="POS Interface" subtitle="Customize the POS terminal experience" color="blue" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <SelectField label="Default Product View" value={posSettings.defaultView} onChange={(v) => setPosSettings(p => ({ ...p, defaultView: v }))}
+            options={[{ value: 'grid', label: 'Grid View' }, { value: 'list', label: 'List View' }]} helpText="Default product display mode" />
+          <SelectField label="Product Card Size" value={posSettings.productCardSize} onChange={(v) => setPosSettings(p => ({ ...p, productCardSize: v }))}
+            options={[{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }]} helpText="Size of product cards in grid" />
+        </div>
+        <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">POS Features</h4>
+          <Toggle label="Show Quick Keys" description="Display quick product access buttons" enabled={posSettings.showQuickKeys} onChange={(v) => setPosSettings(p => ({ ...p, showQuickKeys: v }))} />
+          <Toggle label="Enable Hold Order" description="Allow orders to be placed on hold and recalled" enabled={posSettings.enableHoldOrder} onChange={(v) => setPosSettings(p => ({ ...p, enableHoldOrder: v }))} />
+          <Toggle label="Require Cashier Selection" description="Force cashier to be selected before billing" enabled={posSettings.requireCashierSelect} onChange={(v) => setPosSettings(p => ({ ...p, requireCashierSelect: v }))} />
+          <Toggle label="Show Recent Orders" description="Display recent orders in POS panel" enabled={posSettings.showRecentOrders} onChange={(v) => setPosSettings(p => ({ ...p, showRecentOrders: v }))} />
+          <Toggle label="Show Product Image" description="Display product images in POS grid" enabled={posSettings.showProductImage} onChange={(v) => setPosSettings(p => ({ ...p, showProductImage: v }))} />
+          <Toggle label="Show Product SKU" description="Display SKU code under product name" enabled={posSettings.showProductSku} onChange={(v) => setPosSettings(p => ({ ...p, showProductSku: v }))} />
+          <Toggle label="Enable Quick Search" description="Quick product search with barcode/scanner" enabled={posSettings.enableQuickSearch} onChange={(v) => setPosSettings(p => ({ ...p, enableQuickSearch: v }))} />
+        </div>
+        <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          <InputField label="Default Customer Name" value={posSettings.defaultCustomer} onChange={(v) => setPosSettings(p => ({ ...p, defaultCustomer: v }))} placeholder="Walk-in Customer" icon={FiUsers} helpText="Default customer for walk-in sales" />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button onClick={handleSavePos} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
+          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save POS Settings'}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ═══ Tax & Invoice Tab ═══
+  const renderTaxTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiFileText} title="Invoice Configuration" subtitle="Invoice numbering and document settings" color="indigo" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField label="Invoice Prefix" value={taxSettings.invoicePrefix} onChange={(v) => setTaxSettings(p => ({ ...p, invoicePrefix: v }))} placeholder="INV-" icon={FiFileText} helpText="Prefix before invoice number (e.g. INV-202607-001)" />
+          <InputField label="Order Prefix" value={taxSettings.orderPrefix} onChange={(v) => setTaxSettings(p => ({ ...p, orderPrefix: v }))} placeholder="ORD-" icon={FiShoppingBag} helpText="Prefix before order number (e.g. ORD-202607-001)" />
+          <div className="md:col-span-2">
+            <InputField label="Invoice Terms & Conditions" value={taxSettings.invoiceTerms} onChange={(v) => setTaxSettings(p => ({ ...p, invoiceTerms: v }))} type="textarea" helpText="Standard terms printed on invoices" />
+          </div>
+        </div>
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiShield} title="Tax & Compliance" subtitle="GST and tax configuration" color="green" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField label="PAN Number" value={taxSettings.pan} onChange={(v) => setTaxSettings(p => ({ ...p, pan: v }))} placeholder="ABCDE1234F" icon={FiShield} helpText="Permanent Account Number" />
+          <SelectField label="Tax Mode" value={taxSettings.taxMode} onChange={(v) => setTaxSettings(p => ({ ...p, taxMode: v }))}
+            options={[{ value: 'inclusive', label: 'Tax Inclusive' }, { value: 'exclusive', label: 'Tax Exclusive' }]} helpText="How taxes are applied to prices" />
+          <Toggle label="Composition Scheme" description="GST composition scheme for small businesses" enabled={taxSettings.compositionScheme} onChange={(v) => setTaxSettings(p => ({ ...p, compositionScheme: v }))} />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button onClick={handleSaveTax} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
+          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Tax & Invoice'}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ═══ Payment Tab ═══
+  const renderPaymentTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiCreditCard} title="Payment Methods" subtitle="Configure payment gateways and defaults" color="green" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField label="UPI ID / VPA" value={paymentConfig.upiId} onChange={(v) => setPaymentConfig(p => ({ ...p, upiId: v }))} placeholder="shop@upi" icon={FiSmartphone} helpText="Your UPI payment ID for QR payments" />
+          <InputField label="UPI QR Code URL" value={paymentConfig.upiQrCode} onChange={(v) => setPaymentConfig(p => ({ ...p, upiQrCode: v }))} placeholder="https://example.com/qr.png" icon={FiDownload} helpText="URL to your UPI QR code image" />
+          <SelectField label="Default Payment Method" value={paymentConfig.defaultPaymentMethod} onChange={(v) => setPaymentConfig(p => ({ ...p, defaultPaymentMethod: v }))}
+            options={[
+              { value: 'cash', label: 'Cash' },
+              { value: 'upi', label: 'UPI' },
+              { value: 'card', label: 'Card' },
+              { value: 'online', label: 'Online' },
+              { value: 'mixed', label: 'Mixed' },
+            ]} helpText="Default payment method selected in POS" />
+        </div>
+        <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          <Toggle label="Auto Open Cash Drawer" description="Automatically open cash drawer after payment" enabled={paymentConfig.autoCashDrawer} onChange={(v) => setPaymentConfig(p => ({ ...p, autoCashDrawer: v }))} />
+          <Toggle label="Enable Cash Management" description="Track opening/closing cash balance" enabled={paymentConfig.enableCashManagement} onChange={(v) => setPaymentConfig(p => ({ ...p, enableCashManagement: v }))} />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button onClick={handleSavePayment} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
+          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Payment Settings'}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ═══ Customer Tab ═══
+  const renderCustomerTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiUsers} title="Customer Management" subtitle="Default customer behavior and credit rules" color="blue" />
+        <Toggle label="Auto-Create Customer on POS" description="Automatically create new customers during billing" enabled={customerSettings.autoCreateOnPos} onChange={(v) => setCustomerSettings(p => ({ ...p, autoCreateOnPos: v }))} />
+        <Toggle label="Require GST for B2B" description="Require GSTIN for business customers" enabled={customerSettings.requireGstForB2B} onChange={(v) => setCustomerSettings(p => ({ ...p, requireGstForB2B: v }))} />
+        <Toggle label="Allow Credit Sales" description="Allow customers to purchase on credit" enabled={customerSettings.allowCreditSales} onChange={(v) => setCustomerSettings(p => ({ ...p, allowCreditSales: v }))} />
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiBriefcase} title="Credit & Discount" subtitle="Default credit limits and discount rules" color="blue" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField label="Default Credit Limit (₹)" value={customerSettings.defaultCreditLimit} onChange={(v) => setCustomerSettings(p => ({ ...p, defaultCreditLimit: Number(v) }))} type="number" icon={FiCreditCard} helpText="Default credit limit for new customers" />
+          <InputField label="Default Discount (%)" value={customerSettings.defaultDiscountPercent} onChange={(v) => setCustomerSettings(p => ({ ...p, defaultDiscountPercent: Number(v) }))} type="number" icon={FiPercent} helpText="Default discount applied for all customers" />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button onClick={handleSaveCustomer} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
+          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Customer Settings'}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ═══ Inventory Settings Tab ═══
+  const renderInventoryTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiBox} title="Inventory Settings" subtitle="Stock management and valuation preferences" color="indigo" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField label="Default Reorder Level" value={inventorySettings.defaultReorderLevel} onChange={(v) => setInventorySettings(p => ({ ...p, defaultReorderLevel: Number(v) }))} type="number" icon={FiAlertCircle} helpText="Stock level that triggers reorder alert" />
+          <SelectField label="Stock Valuation Method" value={inventorySettings.stockValuationMethod} onChange={(v) => setInventorySettings(p => ({ ...p, stockValuationMethod: v }))}
+            options={[{ value: 'fifo', label: 'FIFO (First In, First Out)' }, { value: 'lifo', label: 'LIFO (Last In, First Out)' }, { value: 'average', label: 'Average Cost' }]} helpText="Method used to calculate inventory value" />
+        </div>
+        <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+          <Toggle label="Allow Negative Stock" description="Allow sales when stock is insufficient" enabled={inventorySettings.allowNegativeStock} onChange={(v) => setInventorySettings(p => ({ ...p, allowNegativeStock: v }))} />
+          <Toggle label="Enable Serial Number Tracking" description="Track individual items by serial number" enabled={inventorySettings.enableSerialTracking} onChange={(v) => setInventorySettings(p => ({ ...p, enableSerialTracking: v }))} />
+          <Toggle label="Enable Batch Tracking" description="Track products by batch/lot number" enabled={inventorySettings.enableBatchTracking} onChange={(v) => setInventorySettings(p => ({ ...p, enableBatchTracking: v }))} />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button onClick={handleSaveInventory} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
+          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Inventory Settings'}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ═══ Communication Tab ═══
+  const renderCommunicationTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiMessageSquare} title="WhatsApp Business" subtitle="Connect WhatsApp for digital receipts and notifications" color="green" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <InputField label="WhatsApp Business Phone" value={communicationSettings.whatsappBusinessPhone} onChange={(v) => setCommunicationSettings(p => ({ ...p, whatsappBusinessPhone: v }))} placeholder="+919876543210" icon={FiSmartphone} helpText="Phone number registered with WhatsApp Business API" />
+          </div>
+          <InputField label="API Key" value={communicationSettings.whatsappApiKey} onChange={(v) => setCommunicationSettings(p => ({ ...p, whatsappApiKey: v }))} type="password" icon={FiKey} helpText="WhatsApp Business API key" />
+          <InputField label="Receipt Template" value={communicationSettings.whatsappReceiptTemplate} onChange={(v) => setCommunicationSettings(p => ({ ...p, whatsappReceiptTemplate: v }))} placeholder="Your receipt from {shop} is ready" icon={FiFileText} helpText="Template for receipt messages" />
+        </div>
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiSend} title="SMS Settings" subtitle="Configure SMS provider for notifications" color="indigo" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <InputField label="SMS Provider" value={communicationSettings.smsProvider} onChange={(v) => setCommunicationSettings(p => ({ ...p, smsProvider: v }))} placeholder="Twilio, MSG91, etc." icon={FiGlobe} />
+          <InputField label="SMS API Key" value={communicationSettings.smsApiKey} onChange={(v) => setCommunicationSettings(p => ({ ...p, smsApiKey: v }))} type="password" icon={FiKey} />
+          <InputField label="Sender ID" value={communicationSettings.smsSenderId} onChange={(v) => setCommunicationSettings(p => ({ ...p, smsSenderId: v }))} placeholder="SHOPID" icon={FiTag} />
+        </div>
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiMail} title="Email Settings" subtitle="SMTP configuration for email notifications" color="blue" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <InputField label="SMTP Host" value={communicationSettings.emailSmtpHost} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailSmtpHost: v }))} placeholder="smtp.gmail.com" icon={FiGlobe} />
+          <InputField label="SMTP Port" value={communicationSettings.emailSmtpPort} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailSmtpPort: Number(v) }))} type="number" placeholder="587" icon={FiBox} />
+          <InputField label="SMTP Username" value={communicationSettings.emailSmtpUser} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailSmtpUser: v }))} placeholder="shop@email.com" icon={FiMail} />
+          <InputField label="SMTP Password" value={communicationSettings.emailSmtpPass} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailSmtpPass: v }))} type="password" icon={FiKey} />
+          <InputField label="From Name" value={communicationSettings.emailFromName} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailFromName: v }))} placeholder="My Store" icon={FiTag} />
+          <InputField label="From Address" value={communicationSettings.emailFromAddress} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailFromAddress: v }))} placeholder="noreply@mystore.com" type="email" icon={FiMail} />
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button onClick={handleSaveCommunication} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
+          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Communication Settings'}
+        </button>
+      </div>
+    </div>
+  );
+
+  // ═══ Backup Tab ═══
+  const renderBackupTab = () => (
+    <div className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiDatabase} title="Backup Configuration" subtitle="Automatic data backup settings" color="indigo" />
+        <Toggle label="Enable Auto Backup" description="Schedule automatic backups of your shop data" enabled={backupSettings.autoBackup} onChange={(v) => setBackupSettings(p => ({ ...p, autoBackup: v }))} />
+        {backupSettings.autoBackup && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Backup Time (24h)</label>
+              <input type="time" value={backupSettings.backupTime} onChange={(e) => setBackupSettings(p => ({ ...p, backupTime: e.target.value }))} className="input-field" />
+            </div>
+            <InputField label="Retention Period (Days)" value={backupSettings.backupRetentionDays} onChange={(v) => setBackupSettings(p => ({ ...p, backupRetentionDays: Number(v) }))} type="number" icon={FiClock} helpText="Days to keep backup files" />
+          </div>
+        )}
+      </div>
+      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+        <SectionHeader icon={FiDownload} title="Manual Data Export" subtitle="Download your data for external use" color="green" />
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Download your shop data in various formats for external use or migration.</p>
+        <div className="flex flex-wrap gap-3">
+          {['CSV', 'Excel', 'PDF Summary'].map((fmt) => (
+            <button key={fmt} className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <FiDownload className="w-4 h-4" />
+              Export {fmt}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex justify-end">
+        <button onClick={handleSaveBackup} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
+          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Backup Settings'}
+        </button>
       </div>
     </div>
   );
@@ -1171,8 +1857,17 @@ export default function SettingsPage() {
       </div>
 
       {activeTab === 'general' && renderGeneralTab()}
+      {activeTab === 'branding' && renderBrandingTab()}
+      {activeTab === 'features' && renderFeaturesTab()}
+      {activeTab === 'pos' && renderPosTab()}
+      {activeTab === 'tax' && renderTaxTab()}
+      {activeTab === 'payment' && renderPaymentTab()}
+      {activeTab === 'customer' && renderCustomerTab()}
+      {activeTab === 'inventory' && renderInventoryTab()}
       {activeTab === 'notifications' && renderNotificationsTab()}
+      {activeTab === 'communication' && renderCommunicationTab()}
       {activeTab === 'printing' && renderPrintingTab()}
+      {activeTab === 'backup' && renderBackupTab()}
       {activeTab === 'security' && renderSecurityTab()}
       {activeTab === 'localization' && renderLocalizationTab()}
     </div>

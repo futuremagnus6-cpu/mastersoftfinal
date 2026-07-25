@@ -54,7 +54,7 @@ const paymentValidator = [
     .isIn(PAYMENT_METHODS).withMessage(`Method must be one of: ${PAYMENT_METHODS.join(', ')}`),
   body('payments.*.amount')
     .notEmpty().withMessage('Payment amount is required')
-    .isFloat({ min: 0.01 }).withMessage('Payment amount must be at least 0.01')
+    .isFloat({ min: 0 }).withMessage('Payment amount must be 0 or more')
     .toFloat(),
   body('payments.*.reference')
     .optional({ values: 'null' })

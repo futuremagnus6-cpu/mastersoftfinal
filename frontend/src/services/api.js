@@ -177,6 +177,8 @@ const apiService = {
   createOrder: (data) => api.post('/orders', data),
   updateOrder: (id, data) => api.put(`/orders/${id}`, data),
   cancelOrder: (id) => api.put(`/orders/${id}/cancel`),
+  deleteOrder: (id) => api.delete(`/orders/${id}`),
+  recordPayment: (id, data) => api.put(`/orders/${id}/record-payment`, data),
   getTodaySummary: () => api.get('/orders/today/summary'),
   syncOfflineOrders: (orders) => api.post('/orders/sync-offline', { orders }),
 

@@ -160,6 +160,17 @@ const updateShopSettingsValidator = [
   optionalObject('features'),
   optionalObject('limits'),
   optionalObject('settings'),
+  optionalObject('alertConfig'),
+  optionalObject('printConfig'),
+  optionalObject('payment'),
+  optionalObject('customer'),
+  optionalObject('inventory'),
+  optionalObject('pos'),
+  optionalObject('communication'),
+  optionalString('invoicePrefix', { max: 20 }),
+  optionalString('orderPrefix', { max: 20 }),
+  optionalString('invoiceTerms', { max: 2000 }),
+  optionalString('lang', { max: 10 }),
   validate,
 ];
 

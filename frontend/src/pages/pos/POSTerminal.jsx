@@ -20,6 +20,7 @@ const PAYMENT_METHODS = [
   { id: 'upi', label: 'Online', icon: FiSmartphone, color: 'bg-primary-500' },
   { id: 'card', label: 'Card', icon: FiCreditCard, color: 'bg-warning-500' },
   { id: 'company', label: 'Company', icon: FiUsers, color: 'bg-violet-500' },
+  { id: 'credit', label: 'Credit', icon: FiAlertCircle, color: 'bg-rose-500' },
 ];
 
 const ONLINE_METHODS = ['UPI', 'Net Banking', 'Wallet', 'QR Code'];
@@ -181,15 +182,23 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
     }
   }, [isOpen, total]);
 
-  const paidTotal = payments.reduce((s, p) => s + p.amount, 0);
+  const paidTotal = payments.reduce((s, p) => s + (p.method === 'credit' ? 0 : p.amount), 0);
   const remaining = Math.max(0, total - paidTotal);
+  const payingByCredit = payments.some(p => p.method === 'credit') && paidTotal === 0;
 
   const addPayment = () => {
+    // Credit payments use fixed 0 amount (pay later)
+    if (method === 'credit') {
+      setPayments([...payments, { method: 'credit', amount: 0 }]);
+      toast.success('Credit (Pay Later) added');
+      return;
+    }
     const amount = parseFloat(customAmount);
     if (!amount || amount <= 0) { toast.error('Enter a valid amount'); return; }
     if (amount > remaining + 0.01) { toast.error(`Maximum remaining: ₹${remaining.toFixed(2)}`); return; }
     
-    const payment = { method, amount };                if (method === 'upi') {
+    const payment = { method, amount };
+    if (method === 'upi') {
       payment.transactionMethod = transactionMethod;
       payment.transactionId = transactionId;
     }
@@ -202,6 +211,11 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
       payment.companyOrderDate = companyOrderDate || new Date().toISOString().split('T')[0];
       payment.companyNote = companyNote;
       if (!companyOrderNumber) { toast.error('Company order number is required'); return; }
+    }
+    if (method === 'credit') {
+      // Credit payment: customer pays nothing now, the full amount becomes balance due
+      // The amount is set to 0 to indicate no payment collected
+      payment.amount = 0;
     }
 
     setPayments([...payments, payment]);
@@ -228,7 +242,8 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
     // Validate each payment entry has required fields
     for (let i = 0; i < payments.length; i++) {
       const p = payments[i];
-      if (p.amount <= 0) {
+      // Credit payments can have 0 amount (pay later)
+      if (p.amount <= 0 && p.method !== 'credit') {
         toast.error(`Payment #${i + 1}: Enter a valid amount`);
         return;
       }
@@ -276,19 +291,24 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
                     p.method === 'cash' ? 'bg-green-500' :
                     p.method === 'upi' ? 'bg-blue-500' :
                     p.method === 'card' ? 'bg-yellow-500' :
-                    'bg-violet-500'
+                    p.method === 'company' ? 'bg-violet-500' :
+                    'bg-rose-500'
                   }`} />
-                  {p.method}
+                  {p.method === 'credit' ? 'Credit (Pay Later)' : p.method}
                 </span>
                 <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={p.amount}
-                    onChange={(e) => updatePaymentAmount(i, e.target.value)}
-                    className="input-field w-28 text-sm text-right font-bold py-1"
-                    min={0}
-                    step="0.01"
-                  />
+                  {p.method !== 'credit' ? (
+                    <input
+                      type="number"
+                      value={p.amount}
+                      onChange={(e) => updatePaymentAmount(i, e.target.value)}
+                      className="input-field w-28 text-sm text-right font-bold py-1"
+                      min={0}
+                      step="0.01"
+                    />
+                  ) : (
+                    <span className="text-sm font-bold text-rose-600 dark:text-rose-400">Pay Later</span>
+                  )}
                   {payments.length > 1 && (
                     <button onClick={() => removePayment(i)} className="text-danger-400 hover:text-danger-600">
                       <FiX className="w-4 h-4" />
@@ -310,6 +330,11 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
                 <p className="text-xs text-gray-500">
                   Order: {p.companyOrderNumber} | {p.companyOrderDate}
                   {p.companyNote && ` | ${p.companyNote}`}
+                </p>
+              )}
+              {p.method === 'credit' && (
+                <p className="text-xs text-rose-600 dark:text-rose-400">
+                  Full amount ₹{total.toFixed(2)} will be recorded as balance due
                 </p>
               )}
             </div>
@@ -419,7 +444,7 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
 
                 <button onClick={addPayment} className="btn-secondary w-full text-sm mt-1">
                   <FiPlus className="w-4 h-4 inline mr-1" />
-                  Add {method} Payment
+                  {method === 'credit' ? 'Confirm Credit (Pay Later)' : `Add ${method} Payment`}
                 </button>
               </div>
             </>
@@ -437,13 +462,15 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
             )}
             <button
               onClick={validateAndConfirm}
-              disabled={paidTotal <= 0 || submitting}
+              disabled={(paidTotal <= 0 && !payments.some(p => p.method === 'credit')) || submitting}
               className={`w-full py-3 flex items-center justify-center gap-2 rounded-xl font-semibold transition-all ${
                 paidTotal >= total && !submitting
                   ? 'bg-success-600 hover:bg-success-700 text-white'
                   : paidTotal > 0 && !submitting
                     ? 'bg-warning-600 hover:bg-warning-700 text-white'
-                    : 'bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed'
+                    : payingByCredit && !submitting
+                      ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                      : 'bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed'
               }`}
             >
               {submitting ? (
@@ -452,6 +479,8 @@ function PaymentModal({ isOpen, onClose, onConfirm, total, balanceDue, submittin
                 <><FiCheck className="w-5 h-5" /> Complete Sale — ₹{paidTotal.toFixed(2)}</>
               ) : paidTotal > 0 ? (
                 <><FiAlertCircle className="w-5 h-5" /> Confirm Partial — ₹{paidTotal.toFixed(2)}</>
+              ) : payingByCredit ? (
+                <><FiAlertCircle className="w-5 h-5" /> Confirm Credit — ₹{total.toFixed(2)} (Pay Later)</>
               ) : (
                 'Add at least one payment'
               )}
@@ -567,10 +596,14 @@ function getInvoiceText(order) {
     text += `\nPayments:\n`;
     text += `${dash}\n`;
     payments.forEach(p => {
-      let detail = `${(p.method || '').toUpperCase()}: ₹${(p.amount || 0).toFixed(2)}`;
-      if (p.transactionId) detail += ` (${p.transactionMethod || ''}: ${p.transactionId})`;
-      if (p.companyOrderNumber) detail += ` (PO: ${p.companyOrderNumber})`;
-      text += `  ${detail}\n`;
+      if (p.method === 'credit') {
+        text += `  CREDIT (Pay Later): ₹${(order.grandTotal || 0).toFixed(2)}\n`;
+      } else {
+        let detail = `${(p.method || '').toUpperCase()}: ₹${(p.amount || 0).toFixed(2)}`;
+        if (p.transactionId) detail += ` (${p.transactionMethod || ''}: ${p.transactionId})`;
+        if (p.companyOrderNumber) detail += ` (PO: ${p.companyOrderNumber})`;
+        text += `  ${detail}\n`;
+      }
     });
     if ((order.balanceDue || 0) > 0) {
       text += `  Balance Due: ₹${(order.balanceDue || 0).toFixed(2)}\n`;
@@ -616,7 +649,11 @@ function getReceiptText(order) {
   if (payments.length > 0) {
     text += `Payments:\n`;
     payments.forEach(p => {
-      text += `  ${(p.method || 'N/A').toUpperCase()}: ₹${(p.amount || 0).toFixed(2)}\n`;
+      if (p.method === 'credit') {
+        text += `  CREDIT (Pay Later): ₹${(order.grandTotal || 0).toFixed(2)}\n`;
+      } else {
+        text += `  ${(p.method || 'N/A').toUpperCase()}: ₹${(p.amount || 0).toFixed(2)}\n`;
+      }
     });
   }
   text += `\nThank you for your purchase!\n`;
@@ -833,9 +870,18 @@ function ReceiptModal({ isOpen, onClose, order, shopInfo, printConfig }) {
           <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm">
             <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">Payments:</p>
             {safeOrder.payments.map((p, i) => (
-              <div key={i} className="flex justify-between text-xs text-gray-500">
-                <span className="capitalize">{p.method}</span>
-                <span>₹{(p.amount || 0).toFixed(2)}</span>
+              <div key={i} className="flex justify-between text-xs">
+                {p.method === 'credit' ? (
+                  <>
+                    <span className="text-rose-600 dark:text-rose-400 font-medium">Credit (Pay Later)</span>
+                    <span className="text-rose-600 dark:text-rose-400">₹{safeOrder.grandTotal.toFixed(2)}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="capitalize text-gray-500">{p.method}</span>
+                    <span className="text-gray-500">₹{(p.amount || 0).toFixed(2)}</span>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -1123,6 +1169,9 @@ export default function POSTerminal() {
       setCustomer(null);
       setAdditionalCustomers([]);
       toast.success(`Order ${order.orderNumber || ''} created successfully`);
+      if (printConfig?.thermal?.autoPrintAfterPayment) {
+        thermalPrint(order, shopInfo, printConfig);
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || 'Failed to create order');
     } finally {

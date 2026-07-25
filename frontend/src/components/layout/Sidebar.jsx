@@ -6,7 +6,7 @@ import {
   FiTruck, FiShoppingBag, FiDollarSign, FiBarChart2,
   FiSettings, FiUserCheck, FiGift, FiAlertCircle,
   FiLogOut, FiChevronDown, FiChevronLeft, FiShield,
-  FiTrendingUp, FiHeadphones, FiLayers, FiClock, FiGlobe, FiTrash2,
+  FiTrendingUp, FiLayers, FiClock, FiTrash2,
   FiMessageSquare,
 } from 'react-icons/fi';
 import { getEnabledMenuItems } from '../../utils/features';
@@ -26,8 +26,7 @@ const shopMenuItems = [
   { path: '/team', icon: FiUserCheck, label: 'Team', roles: ['shop_admin'], feature: 'employees' },
   { path: '/employees', icon: FiUsers, label: 'Employees', roles: ['shop_admin'], feature: 'employees' },
   { path: '/loyalty', icon: FiGift, label: 'Loyalty', roles: ['shop_admin'], feature: 'loyalty' },
-  { path: '/ecommerce', icon: FiGlobe, label: 'E-Commerce', roles: ['shop_admin'], feature: 'ecommerce' },
-  { path: '/support', icon: FiHeadphones, label: 'Support', roles: ['shop_admin', 'manager', 'staff'], feature: 'customerSupport' },
+
   { path: '/reports', icon: FiBarChart2, label: 'Reports', roles: ['shop_admin', 'manager'] },
   { path: '/alerts', icon: FiAlertCircle, label: 'Alerts', roles: ['shop_admin', 'manager'] },
   { path: '/billing', icon: FiDollarSign, label: 'Billing', roles: ['shop_admin'] },

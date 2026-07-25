@@ -497,6 +497,182 @@ function OrderDetailModal({ isOpen, onClose, orderId, onEdit }) {
   );
 }
 
+// ─── Record Payment Modal ───
+function RecordPaymentModal({ isOpen, onClose, order }) {
+  const [method, setMethod] = useState('cash');
+  const [amount, setAmount] = useState(0);
+  const [transactionMethod, setTransactionMethod] = useState('');
+  const [transactionId, setTransactionId] = useState('');
+  const [companyOrderNumber, setCompanyOrderNumber] = useState('');
+  const [companyOrderDate, setCompanyOrderDate] = useState('');
+  const [companyNote, setCompanyNote] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (order) {
+      setAmount(order.balanceDue || 0);
+      setMethod('cash');
+      setTransactionMethod('');
+      setTransactionId('');
+      setCompanyOrderNumber('');
+      setCompanyOrderDate('');
+      setCompanyNote('');
+    }
+  }, [order]);
+
+  if (!isOpen || !order) return null;
+
+  const paymentMethods = [
+    { id: 'cash', label: 'Cash', icon: '💰' },
+    { id: 'online', label: 'Online', icon: '📱' },
+    { id: 'card', label: 'Card', icon: '💳' },
+    { id: 'company', label: 'Company', icon: '🏢' },
+  ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!amount || amount <= 0) {
+      toast.error('Please enter a valid amount');
+      return;
+    }
+    if (amount > (order.balanceDue || 0)) {
+      toast.error(`Amount exceeds balance due of ₹${(order.balanceDue || 0).toFixed(2)}`);
+      return;
+    }
+    setSaving(true);
+    try {
+      const payload = { method, amount: parseFloat(amount) };
+      if (method === 'online' || method === 'card') {
+        payload.transactionMethod = transactionMethod;
+        payload.transactionId = transactionId;
+      }
+      if (method === 'company') {
+        payload.companyOrderNumber = companyOrderNumber;
+        payload.companyOrderDate = companyOrderDate || undefined;
+        payload.companyNote = companyNote;
+      }
+      await apiService.recordPayment(order._id, payload);
+      toast.success(`₹${parseFloat(amount).toFixed(2)} payment recorded successfully`);
+      onClose(true);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to record payment');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={() => onClose()}>
+      <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <FiDollarSign className="w-5 h-5 text-success-500" />
+            Record Payment — {order.orderNumber}
+          </h3>
+          <button onClick={() => onClose()} className="p-1 rounded hover:bg-gray-100"><FiX className="w-5 h-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-4 space-y-4">
+          {/* Balance info */}
+          <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <div>
+              <p className="text-xs text-amber-600 dark:text-amber-400">Total Amount</p>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">₹{(order.grandTotal || 0).toFixed(2)}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-amber-600 dark:text-amber-400">Balance Due</p>
+              <p className="text-lg font-bold text-red-600 dark:text-red-400">₹{(order.balanceDue || 0).toFixed(2)}</p>
+            </div>
+          </div>
+
+          {/* Payment Method */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payment Method</label>
+            <div className="grid grid-cols-2 gap-2">
+              {paymentMethods.map(pm => (
+                <button
+                  key={pm.id}
+                  type="button"
+                  onClick={() => setMethod(pm.id)}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                    method === pm.id
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 ring-2 ring-primary-200 dark:ring-primary-800'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 text-gray-600 dark:text-gray-400'
+                  }`}
+                >
+                  <span>{pm.icon}</span>
+                  <span>{pm.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Amount */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount (₹)</label>
+            <input
+              type="number"
+              value={amount}
+              onChange={e => setAmount(parseFloat(e.target.value) || 0)}
+              className="input-field text-lg font-bold text-right"
+              min={1}
+              max={order.balanceDue || 0}
+              step="0.01"
+              placeholder="0.00"
+            />
+          </div>
+
+          {/* Online / Card details */}
+          {(method === 'online' || method === 'card') && (
+            <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{method === 'online' ? 'Online' : 'Card'} Payment Details</h4>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Transaction Method</label>
+                {method === 'online' ? (
+                  <select value={transactionMethod} onChange={e => setTransactionMethod(e.target.value)} className="input-field text-sm">
+                    <option value="">Select...</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Net Banking">Net Banking</option>
+                    <option value="QR">QR Code</option>
+                  </select>
+                ) : (
+                  <select value={transactionMethod} onChange={e => setTransactionMethod(e.target.value)} className="input-field text-sm">
+                    <option value="">Select...</option>
+                    <option value="Credit">Credit Card</option>
+                    <option value="Debit">Debit Card</option>
+                  </select>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Transaction ID</label>
+                <input value={transactionId} onChange={e => setTransactionId(e.target.value)} placeholder="Enter transaction ID" className="input-field text-sm" />
+              </div>
+            </div>
+          )}
+
+          {/* Company details */}
+          {method === 'company' && (
+            <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Company Payment Details</h4>
+              <input value={companyOrderNumber} onChange={e => setCompanyOrderNumber(e.target.value)} placeholder="Company Order Number" className="input-field text-sm" />
+              <input type="date" value={companyOrderDate} onChange={e => setCompanyOrderDate(e.target.value)} className="input-field text-sm" />
+              <input value={companyNote} onChange={e => setCompanyNote(e.target.value)} placeholder="Note" className="input-field text-sm" />
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={() => onClose()} className="btn-secondary flex-1">Cancel</button>
+            <button type="submit" disabled={saving || !amount || amount <= 0} className="btn-primary flex-1 flex items-center justify-center gap-2">
+              <FiCheck className="w-4 h-4" />
+              {saving ? 'Recording...' : 'Record Payment'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Orders Page ───
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
@@ -509,6 +685,9 @@ export default function OrdersPage() {
   const [total, setTotal] = useState(0);
   const [detailOrderId, setDetailOrderId] = useState(null);
   const [editOrder, setEditOrder] = useState(null);
+  const [deleteOrderId, setDeleteOrderId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [paymentOrder, setPaymentOrder] = useState(null);
   const limit = 20;
 
   const load = useCallback(async () => {
@@ -598,6 +777,22 @@ export default function OrdersPage() {
                   {o.status !== 'cancelled' && o.status !== 'returned' && (
                     <button onClick={() => { setEditOrder(o); }} className="p-1.5 rounded hover:bg-gray-100 text-primary-500" title="Edit"><FiEdit2 className="w-4 h-4" /></button>
                   )}
+                  {(o.isPartialPayment || o.paymentStatus === 'pending') && o.status !== 'cancelled' && o.status !== 'returned' && (
+                    <button
+                      onClick={() => setPaymentOrder(o)}
+                      className="p-1.5 rounded hover:bg-success-100 text-success-600 hover:text-success-700"
+                      title="Complete Payment"
+                    >
+                      <FiDollarSign className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setDeleteOrderId(o._id)}
+                    className="p-1.5 rounded hover:bg-red-100 text-red-400 hover:text-red-600"
+                    title="Delete"
+                  >
+                    <FiTrash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </td>
             </tr>))}
@@ -621,6 +816,68 @@ export default function OrdersPage() {
         order={editOrder}
 
       />
+
+      {/* Record Payment Modal */}
+      <RecordPaymentModal
+        isOpen={!!paymentOrder}
+        onClose={(refreshed) => { setPaymentOrder(null); if (refreshed) load(); }}
+        order={paymentOrder}
+      />
+
+      {/* Delete Order Confirmation */}
+      {deleteOrderId && (
+        <div className="modal-overlay" onClick={() => setDeleteOrderId(null)}>
+          <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <FiTrash2 className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Delete Order</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                Are you sure you want to delete this order? The following will happen:
+              </p>
+              <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 mb-6 ml-4 list-disc">
+                <li>The order will be permanently removed</li>
+                <li>All product stock will be restored</li>
+                <li>Customer stats will be updated</li>
+              </ul>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteOrderId(null)}
+                  className="btn-secondary flex-1"
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    setDeleting(true);
+                    try {
+                      await apiService.deleteOrder(deleteOrderId);
+                      toast.success('Order deleted. Stock restored.');
+                      setDeleteOrderId(null);
+                      load();
+                    } catch (err) {
+                      toast.error(err.response?.data?.message || 'Failed to delete order');
+                    } finally {
+                      setDeleting(false);
+                    }
+                  }}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  {deleting ? 'Deleting...' : 'Yes, Delete Order'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
