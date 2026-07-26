@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { setShopFeatures } from '../../store/slices/authSlice';
 import {
   FiSave, FiSettings, FiBell, FiShield,
-  FiGlobe, FiTrash2, FiPlus,
+  FiGlobe, FiTrash2, FiPlus, FiImage,
   FiRefreshCw, FiAlertCircle, FiCheckCircle,
   FiMail, FiSmartphone, FiClock,
   FiPercent, FiMapPin, FiPrinter, FiFileText,
@@ -9,6 +11,7 @@ import {
   FiDroplet, FiMonitor, FiCreditCard, FiUsers,
   FiMessageSquare, FiLayout, FiDatabase,
   FiBriefcase, FiShoppingBag, FiSend, FiBox, FiKey,
+  FiExternalLink,
 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import { thermalPrint, standardBillPrint } from '../../utils/printUtils';
@@ -19,7 +22,6 @@ const SETTINGS_TABS = [
   { id: 'features', label: 'Features', icon: FiSliders },
   { id: 'pos', label: 'POS', icon: FiMonitor },
   { id: 'tax', label: 'Tax & Invoice', icon: FiFileText },
-  { id: 'payment', label: 'Payment', icon: FiCreditCard },
   { id: 'customer', label: 'Customer', icon: FiUsers },
   { id: 'inventory', label: 'Inventory', icon: FiBox },
   { id: 'notifications', label: 'Notifications', icon: FiBell },
@@ -426,6 +428,7 @@ function A4Preview({ config, shop }) {
 // ─── MAIN SETTINGS PAGE ───
 // ═══════════════════════════════════════════════════
 export default function SettingsPage() {
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -441,6 +444,7 @@ export default function SettingsPage() {
   const [generalForm, setGeneralForm] = useState({
     shopName: '', gstin: '', phone: '', email: '', address: '', city: '', state: '', pincode: '',
     currency: 'INR', timezone: 'Asia/Kolkata', dateFormat: 'DD/MM/YYYY', taxMode: 'inclusive', defaultDiscount: 0,
+    logo: '',
   });
 
   // Features
@@ -453,7 +457,6 @@ export default function SettingsPage() {
     expenses: false,
     employees: false,
     multiBranch: false,
-    loyalty: false,
     ecommerce: false,
     customerPortal: false,
     referralSystem: false,
@@ -486,6 +489,22 @@ export default function SettingsPage() {
     fontFamily: 'Inter',
     logo: '',
     darkMode: false,
+    googleBusinessProfile: {
+      enabled: false,
+      businessName: '',
+      category: '',
+      description: '',
+      googleMapsUrl: '',
+      googleBusinessUrl: '',
+      phone: '',
+      website: '',
+      businessHours: '',
+      serviceArea: '',
+      verified: false,
+      plusCode: '',
+      placeId: '',
+      attributes: '',
+    },
   });
 
   // POS Settings
@@ -675,9 +694,21 @@ export default function SettingsPage() {
       });
       if (s.features) setFeatures(prev => ({ ...prev, ...s.features }));
       if (s.alertConfig) setAlertConfig(s.alertConfig);
-      if (s.branding) setBranding(prev => ({ ...prev, ...s.branding }));
+      if (s.branding) {
+        setBranding(prev => ({
+          ...prev,
+          ...s.branding,
+          googleBusinessProfile: {
+            ...prev.googleBusinessProfile,
+            ...(s.branding.googleBusinessProfile || {}),
+          },
+        }));
+      }
       if (s.darkMode !== undefined) setBranding(prev => ({ ...prev, darkMode: s.darkMode }));
-      if (s.logo) setBranding(prev => ({ ...prev, logo: s.logo }));
+      if (s.logo) {
+        setGeneralForm(prev => ({ ...prev, logo: s.logo }));
+        setBranding(prev => ({ ...prev, logo: s.logo }));
+      }
       if (s.pos) setPosSettings(prev => ({ ...prev, ...s.pos }));
       if (s.invoicePrefix) setTaxSettings(prev => ({ ...prev, invoicePrefix: s.invoicePrefix }));
       if (s.orderPrefix) setTaxSettings(prev => ({ ...prev, orderPrefix: s.orderPrefix }));
@@ -745,7 +776,11 @@ export default function SettingsPage() {
 
   const handleSaveFeatures = async () => {
     setSaving(true);
-    try { await apiService.updateShopSettings({ features }); showSuccess('Feature settings saved successfully'); }
+    try {
+      await apiService.updateShopSettings({ features });
+      dispatch(setShopFeatures(features));
+      showSuccess('Feature settings saved successfully');
+    }
     catch (err) { setError('Failed to save feature settings'); }
     finally { setSaving(false); }
   };
@@ -767,7 +802,15 @@ export default function SettingsPage() {
   // ─── New Save Handlers ───
   const handleSaveBranding = async () => {
     setSaving(true);
-    try { await apiService.updateShopSettings({ branding, darkMode: branding.darkMode, logo: branding.logo }); showSuccess('Branding saved'); }
+    try {
+      const { logo, darkMode, ...brandingData } = branding;
+      await apiService.updateShopSettings({
+        branding: brandingData,
+        darkMode,
+        logo,
+      });
+      showSuccess('Branding saved');
+    }
     catch (err) { setError('Failed to save branding'); }
     finally { setSaving(false); }
   };
@@ -980,6 +1023,46 @@ export default function SettingsPage() {
       <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Shop Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Logo Upload */}
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Shop Logo</label>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {generalForm.logo ? (
+                  <img src={generalForm.logo} alt="Shop Logo" className="w-full h-full object-cover" />
+                ) : (
+                  <FiImage className="w-6 h-6 text-gray-400" />
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('purpose', 'logo');
+                    try {
+                      const res = await apiService.uploadFile(formData);
+                      const url = res.data?.data?.url || res.data?.url;
+                      if (url) {
+                        setGeneralForm(prev => ({ ...prev, logo: url }));
+                        showSuccess('Logo uploaded successfully');
+                      }
+                    } catch (err) {
+                      console.error('Logo upload failed:', err);
+                      setError('Failed to upload logo');
+                    }
+                    e.target.value = '';
+                  }}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-400"
+                />
+                <p className="mt-1 text-xs text-gray-400">Upload your shop logo (PNG, JPG). Recommended: 200x200px</p>
+              </div>
+            </div>
+          </div>
           <InputField label="Shop Name" value={generalForm.shopName} onChange={(v) => setGeneralForm(p => ({ ...p, shopName: v }))} required icon={FiSettings} />
           <InputField label="GSTIN" value={generalForm.gstin} onChange={(v) => setGeneralForm(p => ({ ...p, gstin: v }))} placeholder="27ABCDE1234F1Z5" icon={FiShield} />
           <InputField label="Phone" value={generalForm.phone} onChange={(v) => setGeneralForm(p => ({ ...p, phone: v }))} type="tel" icon={FiSmartphone} />
@@ -1249,94 +1332,57 @@ export default function SettingsPage() {
 
   // ═══ Branding Tab ═══
   const renderBrandingTab = () => {
-    const colorPresets = [
-      { name: 'Indigo', colors: { primary: '#4f46e5', secondary: '#1e40af', accent: '#f59e0b' } },
-      { name: 'Blue', colors: { primary: '#2563eb', secondary: '#1d4ed8', accent: '#06b6d4' } },
-      { name: 'Green', colors: { primary: '#059669', secondary: '#047857', accent: '#f59e0b' } },
-      { name: 'Purple', colors: { primary: '#7c3aed', secondary: '#5b21b6', accent: '#f472b6' } },
-      { name: 'Rose', colors: { primary: '#e11d48', secondary: '#be123c', accent: '#fbbf24' } },
-      { name: 'Orange', colors: { primary: '#ea580c', secondary: '#c2410c', accent: '#65a30d' } },
-    ];
-    const fonts = ['Inter', 'Poppins', 'Roboto', 'Open Sans', 'Lato', 'Nunito', 'Montserrat', 'Lexend'];
-
     return (
       <div className="space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-          <SectionHeader icon={FiPalette} title="Brand Colors" subtitle="Customize your shop's appearance" color="indigo" />
+          <SectionHeader icon={FiMapPin} title="Google Business Profile" subtitle="List your shop on Google Search & Google Maps" color="green" />
 
-          <div className="mb-5">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">Quick Color Presets</p>
-            <div className="flex flex-wrap gap-2">
-              {colorPresets.map((preset) => (
-                <button
-                  key={preset.name}
-                  onClick={() => setBranding(prev => ({ ...prev, ...preset.colors }))}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-400 transition-all text-xs font-medium"
-                  style={{ backgroundColor: preset.colors.primary + '15', color: preset.colors.primary }}
+          <div className="mb-5 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-start gap-3">
+              <FiExternalLink className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-blue-800 dark:text-blue-300">Get Found on Google</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  A Google Business Profile helps your shop appear in Google Search and Google Maps when customers
+                  search for businesses like yours. Fill in your details below to improve your local online presence.
+                </p>
+              </div>
+            </div>
+          </div>              <div className="space-y-5 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <a
+                  href="https://www.google.com/business/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <span className="w-3 h-3 rounded-full border border-white/50 shadow-sm" style={{ backgroundColor: preset.colors.primary }} />
-                  {preset.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Primary Color</label>
-              <div className="flex gap-2 items-center">
-                <input type="color" value={branding.primaryColor} onChange={(e) => setBranding(p => ({ ...p, primaryColor: e.target.value }))} className="w-10 h-10 rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600" />
-                <input type="text" value={branding.primaryColor} onChange={(e) => setBranding(p => ({ ...p, primaryColor: e.target.value }))} className="input-field flex-1 font-mono text-sm" />
+                  <FiExternalLink className="w-4 h-4" />
+                  Manage Google Business Profile
+                </a>
+                <a
+                  href="https://www.google.com/maps"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <FiMapPin className="w-4 h-4" />
+                  Create Location on Google Maps
+                </a>
+                {branding.googleBusinessProfile.googleMapsUrl && (
+                  <a
+                    href={branding.googleBusinessProfile.googleMapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <FiExternalLink className="w-4 h-4" />
+                    Open in Google Maps
+                  </a>
+                )}
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Secondary Color</label>
-              <div className="flex gap-2 items-center">
-                <input type="color" value={branding.secondaryColor} onChange={(e) => setBranding(p => ({ ...p, secondaryColor: e.target.value }))} className="w-10 h-10 rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600" />
-                <input type="text" value={branding.secondaryColor} onChange={(e) => setBranding(p => ({ ...p, secondaryColor: e.target.value }))} className="input-field flex-1 font-mono text-sm" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Accent Color</label>
-              <div className="flex gap-2 items-center">
-                <input type="color" value={branding.accentColor} onChange={(e) => setBranding(p => ({ ...p, accentColor: e.target.value }))} className="w-10 h-10 rounded-lg cursor-pointer border border-gray-300 dark:border-gray-600" />
-                <input type="text" value={branding.accentColor} onChange={(e) => setBranding(p => ({ ...p, accentColor: e.target.value }))} className="input-field flex-1 font-mono text-sm" />
-              </div>
-            </div>
-          </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-          <SectionHeader icon={FiLayout} title="Typography & Theme" subtitle="Fonts and display preferences" color="blue" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SelectField label="Font Family" value={branding.fontFamily} onChange={(v) => setBranding(p => ({ ...p, fontFamily: v }))}
-              options={fonts.map(f => ({ value: f, label: f }))} helpText="Font used in invoices and receipts" />
-            <Toggle label="Dark Mode" description="Use dark theme across the app" enabled={branding.darkMode} onChange={(v) => setBranding(p => ({ ...p, darkMode: v }))} />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-          <SectionHeader icon={FiDownload} title="Shop Logo" subtitle="Upload your business logo" color="green" />
-          <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900">
-              {branding.logo ? (
-                <img src={branding.logo} alt="Logo" className="w-full h-full object-contain" />
-              ) : (
-                <FiDroplet className="w-8 h-8 text-gray-300" />
-              )}
-            </div>
-            <div className="flex-1">
-              <input type="text" value={branding.logo} onChange={(e) => setBranding(p => ({ ...p, logo: e.target.value }))} placeholder="Paste image URL or upload..." className="input-field text-sm mb-2" />
-              <p className="text-xs text-gray-400">Recommended: 200x200px transparent PNG</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end">
-          <button onClick={handleSaveBranding} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
-            <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Branding'}
-          </button>
-        </div>
       </div>
     );
   };
@@ -1399,36 +1445,6 @@ export default function SettingsPage() {
       <div className="flex justify-end">
         <button onClick={handleSaveTax} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
           <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Tax & Invoice'}
-        </button>
-      </div>
-    </div>
-  );
-
-  // ═══ Payment Tab ═══
-  const renderPaymentTab = () => (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <SectionHeader icon={FiCreditCard} title="Payment Methods" subtitle="Configure payment gateways and defaults" color="green" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField label="UPI ID / VPA" value={paymentConfig.upiId} onChange={(v) => setPaymentConfig(p => ({ ...p, upiId: v }))} placeholder="shop@upi" icon={FiSmartphone} helpText="Your UPI payment ID for QR payments" />
-          <InputField label="UPI QR Code URL" value={paymentConfig.upiQrCode} onChange={(v) => setPaymentConfig(p => ({ ...p, upiQrCode: v }))} placeholder="https://example.com/qr.png" icon={FiDownload} helpText="URL to your UPI QR code image" />
-          <SelectField label="Default Payment Method" value={paymentConfig.defaultPaymentMethod} onChange={(v) => setPaymentConfig(p => ({ ...p, defaultPaymentMethod: v }))}
-            options={[
-              { value: 'cash', label: 'Cash' },
-              { value: 'upi', label: 'UPI' },
-              { value: 'card', label: 'Card' },
-              { value: 'online', label: 'Online' },
-              { value: 'mixed', label: 'Mixed' },
-            ]} helpText="Default payment method selected in POS" />
-        </div>
-        <div className="mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-          <Toggle label="Auto Open Cash Drawer" description="Automatically open cash drawer after payment" enabled={paymentConfig.autoCashDrawer} onChange={(v) => setPaymentConfig(p => ({ ...p, autoCashDrawer: v }))} />
-          <Toggle label="Enable Cash Management" description="Track opening/closing cash balance" enabled={paymentConfig.enableCashManagement} onChange={(v) => setPaymentConfig(p => ({ ...p, enableCashManagement: v }))} />
-        </div>
-      </div>
-      <div className="flex justify-end">
-        <button onClick={handleSavePayment} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
-          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Payment Settings'}
         </button>
       </div>
     </div>
@@ -1861,7 +1877,6 @@ export default function SettingsPage() {
       {activeTab === 'features' && renderFeaturesTab()}
       {activeTab === 'pos' && renderPosTab()}
       {activeTab === 'tax' && renderTaxTab()}
-      {activeTab === 'payment' && renderPaymentTab()}
       {activeTab === 'customer' && renderCustomerTab()}
       {activeTab === 'inventory' && renderInventoryTab()}
       {activeTab === 'notifications' && renderNotificationsTab()}

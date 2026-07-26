@@ -5,7 +5,7 @@ import {
   FiShoppingCart, FiDollarSign, FiPackage, FiUsers, FiBox,
   FiTrendingUp, FiTrendingDown, FiRefreshCw, FiAlertTriangle,
   FiClock, FiEye, FiArrowRight, FiPlus, FiPrinter,
-  FiBarChart2, FiSettings, FiShoppingBag, FiTruck, FiCheckCircle,
+  FiBarChart2, FiSettings, FiShoppingBag, FiTruck, FiCheckCircle, FiImage,
 } from 'react-icons/fi';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -346,7 +346,7 @@ function Sparkline({ data, loading }) {
 // ─── Main Component ───
 export default function ShopAdminDashboard() {
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { user, shopName: reduxShopName } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
   const [dashboard, setDashboard] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
@@ -418,15 +418,21 @@ export default function ShopAdminDashboard() {
       {/* Page Header Card */}        <div className="card p-5 mb-6">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/20">
-              <FiBarChart2 className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-lg shadow-primary-500/20">
+              {dashboard?.shopLogo ? (
+                <img src={dashboard.shopLogo} alt="Shop Logo" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
+                  <FiBarChart2 className="w-6 h-6 text-white" />
+                </div>
+              )}
             </div>
             <div>
               <h1 className="text-lg font-bold text-gray-900 dark:text-white">
                 Welcome, {user?.name?.split(' ')[0] || 'User'} 👋
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                Here's what's happening with your business today.
+                {dashboard?.shopName || reduxShopName || 'Your Shop'} — {dashboard?.todayOrders || 0} orders today
               </p>
             </div>
           </div>

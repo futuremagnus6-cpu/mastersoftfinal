@@ -39,7 +39,24 @@ router.get('/', async (req, res, next) => {
       pincode: shop.address?.pincode || '',
       country: shop.address?.country || 'India',
       logo: shop.logo || '',
-      branding: shop.branding || {},
+      branding: shop.branding || {
+        googleBusinessProfile: {
+          enabled: false,
+          businessName: '',
+          category: '',
+          description: '',
+          googleMapsUrl: '',
+          googleBusinessUrl: '',
+          phone: '',
+          website: '',
+          businessHours: '',
+          serviceArea: '',
+          verified: false,
+          plusCode: '',
+          placeId: '',
+          attributes: '',
+        },
+      },
       currency: shop.settings?.currency || 'INR',
       timezone: shop.settings?.timezone || 'Asia/Kolkata',
       dateFormat: shop.settings?.dateFormat || 'DD/MM/YYYY',
@@ -172,6 +189,7 @@ router.put('/', authorize('shop_admin'), updateShopSettingsValidator, async (req
     if (body.branding && typeof body.branding === 'object') {
       if (!shop.branding) shop.branding = {};
       Object.assign(shop.branding, body.branding);
+      shop.markModified('branding');
     }
 
     // Features (nested object — merge)

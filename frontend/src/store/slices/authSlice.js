@@ -104,6 +104,12 @@ const authSlice = createSlice({
       state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
     },
+    setShopFeatures: (state, action) => {
+      state.shopFeatures = {
+        features: action.payload,
+        subscriptionStatus: state.shopFeatures?.subscriptionStatus || 'trial',
+      };
+    },
     clearError: (state) => { state.error = null; },
     setTwoFactor: (state, action) => {
       state.requiresTwoFactor = action.payload.requiresTwoFactor;
@@ -169,5 +175,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, clearError, setTwoFactor } = authSlice.actions;
+export const { setCredentials, setShopFeatures, clearError, setTwoFactor } = authSlice.actions;
 export default authSlice.reducer;

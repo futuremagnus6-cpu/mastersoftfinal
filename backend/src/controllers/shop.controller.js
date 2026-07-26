@@ -666,17 +666,17 @@ function shopDefaultFeatures(businessType) {
   };
 
   const typeSpecifics = {
-    medical_store: { employees: false, loyalty: true, ecommerce: false, multiBranch: false, whatsappNotifications: true },
-    pharmacy: { employees: false, loyalty: true, ecommerce: false, multiBranch: false, batchTracking: true, whatsappNotifications: true },
-    distributor: { employees: true, loyalty: false, ecommerce: false, multiBranch: true, suppliers: true, purchases: true, whatsappNotifications: false },
-    grocery_store: { employees: true, loyalty: true, ecommerce: true, multiBranch: true },
-    supermarket: { employees: true, loyalty: true, ecommerce: true, multiBranch: true, whatsappNotifications: true },
-    electronics_shop: { employees: true, loyalty: true, ecommerce: true, multiBranch: false },
-    mobile_shop: { employees: true, loyalty: true, ecommerce: true, multiBranch: false },
-    cosmetics_shop: { employees: true, loyalty: true, ecommerce: true, multiBranch: false },
-    hardware_shop: { employees: false, loyalty: false, ecommerce: false, multiBranch: true, suppliers: true, purchases: true },
-    riyansh_mlm: { employees: true, loyalty: true, ecommerce: false, multiBranch: true, referralSystem: true, affiliateSystem: true },
-    custom: { employees: true, loyalty: true, ecommerce: true, multiBranch: true },
+    medical_store: { employees: false, ecommerce: false, multiBranch: false, whatsappNotifications: true },
+    pharmacy: { employees: false, ecommerce: false, multiBranch: false, batchTracking: true, whatsappNotifications: true },
+    distributor: { employees: true, ecommerce: false, multiBranch: true, suppliers: true, purchases: true, whatsappNotifications: false },
+    grocery_store: { employees: true, ecommerce: true, multiBranch: true },
+    supermarket: { employees: true, ecommerce: true, multiBranch: true, whatsappNotifications: true },
+    electronics_shop: { employees: true, ecommerce: true, multiBranch: false },
+    mobile_shop: { employees: true, ecommerce: true, multiBranch: false },
+    cosmetics_shop: { employees: true, ecommerce: true, multiBranch: false },
+    hardware_shop: { employees: false, ecommerce: false, multiBranch: true, suppliers: true, purchases: true },
+    riyansh_mlm: { employees: true, ecommerce: false, multiBranch: true, referralSystem: true, affiliateSystem: true },
+    custom: { employees: true, ecommerce: true, multiBranch: true },
   };
 
   return { ...common, ...(typeSpecifics[businessType] || typeSpecifics.custom) };

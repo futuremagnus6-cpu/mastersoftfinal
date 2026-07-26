@@ -27,7 +27,6 @@ const InventoryPage = lazy(() => import('./pages/inventory/InventoryPage'));
 const PurchasesPage = lazy(() => import('./pages/purchases/PurchasesPage'));
 const ExpensesPage = lazy(() => import('./pages/expenses/ExpensesPage'));
 const EmployeesPage = lazy(() => import('./pages/employees/EmployeesPage'));
-const LoyaltyPage = lazy(() => import('./pages/loyalty/LoyaltyPage'));
 const SuppliersPage = lazy(() => import('./pages/suppliers/SuppliersPage'));
 const AlertsPage = lazy(() => import('./pages/settings/AlertsPage'));
 const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'));
@@ -132,7 +131,6 @@ export default function App() {
           <Route path="expenses" element={<ExpensesPage />} />
           <Route path="team" element={<TeamPage />} />
           <Route path="employees" element={<EmployeesPage />} />
-          <Route path="loyalty" element={<LoyaltyPage />} />
           <Route path="suppliers" element={<SuppliersPage />} />
           <Route path="alerts" element={<AlertsPage />} />
           <Route path="crm" element={<CrmPage />} />

@@ -23,7 +23,6 @@ const subscriptionPlanSchema = new mongoose.Schema({
     expenses: { type: Boolean, default: false },
     employees: { type: Boolean, default: false },
     multiBranch: { type: Boolean, default: false },
-    loyalty: { type: Boolean, default: false },
     ecommerce: { type: Boolean, default: false },
     customerPortal: { type: Boolean, default: false },
     barcodeScanner: { type: Boolean, default: false },

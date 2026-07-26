@@ -82,18 +82,17 @@ export default function CustomersPage() {
       <div className="table-container">
         <table className="w-full">
           <thead><tr className="bg-gray-50 dark:bg-gray-900">
-            <th className="table-header">Customer</th><th className="table-header">Mobile</th><th className="table-header">GSTIN</th><th className="table-header">Orders</th><th className="table-header">Total Spent</th><th className="table-header">Loyalty</th><th className="table-header">Credit</th><th className="table-header text-right">Actions</th>
+            <th className="table-header">Customer</th><th className="table-header">Mobile</th><th className="table-header">GSTIN</th><th className="table-header">Orders</th><th className="table-header">Total Spent</th><th className="table-header">Credit</th><th className="table-header text-right">Actions</th>
           </tr></thead>
           <tbody className="divide-y dark:divide-gray-700">
-            {loading ? Array.from({ length: 8 }).map((_, i) => (<tr key={i}>{Array.from({ length: 8 }).map((_, j) => (<td key={j} className="table-cell"><div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></td>))}</tr>))
-            : customers.length === 0 ? <tr><td colSpan={8} className="text-center py-12 text-gray-400"><FiUsers className="w-12 h-12 mx-auto mb-3 opacity-30" /><p>No customers found</p></td></tr>
+            {loading ? Array.from({ length: 5 }).map((_, i) => (<tr key={i}>{Array.from({ length: 7 }).map((_, j) => (<td key={j} className="table-cell"><div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></td>))}</tr>))
+            : customers.length === 0 ? <tr><td colSpan={7} className="text-center py-12 text-gray-400"><FiUsers className="w-12 h-12 mx-auto mb-3 opacity-30" /><p>No customers found</p></td></tr>
             : customers.map(c => (<tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
               <td className="table-cell"><p className="font-medium">{c.name}</p><p className="text-xs text-gray-500">{c.customerId}</p></td>
               <td className="table-cell">{c.mobile}</td>
               <td className="table-cell text-xs font-mono">{c.gstin || '-'}</td>
               <td className="table-cell">{c.totalOrders || 0}</td>
               <td className="table-cell font-medium">₹{(c.totalSpent || 0).toLocaleString('en-IN')}</td>
-              <td className="table-cell"><span className="badge-info">{c.loyalty?.points || 0} pts</span><br /><span className="text-xs text-gray-500 capitalize">{c.loyalty?.tier || 'silver'}</span></td>
               <td className="table-cell">{c.creditBalance > 0 ? <span className="text-warning-600">₹{c.creditBalance}</span> : '-'}</td>
               <td className="table-cell text-right"><div className="flex justify-end gap-1">
                 <button onClick={() => { setEditing(c); setModalOpen(true); }} className="p-1.5 rounded hover:bg-gray-100 text-gray-400"><FiEdit2 className="w-4 h-4" /></button>

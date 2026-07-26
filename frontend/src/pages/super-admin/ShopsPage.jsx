@@ -7,7 +7,7 @@ import {
   FiMapPin, FiCalendar, FiDollarSign, FiUsers,
   FiEdit2, FiClock,
   FiCheckSquare, FiSquare, FiCpu, FiServer, FiLayers,
-  FiGift, FiGlobe, FiTrendingUp, FiSmartphone,
+  FiGlobe, FiTrendingUp, FiSmartphone,
   FiPrinter, FiMessageSquare, FiBell, FiAlertTriangle,
   FiFileText, FiWifi, FiDownload, FiCreditCard, FiSend,
   FiCheck, FiCheckCircle,
@@ -64,7 +64,6 @@ function ShopModal({ shop, onClose, onSave }) {
     employees: shop?.features?.employees ?? false,
     // Advanced
     multiBranch: shop?.features?.multiBranch ?? false,
-    loyalty: shop?.features?.loyalty ?? false,
     ecommerce: shop?.features?.ecommerce ?? false,
     customerPortal: shop?.features?.customerPortal ?? false,
     referralSystem: shop?.features?.referralSystem ?? false,
@@ -104,7 +103,6 @@ function ShopModal({ shop, onClose, onSave }) {
       icon: FiLayers,
       items: [
         { key: 'multiBranch', label: 'Multi-Branch Support', description: 'Manage multiple branches with centralized reporting' },
-        { key: 'loyalty', label: 'Loyalty Program', description: 'Points, tiers, and rewards for customers' },
         { key: 'ecommerce', label: 'E-Commerce Integration', description: 'Online store integration and order sync' },
         { key: 'customerPortal', label: 'Customer Portal', description: 'Self-service portal for customers' },
         { key: 'referralSystem', label: 'Referral System', description: 'Referral tracking and rewards' },
@@ -1131,7 +1129,7 @@ function ShopDetailModal({ shop, onClose, onExtendPlan }) {
                   const featureLabels = {
                     pos: 'POS Terminal', inventory: 'Inventory', crm: 'CRM',
                     suppliers: 'Suppliers', purchases: 'Purchases', expenses: 'Expenses',
-                    employees: 'Employees', multiBranch: 'Multi-Branch', loyalty: 'Loyalty',
+                    employees: 'Employees', multiBranch: 'Multi-Branch',
                     ecommerce: 'E-Commerce', customerPortal: 'Customer Portal',
                     barcodeScanner: 'Barcode Scanner', thermalPrinter: 'Thermal Printer',
                     whatsappNotifications: 'WhatsApp', emailNotifications: 'Email Notif.',

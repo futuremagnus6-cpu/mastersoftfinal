@@ -9,7 +9,6 @@ const logger = require('../config/logger');
 const emailService = require('../services/emailService');
 const mongoose = require('mongoose');
 const crypto = require('crypto');
-const { awardPointsFromOrder } = require('./loyalty.controller');
 
 /**
  * Generate a guaranteed-unique order number.
@@ -269,20 +268,6 @@ exports.createOrder = async (req, res, next) => {
     const io = req.app.get('io');
     if (io) {
       io.to(`shop:${req.shopId}`).emit('order:created', order);
-    }
-
-    // ─── Auto-award loyalty points if customer is attached ───
-    if (customerDoc) {
-      awardPointsFromOrder({
-        customerId: customerDoc._id,
-        orderId: order._id,
-        orderNumber: order.orderNumber,
-        orderTotal: order.grandTotal,
-        shopId: req.shopId,
-        userId: req.userId,
-      }).catch(err => {
-        logger.warn(`Loyalty award failed for order ${order.orderNumber}: ${err.message}`);
-      });
     }
 
     // ─── Auto-send invoice email if customer has email ───

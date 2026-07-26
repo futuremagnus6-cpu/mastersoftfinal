@@ -21,7 +21,6 @@ export const FEATURE_LABELS = {
   expenses: 'Expense Tracking',
   employees: 'Employee Management',
   multiBranch: 'Multi-Branch Support',
-  loyalty: 'Loyalty Program',
   ecommerce: 'E-Commerce Integration',
   customerPortal: 'Customer Portal',
   referralSystem: 'Referral System',

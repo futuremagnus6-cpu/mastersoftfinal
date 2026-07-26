@@ -17,7 +17,7 @@ function PlanCard({ plan, selected, onSelect, onSubscribe, processing, isCurrent
   const featureIcons = {
     pos: FiCpu, inventory: FiPackage, crm: FiUsers,
     suppliers: FiUsers, purchases: FiPackage, expenses: FiDollarSign,
-    employees: FiUsers, multiBranch: FiLayers, loyalty: FiGift,
+    employees: FiUsers, multiBranch: FiLayers,
     ecommerce: FiGlobe, barcodeScanner: FiCpu, gstModule: FiShield,
     whatsappNotifications: FiBell, emailNotifications: FiBell,
     lowStockAlerts: FiBell, expiryAlerts: FiBell,
@@ -28,13 +28,12 @@ function PlanCard({ plan, selected, onSelect, onSubscribe, processing, isCurrent
     .filter(([, v]) => v === true)
     .map(([k]) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()));
 
-  const p1 = plan.price1Month || plan.monthlyPrice;
-  const p6 = plan.price6Months || Math.round(plan.monthlyPrice * 6 * 0.95);
-  const p12 = plan.price12Months || Math.round(plan.monthlyPrice * 12 * 0.90);
-  const s6 = plan.savings6Months || 5;
-  const s12 = plan.savings12Months || 10;
-
   const buttonLabel = isCurrentPlan ? 'Extend Plan' : (hasActiveSub ? 'Buy Premium' : 'Buy Subscription');
+
+  const isYearly = plan.name?.toLowerCase().includes('year') || plan.name?.toLowerCase().includes('annual') || !!plan.annualPrice;
+  const displayPrice = isYearly ? '₹7,000' : '₹700';
+  const displayLabel = isYearly ? 'Billed Yearly' : 'Billed Monthly';
+  const savingsText = isYearly ? 'Save ₹1,400/year' : null;
 
   return (
     <motion.div
@@ -54,26 +53,11 @@ function PlanCard({ plan, selected, onSelect, onSubscribe, processing, isCurrent
           <p className="text-sm text-gray-500">{plan.description || ''}</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">₹{p1}</p>
-          <p className="text-xs text-gray-400">/month</p>
-        </div>
-      </div>
-
-      {/* Duration Pricing Tiers */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="text-center p-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700">
-          <p className="text-sm font-bold text-gray-900 dark:text-white">₹{p1}</p>
-          <p className="text-[10px] text-gray-400">1mo</p>
-        </div>
-        <div className="text-center p-2 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 relative">
-          <span className="absolute -top-2 -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full bg-primary-600 text-white">Save {s6}%</span>
-          <p className="text-sm font-bold text-gray-900 dark:text-white">₹{p6.toLocaleString('en-IN')}</p>
-          <p className="text-[10px] text-gray-400">6mo</p>
-        </div>
-        <div className="text-center p-2 rounded-lg bg-success-50 dark:bg-success-900/20 border border-success-200 dark:border-success-800 relative">
-          <span className="absolute -top-2 -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full bg-success-600 text-white">Save {s12}%</span>
-          <p className="text-sm font-bold text-success-700 dark:text-success-300">₹{p12.toLocaleString('en-IN')}</p>
-          <p className="text-[10px] text-success-500">12mo</p>
+          <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{displayPrice}</p>
+          <p className="text-xs text-gray-400">{displayLabel}</p>
+          {savingsText && (
+            <p className="text-[10px] font-medium text-success-600 dark:text-success-400 mt-0.5">{savingsText}</p>
+          )}
         </div>
       </div>
 
@@ -206,25 +190,13 @@ const PaymentReceipt = React.forwardRef(({ transaction, shopName }, ref) => (
 function PaymentConfirmModal({ plan, onConfirm, onClose, processing, isExtension }) {
   if (!plan) return null;
 
-  const [selectedDuration, setSelectedDuration] = React.useState(1);
+  const isYearly = plan.name?.toLowerCase().includes('year') || plan.name?.toLowerCase().includes('annual') || !!plan.annualPrice;
+  const planAmount = isYearly ? 7000 : 700;
+  const planDuration = isYearly ? 12 : 1;
 
   const enabledFeatures = Object.entries(plan.features || {})
     .filter(([, v]) => v === true)
     .map(([k]) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()));
-
-  const p1 = plan.price1Month || plan.monthlyPrice;
-  const p6 = plan.price6Months || Math.round(plan.monthlyPrice * 6 * 0.95);
-  const p12 = plan.price12Months || Math.round(plan.monthlyPrice * 12 * 0.90);
-  const s6 = plan.savings6Months || 5;
-  const s12 = plan.savings12Months || 10;
-
-  const durationOptions = [
-    { value: 1, label: '1 Month', price: p1, savings: 0, badge: null },
-    { value: 6, label: '6 Months', price: p6, savings: s6, badge: 'Popular' },
-    { value: 12, label: '12 Months', price: p12, savings: s12, badge: 'Best Value' },
-  ];
-
-  const selected = durationOptions.find(d => d.value === selectedDuration);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
@@ -242,7 +214,7 @@ function PaymentConfirmModal({ plan, onConfirm, onClose, processing, isExtension
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">{isExtension ? 'Extend Plan' : 'Confirm Subscription'}</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{plan.name} — {isExtension ? 'Add more months' : 'Choose duration'}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{plan.name} — {isExtension ? 'Extend your plan' : 'Confirm your plan'}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 transition-colors">
@@ -251,59 +223,15 @@ function PaymentConfirmModal({ plan, onConfirm, onClose, processing, isExtension
         </div>
 
         <div className="p-5 space-y-5 overflow-y-auto flex-1">
-          {/* Duration Selector */}
-          <div>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Select Duration</p>
-            <div className="grid grid-cols-3 gap-2">
-              {durationOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setSelectedDuration(opt.value)}
-                  className={`relative p-2 rounded-xl border-2 text-center transition-all ${
-                    selectedDuration === opt.value
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md shadow-primary-500/10'
-                      : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-800'
-                  }`}
-                >
-                  {opt.badge && (
-                    <span className={`absolute -top-2 left-1/2 -translate-x-1/2 text-[8px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${
-                      opt.value === 6
-                        ? 'bg-primary-600 text-white'
-                        : 'bg-success-600 text-white'
-                    }`}>
-                      {opt.badge}
-                    </span>
-                  )}
-                  <p className={`text-sm font-bold ${
-                    selectedDuration === opt.value ? 'text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-white'
-                  }`}>
-                    ₹{opt.price.toLocaleString('en-IN')}
-                  </p>
-                  <p className={`text-[10px] mt-0.5 ${
-                    selectedDuration === opt.value ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'
-                  }`}>
-                    {opt.label}
-                  </p>
-                  {opt.savings > 0 && (
-                    <p className="text-[9px] font-medium text-success-600 dark:text-success-400 mt-0.5">
-                      Save {opt.savings}%
-                    </p>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Plan Summary */}
+          {/* Payment Summary */}
           <div className="flex items-center justify-between p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl border border-primary-100 dark:border-primary-800">
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{plan.name}</p>
-              <p className="text-xs text-gray-400">{selected?.label}{isExtension ? ' extension' : ' subscription'}</p>
+              <p className="text-xs text-gray-400">{isExtension ? 'Extension' : 'New subscription'}</p>
             </div>
             <div className="text-right">
-              <p className="text-xl font-bold text-primary-600 dark:text-primary-400">₹{(selected?.price || p1).toLocaleString('en-IN')}</p>
-              <p className="text-xs text-gray-400">{selected?.label === '1 Month' ? '/month' : `for ${selected?.label}`}</p>
+              <p className="text-xl font-bold text-primary-600 dark:text-primary-400">₹{planAmount.toLocaleString('en-IN')}</p>
+              <p className="text-xs text-gray-400">{planDuration === 1 ? '/month' : '/year'}</p>
             </div>
           </div>
 
@@ -362,14 +290,14 @@ function PaymentConfirmModal({ plan, onConfirm, onClose, processing, isExtension
             Cancel
           </button>
           <button
-            onClick={() => onConfirm(plan, selectedDuration)}
+            onClick={() => onConfirm(plan, planDuration)}
             disabled={processing}
             className="btn-primary flex-1 py-2.5 text-sm flex items-center justify-center gap-2"
           >
             {processing ? (
               <><FiRefreshCw className="w-4 h-4 animate-spin" /> Processing...</>
             ) : (
-              <><FiCheck className="w-4 h-4" /> Pay ₹{(selected?.price || p1).toLocaleString('en-IN')}</>
+              <><FiCheck className="w-4 h-4" /> Pay ₹{planAmount.toLocaleString('en-IN')}</>
             )}
           </button>
         </div>

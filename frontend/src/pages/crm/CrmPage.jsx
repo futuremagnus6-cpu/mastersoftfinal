@@ -20,7 +20,7 @@ export default function CrmPage() {
       // Compute segments from customer data
       const segMap = {};
       data.forEach(c => {
-        const segment = c.loyalty?.tier || (c.totalSpent > 10000 ? 'Premium' : c.totalSpent > 1000 ? 'Regular' : 'New');
+        const segment = c.totalSpent > 10000 ? 'Premium' : c.totalSpent > 1000 ? 'Regular' : 'New';
         segMap[segment] = (segMap[segment] || 0) + 1;
       });
       setSegments(Object.entries(segMap).map(([name, count]) => ({ name, count })));
@@ -100,7 +100,7 @@ export default function CrmPage() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div><p className="text-lg font-bold">₹{(selectedCustomer.totalSpent || 0).toLocaleString()}</p><p className="text-xs text-gray-400">Total Spent</p></div>
                   <div><p className="text-lg font-bold">{selectedCustomer.totalOrders || 0}</p><p className="text-xs text-gray-400">Orders</p></div>
-                  <div><p className="text-lg font-bold">{selectedCustomer.loyalty?.points || 0}</p><p className="text-xs text-gray-400">Loyalty Points</p></div>
+                  <div><p className="text-lg font-bold">{selectedCustomer.totalOrders || 0}</p><p className="text-xs text-gray-400">Total Orders</p></div>
                 </div>
               </div>
 

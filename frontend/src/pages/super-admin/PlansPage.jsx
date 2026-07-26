@@ -54,7 +54,6 @@ function PlanModal({ plan, onClose, onSave }) {
       expenses: plan?.features?.expenses ?? false,
       employees: plan?.features?.employees ?? false,
       multiBranch: plan?.features?.multiBranch ?? false,
-      loyalty: plan?.features?.loyalty ?? false,
       ecommerce: plan?.features?.ecommerce ?? false,
       barcodeScanner: plan?.features?.barcodeScanner ?? false,
       thermalPrinter: plan?.features?.thermalPrinter ?? false,
@@ -121,7 +120,6 @@ function PlanModal({ plan, onClose, onSave }) {
       title: 'Advanced',
       features: [
         { key: 'multiBranch', label: 'Multi-Branch Support' },
-        { key: 'loyalty', label: 'Loyalty Program' },
         { key: 'ecommerce', label: 'E-Commerce Integration' },
         { key: 'customerPortal', label: 'Customer Portal' },
         { key: 'referralSystem', label: 'Referral System' },

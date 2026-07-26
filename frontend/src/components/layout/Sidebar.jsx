@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import {
   FiGrid, FiShoppingCart, FiBox, FiUsers, FiPackage,
   FiTruck, FiShoppingBag, FiDollarSign, FiBarChart2,
-  FiSettings, FiUserCheck, FiGift, FiAlertCircle,
+  FiSettings,  FiUserCheck, FiAlertCircle,
   FiLogOut, FiChevronDown, FiChevronLeft, FiShield,
   FiTrendingUp, FiLayers, FiClock, FiTrash2,
   FiMessageSquare,
@@ -25,7 +25,6 @@ const shopMenuItems = [
   { path: '/expenses', icon: FiDollarSign, label: 'Expenses', roles: ['shop_admin', 'manager'], feature: 'expenses' },
   { path: '/team', icon: FiUserCheck, label: 'Team', roles: ['shop_admin'], feature: 'employees' },
   { path: '/employees', icon: FiUsers, label: 'Employees', roles: ['shop_admin'], feature: 'employees' },
-  { path: '/loyalty', icon: FiGift, label: 'Loyalty', roles: ['shop_admin'], feature: 'loyalty' },
 
   { path: '/reports', icon: FiBarChart2, label: 'Reports', roles: ['shop_admin', 'manager'] },
   { path: '/alerts', icon: FiAlertCircle, label: 'Alerts', roles: ['shop_admin', 'manager'] },
