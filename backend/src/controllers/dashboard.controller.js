@@ -15,10 +15,10 @@ exports.getShopDashboard = async (req, res, next) => {
       Order.countDocuments({ ...baseQuery, createdAt: { $gte: thisMonth } }),
       Order.aggregate([{ $match: { ...baseQuery, createdAt: { $gte: thisMonth }, status: 'completed' } }, { $group: { _id: null, total: { $sum: '$grandTotal' } } }]),
       Product.countDocuments({ ...baseQuery, isActive: true }),
-      Customer.countDocuments({ ...baseQuery, isActive: true }),
+      Customer.countDocuments({ ...baseQuery }),
       Product.countDocuments({ ...baseQuery, isActive: true, $expr: { $and: [{ $lte: ['$inventory.quantity', '$inventory.minStockLevel'] }, { $gt: ['$inventory.quantity', 0] }] } }),
       Order.find(baseQuery).sort({ createdAt: -1 }).limit(10).populate('customer', 'name mobile'),
-      Order.aggregate([{ $match: { ...baseQuery, status: 'completed', createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } }, { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, revenue: { $sum: '$grandTotal' }, orders: { $sum: 1 } } }, { $sort: { _id: 1 } }]),
+      Order.aggregate([{ $match: { ...baseQuery, createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } } }, { $group: { _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } }, revenue: { $sum: { $cond: [{ $eq: ['$status', 'completed'] }, '$grandTotal', 0] } }, orders: { $sum: 1 } } }, { $sort: { _id: 1 } }]),
       Expense.aggregate([{ $match: { ...baseQuery, date: { $gte: thisMonth } } }, { $group: { _id: null, total: { $sum: '$amount' } } }]),
     ]);
     res.json({ success: true, data: { todayOrders, todayRevenue: todayRevenue[0]?.total || 0, monthOrders, monthRevenue: monthRevenue[0]?.total || 0, totalProducts, totalCustomers, lowStock, recentOrders, salesTrend, monthExpenses: expenseTotal[0]?.total || 0 } });

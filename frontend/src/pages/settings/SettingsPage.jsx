@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
-import { setShopFeatures } from '../../store/slices/authSlice';
 import {
   FiSave, FiSettings, FiBell, FiShield,
-  FiGlobe, FiTrash2, FiPlus, FiImage,
+  FiTrash2, FiPlus, FiImage,
   FiRefreshCw, FiAlertCircle, FiCheckCircle,
   FiMail, FiSmartphone, FiClock,
   FiPercent, FiMapPin, FiPrinter, FiFileText,
-  FiTag, FiEye, FiEyeOff, FiDownload, FiSliders,
+  FiTag, FiEye, FiEyeOff, FiDownload,
   FiDroplet, FiMonitor, FiCreditCard, FiUsers,
-  FiMessageSquare, FiLayout, FiDatabase,
+  FiLayout,
   FiBriefcase, FiShoppingBag, FiSend, FiBox, FiKey,
   FiExternalLink,
 } from 'react-icons/fi';
@@ -19,17 +17,13 @@ import { thermalPrint, standardBillPrint } from '../../utils/printUtils';
 const SETTINGS_TABS = [
   { id: 'general', label: 'General', icon: FiSettings },
   { id: 'branding', label: 'Branding', icon: FiDroplet },
-  { id: 'features', label: 'Features', icon: FiSliders },
   { id: 'pos', label: 'POS', icon: FiMonitor },
   { id: 'tax', label: 'Tax & Invoice', icon: FiFileText },
   { id: 'customer', label: 'Customer', icon: FiUsers },
   { id: 'inventory', label: 'Inventory', icon: FiBox },
   { id: 'notifications', label: 'Notifications', icon: FiBell },
-  { id: 'communication', label: 'Communication', icon: FiMessageSquare },
   { id: 'printing', label: 'Printing', icon: FiPrinter },
-  { id: 'backup', label: 'Backup', icon: FiDatabase },
   { id: 'security', label: 'Security', icon: FiShield },
-  { id: 'localization', label: 'Localization', icon: FiGlobe },
 ];
 
 function Toggle({ enabled, onChange, label, description }) {
@@ -428,7 +422,6 @@ function A4Preview({ config, shop }) {
 // ─── MAIN SETTINGS PAGE ───
 // ═══════════════════════════════════════════════════
 export default function SettingsPage() {
-  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -556,29 +549,6 @@ export default function SettingsPage() {
     allowNegativeStock: false,
     enableSerialTracking: false,
     enableBatchTracking: false,
-  });
-
-  // Communication
-  const [communicationSettings, setCommunicationSettings] = useState({
-    whatsappBusinessPhone: '',
-    whatsappApiKey: '',
-    whatsappReceiptTemplate: '',
-    smsProvider: '',
-    smsApiKey: '',
-    smsSenderId: '',
-    emailSmtpHost: '',
-    emailSmtpPort: 587,
-    emailSmtpUser: '',
-    emailSmtpPass: '',
-    emailFromName: '',
-    emailFromAddress: '',
-  });
-
-  // Backup
-  const [backupSettings, setBackupSettings] = useState({
-    autoBackup: false,
-    backupTime: '02:00',
-    backupRetentionDays: 30,
   });
 
   // ─── Print Config State ───
@@ -719,10 +689,7 @@ export default function SettingsPage() {
       if (s.payment) setPaymentConfig(prev => ({ ...prev, ...s.payment }));
       if (s.customer) setCustomerSettings(prev => ({ ...prev, ...s.customer }));
       if (s.inventory) setInventorySettings(prev => ({ ...prev, ...s.inventory }));
-      if (s.communication) setCommunicationSettings(prev => ({ ...prev, ...s.communication }));
-      if (s.autoBackup !== undefined) setBackupSettings(prev => ({ ...prev, autoBackup: s.autoBackup }));
       if (s.language) setLang(s.language);
-      if (s.settings?.backupTime) setBackupSettings(prev => ({ ...prev, backupTime: s.settings.backupTime }));
       if (s.printConfig) {
         setPrintConfig(prev => {
           const merge = (obj, defaults) => {
@@ -734,7 +701,6 @@ export default function SettingsPage() {
                   result[key] = merge(obj[key], defaults[key]);
                 } else {
                   result[key] = obj[key];
-                }
               }
             });
             return result;
@@ -771,17 +737,6 @@ export default function SettingsPage() {
     setSaving(true);
     try { await apiService.updateShopSettings(generalForm); showSuccess('Settings saved successfully'); }
     catch (err) { setError('Failed to save settings'); }
-    finally { setSaving(false); }
-  };
-
-  const handleSaveFeatures = async () => {
-    setSaving(true);
-    try {
-      await apiService.updateShopSettings({ features });
-      dispatch(setShopFeatures(features));
-      showSuccess('Feature settings saved successfully');
-    }
-    catch (err) { setError('Failed to save feature settings'); }
     finally { setSaving(false); }
   };
 
@@ -849,22 +804,6 @@ export default function SettingsPage() {
     setSaving(true);
     try { await apiService.updateShopSettings({ customer: customerSettings }); showSuccess('Customer settings saved'); }
     catch (err) { setError('Failed to save customer settings'); }
-    finally { setSaving(false); }
-  };
-
-  const handleSaveCommunication = async () => {
-    setSaving(true);
-    try { await apiService.updateShopSettings({ communication: communicationSettings }); showSuccess('Communication settings saved'); }
-    catch (err) { setError('Failed to save communication settings'); }
-    finally { setSaving(false); }
-  };
-
-  const handleSaveBackup = async () => {
-    setSaving(true);
-    try {
-      await apiService.updateShopSettings({ autoBackup: backupSettings.autoBackup, backupRetentionDays: backupSettings.backupRetentionDays, settings: { backupTime: backupSettings.backupTime } });
-      showSuccess('Backup settings saved');
-    } catch (err) { setError('Failed to save backup settings'); }
     finally { setSaving(false); }
   };
 
@@ -1102,234 +1041,6 @@ export default function SettingsPage() {
     </div>
   );
 
-  // ═══ Features Tab ═══
-  const renderFeaturesTab = () => {
-    const updateFeature = (key, val) => {
-      setFeatures(prev => ({ ...prev, [key]: val }));
-    };
-
-    const featureGroups = [
-      {
-        title: 'Core Features',
-        items: [
-          { key: 'pos', label: 'POS Terminal', description: 'Point of Sale billing and terminal operations' },
-          { key: 'inventory', label: 'Inventory Management', description: 'Stock tracking, adjustments, and low stock alerts' },
-          { key: 'crm', label: 'CRM / Customer Management', description: 'Customer directory, purchase history, and credits' },
-          { key: 'suppliers', label: 'Supplier Management', description: 'Supplier directory, purchase orders, and balances' },
-          { key: 'purchases', label: 'Purchase Management', description: 'Purchase invoices, GRN, and vendor entry' },
-          { key: 'expenses', label: 'Expense Tracking', description: 'Business expenses, categories, and payment logging' },
-          { key: 'employees', label: 'Employee Management', description: 'Staff accounts, roles, attendance, and permissions' },
-        ],
-      },
-      {
-        title: 'Advanced Features',
-        items: [
-          { key: 'multiBranch', label: 'Multi-Branch Support', description: 'Manage multiple shop branches and central sync' },
-          { key: 'loyalty', label: 'Loyalty Program', description: 'Customer reward points, tiers, and redemptions' },
-          { key: 'ecommerce', label: 'E-Commerce Integration', description: 'Online storefront and web order processing' },
-          { key: 'customerPortal', label: 'Customer Portal', description: 'Self-service online portal for customers' },
-          { key: 'referralSystem', label: 'Referral System', description: 'Customer referral codes and rewards' },
-          { key: 'aiForecasting', label: 'AI Demand Forecasting', description: 'Predictive sales & inventory demand analytics' },
-        ],
-      },
-      {
-        title: 'Integrations & Tools',
-        items: [
-          { key: 'barcodeScanner', label: 'Barcode Scanner', description: 'Barcode scanning for products & quick lookup' },
-          { key: 'thermalPrinter', label: 'Thermal Printer Support', description: 'Compact thermal slip receipt printing' },
-          { key: 'gstModule', label: 'GST Module', description: 'GST invoicing, HSN codes, and GSTR summaries' },
-          { key: 'offlinePos', label: 'Offline POS Mode', description: 'Operate POS offline when internet is unavailable' },
-          { key: 'customerSupport', label: 'Customer Support', description: 'Built-in support ticket system' },
-        ],
-      },
-      {
-        title: 'Notifications & Alerts',
-        items: [
-          { key: 'whatsappNotifications', label: 'WhatsApp Notifications', description: 'Send digital receipts and alerts via WhatsApp' },
-          { key: 'emailNotifications', label: 'Email Notifications', description: 'Send order invoices and system reports via Email' },
-          { key: 'lowStockAlerts', label: 'Low Stock Alerts', description: 'Automated warnings when items reach reorder levels' },
-          { key: 'expiryAlerts', label: 'Expiry Alerts', description: 'Warnings for products nearing expiry date' },
-        ],
-      },
-      {
-        title: 'System Settings',
-        items: [
-          { key: 'autoBackup', label: 'Auto Backup', description: 'Automatic scheduled cloud backups' },
-          { key: 'multiLanguage', label: 'Multi-Language Support', description: 'Support for multiple regional languages' },
-        ],
-      },
-    ];
-
-    return (
-      <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Shop Feature Modules</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Enable or disable module features for your shop navigation and workflow.</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const allOn = {};
-                  featureGroups.forEach(g => g.items.forEach(i => { allOn[i.key] = true; }));
-                  setFeatures(prev => ({ ...prev, ...allOn }));
-                }}
-                className="text-xs px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 font-medium transition-colors"
-              >
-                Enable All
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const defaults = {
-                    pos: true, inventory: true, gstModule: true, emailNotifications: true, lowStockAlerts: true, expiryAlerts: true
-                  };
-                  setFeatures(prev => ({ ...prev, ...defaults }));
-                }}
-                className="text-xs px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 font-medium transition-colors"
-              >
-                Reset Defaults
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {featureGroups.map((group) => (
-              <div key={group.title} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden bg-gray-50/50 dark:bg-gray-800/50">
-                <div className="px-4 py-3 bg-gray-100 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{group.title}</span>
-                  <span className="text-xs text-gray-400">{group.items.filter(i => features[i.key]).length} / {group.items.length} Enabled</span>
-                </div>
-                <div className="p-4 space-y-1 divide-y divide-gray-100 dark:divide-gray-700/50">
-                  {group.items.map((item) => (
-                    <Toggle
-                      key={item.key}
-                      label={item.label}
-                      description={item.description}
-                      enabled={!!features[item.key]}
-                      onChange={(v) => updateFeature(item.key, v)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex justify-end">
-          <button
-            onClick={handleSaveFeatures}
-            disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
-          >
-            <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Features'}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  // ═══ Notifications Tab ═══
-  const renderNotificationsTab = () => (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Alert Configuration</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <InputField label="Low Stock Threshold" value={alertConfig.lowStockThreshold} onChange={(v) => setAlertConfig(p => ({ ...p, lowStockThreshold: Number(v) }))} type="number" icon={FiAlertCircle} helpText="Notify when stock falls below this level" />
-          <InputField label="Expiry Warning (Days)" value={alertConfig.expiryWarningDays} onChange={(v) => setAlertConfig(p => ({ ...p, expiryWarningDays: Number(v) }))} type="number" icon={FiClock} helpText="Warn before product expiry" />
-        </div>
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Report Schedules</h4>
-          <Toggle label="Daily Sales Report" enabled={alertConfig.dailySalesReport} onChange={(v) => setAlertConfig(p => ({ ...p, dailySalesReport: v }))} />
-          <Toggle label="Weekly Report" enabled={alertConfig.weeklyReport} onChange={(v) => setAlertConfig(p => ({ ...p, weeklyReport: v }))} />
-          <Toggle label="Monthly Report" enabled={alertConfig.monthlyReport} onChange={(v) => setAlertConfig(p => ({ ...p, monthlyReport: v }))} />
-        </div>
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-2">
-          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Reminders</h4>
-          <Toggle label="Payment Reminders" enabled={alertConfig.paymentReminders} onChange={(v) => setAlertConfig(p => ({ ...p, paymentReminders: v }))} />
-          <Toggle label="Backup Reminders" enabled={alertConfig.backupReminders} onChange={(v) => setAlertConfig(p => ({ ...p, backupReminders: v }))} />
-        </div>
-      </div>
-      <div className="flex justify-end">
-        <button onClick={handleSaveAlerts} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Alert Config'}
-        </button>
-      </div>
-    </div>
-  );
-
-  // ═══ Security Tab ═══
-  const renderSecurityTab = () => (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Security Settings</h3>
-        <Toggle label="Two-Factor Authentication" description="Require OTP for login" enabled={false} onChange={() => {}} />
-        <Toggle label="Session Timeout" description="Auto-logout after 30 minutes of inactivity" enabled={true} onChange={() => {}} />
-        <Toggle label="Login Notifications" enabled={true} onChange={() => {}} />
-      </div>
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">API Keys</h3>
-        {[{ name: 'Production API Key', key: 'fm_sk_prod_••••••••••' }, { name: 'Test API Key', key: 'fm_sk_test_••••••••••' }].map((api, i) => (
-          <div key={i} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg mb-2">
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{api.name}</p>
-              <p className="text-xs text-gray-500">{api.key}</p>
-            </div>
-            <button className="p-2 text-gray-400 hover:text-red-600 transition-colors"><FiTrash2 className="w-4 h-4" /></button>
-          </div>
-        ))}
-        <button className="flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400"><FiPlus className="w-4 h-4" /> Generate New Key</button>
-      </div>
-    </div>
-  );
-
-  // ═══ Localization Tab ═══
-  const renderLocalizationTab = () => (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Language & Region</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SelectField label="Store Language" value={lang} onChange={(v) => setLang(v)} helpText="Display language for the POS and dashboard"
-            options={[
-              { value: 'en', label: 'English (EN)' },
-              { value: 'hi', label: 'Hindi (HI)' },
-              { value: 'mr', label: 'Marathi (MR)' },
-              { value: 'gu', label: 'Gujarati (GU)' },
-              { value: 'ta', label: 'Tamil (TA)' },
-              { value: 'te', label: 'Telugu (TE)' },
-              { value: 'kn', label: 'Kannada (KN)' },
-              { value: 'bn', label: 'Bengali (BN)' },
-            ]} />
-          <SelectField label="Invoice Language" value={lang} onChange={(v) => setLang(v)} helpText="Language used on printed invoices"
-            options={[
-              { value: 'en', label: 'English (EN)' },
-              { value: 'hi', label: 'Hindi (HI)' },
-              { value: 'mr', label: 'Marathi (MR)' },
-              { value: 'gu', label: 'Gujarati (GU)' },
-            ]} />
-        </div>
-      </div>
-      <div className="flex justify-end">
-        <button
-          onClick={async () => {
-            setSaving(true);
-            try {
-              await apiService.updateShopSettings({ lang });
-              showSuccess('Language settings saved');
-            } catch { setError('Failed to save'); }
-            finally { setSaving(false); }
-          }}
-          disabled={saving}
-          className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-        >
-          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Language'}
-        </button>
-      </div>
-    </div>
-  );
-
   // ═══ Branding Tab ═══
   const renderBrandingTab = () => {
     return (
@@ -1498,83 +1209,6 @@ export default function SettingsPage() {
     </div>
   );
 
-  // ═══ Communication Tab ═══
-  const renderCommunicationTab = () => (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <SectionHeader icon={FiMessageSquare} title="WhatsApp Business" subtitle="Connect WhatsApp for digital receipts and notifications" color="green" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="md:col-span-2">
-            <InputField label="WhatsApp Business Phone" value={communicationSettings.whatsappBusinessPhone} onChange={(v) => setCommunicationSettings(p => ({ ...p, whatsappBusinessPhone: v }))} placeholder="+919876543210" icon={FiSmartphone} helpText="Phone number registered with WhatsApp Business API" />
-          </div>
-          <InputField label="API Key" value={communicationSettings.whatsappApiKey} onChange={(v) => setCommunicationSettings(p => ({ ...p, whatsappApiKey: v }))} type="password" icon={FiKey} helpText="WhatsApp Business API key" />
-          <InputField label="Receipt Template" value={communicationSettings.whatsappReceiptTemplate} onChange={(v) => setCommunicationSettings(p => ({ ...p, whatsappReceiptTemplate: v }))} placeholder="Your receipt from {shop} is ready" icon={FiFileText} helpText="Template for receipt messages" />
-        </div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <SectionHeader icon={FiSend} title="SMS Settings" subtitle="Configure SMS provider for notifications" color="indigo" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <InputField label="SMS Provider" value={communicationSettings.smsProvider} onChange={(v) => setCommunicationSettings(p => ({ ...p, smsProvider: v }))} placeholder="Twilio, MSG91, etc." icon={FiGlobe} />
-          <InputField label="SMS API Key" value={communicationSettings.smsApiKey} onChange={(v) => setCommunicationSettings(p => ({ ...p, smsApiKey: v }))} type="password" icon={FiKey} />
-          <InputField label="Sender ID" value={communicationSettings.smsSenderId} onChange={(v) => setCommunicationSettings(p => ({ ...p, smsSenderId: v }))} placeholder="SHOPID" icon={FiTag} />
-        </div>
-      </div>
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <SectionHeader icon={FiMail} title="Email Settings" subtitle="SMTP configuration for email notifications" color="blue" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField label="SMTP Host" value={communicationSettings.emailSmtpHost} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailSmtpHost: v }))} placeholder="smtp.gmail.com" icon={FiGlobe} />
-          <InputField label="SMTP Port" value={communicationSettings.emailSmtpPort} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailSmtpPort: Number(v) }))} type="number" placeholder="587" icon={FiBox} />
-          <InputField label="SMTP Username" value={communicationSettings.emailSmtpUser} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailSmtpUser: v }))} placeholder="shop@email.com" icon={FiMail} />
-          <InputField label="SMTP Password" value={communicationSettings.emailSmtpPass} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailSmtpPass: v }))} type="password" icon={FiKey} />
-          <InputField label="From Name" value={communicationSettings.emailFromName} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailFromName: v }))} placeholder="My Store" icon={FiTag} />
-          <InputField label="From Address" value={communicationSettings.emailFromAddress} onChange={(v) => setCommunicationSettings(p => ({ ...p, emailFromAddress: v }))} placeholder="noreply@mystore.com" type="email" icon={FiMail} />
-        </div>
-      </div>
-      <div className="flex justify-end">
-        <button onClick={handleSaveCommunication} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
-          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Communication Settings'}
-        </button>
-      </div>
-    </div>
-  );
-
-  // ═══ Backup Tab ═══
-  const renderBackupTab = () => (
-    <div className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <SectionHeader icon={FiDatabase} title="Backup Configuration" subtitle="Automatic data backup settings" color="indigo" />
-        <Toggle label="Enable Auto Backup" description="Schedule automatic backups of your shop data" enabled={backupSettings.autoBackup} onChange={(v) => setBackupSettings(p => ({ ...p, autoBackup: v }))} />
-        {backupSettings.autoBackup && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Backup Time (24h)</label>
-              <input type="time" value={backupSettings.backupTime} onChange={(e) => setBackupSettings(p => ({ ...p, backupTime: e.target.value }))} className="input-field" />
-            </div>
-            <InputField label="Retention Period (Days)" value={backupSettings.backupRetentionDays} onChange={(v) => setBackupSettings(p => ({ ...p, backupRetentionDays: Number(v) }))} type="number" icon={FiClock} helpText="Days to keep backup files" />
-          </div>
-        )}
-      </div>
-      <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
-        <SectionHeader icon={FiDownload} title="Manual Data Export" subtitle="Download your data for external use" color="green" />
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Download your shop data in various formats for external use or migration.</p>
-        <div className="flex flex-wrap gap-3">
-          {['CSV', 'Excel', 'PDF Summary'].map((fmt) => (
-            <button key={fmt} className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-              <FiDownload className="w-4 h-4" />
-              Export {fmt}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="flex justify-end">
-        <button onClick={handleSaveBackup} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm">
-          <FiSave className="w-4 h-4" />{saving ? 'Saving...' : 'Save Backup Settings'}
-        </button>
-      </div>
-    </div>
-  );
-
-  // ═══════════════════════════════════════════════
   // ─── PRINTING TAB (The main feature) ───
   // ═══════════════════════════════════════════════
   const renderPrintingTab = () => {
@@ -1874,17 +1508,13 @@ export default function SettingsPage() {
 
       {activeTab === 'general' && renderGeneralTab()}
       {activeTab === 'branding' && renderBrandingTab()}
-      {activeTab === 'features' && renderFeaturesTab()}
       {activeTab === 'pos' && renderPosTab()}
       {activeTab === 'tax' && renderTaxTab()}
       {activeTab === 'customer' && renderCustomerTab()}
       {activeTab === 'inventory' && renderInventoryTab()}
       {activeTab === 'notifications' && renderNotificationsTab()}
-      {activeTab === 'communication' && renderCommunicationTab()}
       {activeTab === 'printing' && renderPrintingTab()}
-      {activeTab === 'backup' && renderBackupTab()}
       {activeTab === 'security' && renderSecurityTab()}
-      {activeTab === 'localization' && renderLocalizationTab()}
     </div>
   );
 }

@@ -103,7 +103,6 @@ export default function SettingsPage() {
     maintenanceMode: false,
     allowRegistration: true,
     defaultTrialDays: 14,
-    maxShopsPerAdmin: 100,
     sessionTimeout: 60,
     passwordMinLength: 8,
     twoFactorRequired: false,
@@ -132,7 +131,6 @@ export default function SettingsPage() {
           maintenanceMode: remote.maintenanceMode || false,
           allowRegistration: remote.allowRegistration ?? true,
           defaultTrialDays: remote.defaultTrialDays || 14,
-          maxShopsPerAdmin: remote.maxShopsPerAdmin || 100,
           sessionTimeout: remote.sessionTimeout || 60,
           passwordMinLength: remote.passwordMinLength || 8,
           twoFactorRequired: remote.twoFactorRequired || false,
@@ -168,7 +166,6 @@ export default function SettingsPage() {
         maintenanceMode: settings.maintenanceMode,
         allowRegistration: settings.allowRegistration,
         defaultTrialDays: settings.defaultTrialDays,
-        maxShopsPerAdmin: settings.maxShopsPerAdmin,
         sessionTimeout: settings.sessionTimeout,
         passwordMinLength: settings.passwordMinLength,
         twoFactorRequired: settings.twoFactorRequired,
@@ -354,15 +351,6 @@ export default function SettingsPage() {
             className="input-field"
             min={0}
             max={90}
-          />
-        </FormField>
-        <FormField label="Max Shops per Admin" description="Maximum shops a super admin can manage">
-          <input
-            type="number"
-            value={settings.maxShopsPerAdmin}
-            onChange={(e) => handleChange('maxShopsPerAdmin', parseInt(e.target.value))}
-            className="input-field"
-            min={1}
           />
         </FormField>
       </SettingsSection>

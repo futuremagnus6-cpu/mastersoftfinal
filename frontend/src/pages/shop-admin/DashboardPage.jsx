@@ -268,8 +268,16 @@ function OrdersBarChart({ data, loading }) {
     </div>
   );
 
-  // Take last 7 days for weekly view
-  const weeklyData = data.slice(-7);
+  // Generate a complete 7-day week, filling in missing days with zero values
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const weeklyData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(date.getDate() - (6 - i)); // Go back 6 days, then forward
+    const dateStr = date.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+    const existing = data.find(d => d._id === dateStr);
+    return existing || { _id: dateStr, revenue: 0, orders: 0 };
+  });
 
   return (
     <ResponsiveContainer width="100%" height={200}>

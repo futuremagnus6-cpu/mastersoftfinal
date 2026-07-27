@@ -48,7 +48,7 @@
     @apply p-6;
   }
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
   .badge-success { @apply badge bg-success-50 text-success-600 dark:bg-success-900/20 dark:text-success-400; }
   .badge-warning { @apply badge bg-warning-50 text-warning-600 dark:bg-warning-900/20 dark:text-warning-400; }
