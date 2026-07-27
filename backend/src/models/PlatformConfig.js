@@ -8,6 +8,7 @@ const platformConfigSchema = new mongoose.Schema({
   platformName: { type: String, default: 'Future Magnus Business OS' },
   supportEmail: { type: String, default: 'support@futuremagnus.com' },
   supportPhone: { type: String, default: '+91-9999999999' },
+  logo: { type: String, default: '' },
 
   // Regional
   defaultCurrency: { type: String, default: 'INR' },

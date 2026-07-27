@@ -9,6 +9,7 @@ import {
 import axios from 'axios';
 import config from '../../config';
 import toast from 'react-hot-toast';
+import FormField from '../../components/form/FormField';
 
 const businessTypes = [
   { value: 'medical_store', label: 'Medical Store' },
@@ -41,6 +42,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const [form, setForm] = useState({
     // Admin details (Step 1)
@@ -70,6 +72,7 @@ export default function SignupPage() {
 
   const handleChange = (field, value) => {
     setForm(f => ({ ...f, [field]: value }));
+    if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: '' }));
   };
 
   const handleNestedChange = (section, field, value) => {
@@ -77,16 +80,47 @@ export default function SignupPage() {
       ...f,
       [section]: { ...f[section], [field]: value },
     }));
+    const key = `${section}.${field}`;
+    if (formErrors[key]) setFormErrors(prev => ({ ...prev, [key]: '' }));
   };
 
+  const clearErrors = () => setFormErrors({});
+
   const validateStep1 = () => {
-    if (!form.password || form.password.length < 6) { toast.error('Password must be at least 6 characters'); return false; }
-    if (form.password !== form.confirmPassword) { toast.error('Passwords do not match'); return false; }
-    return true;
+    const errors = {};
+    if (!form.adminName.trim()) errors.adminName = 'Name is required';
+    if (!form.adminEmail.trim()) errors.adminEmail = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(form.adminEmail)) errors.adminEmail = 'Invalid email format';
+    if (!form.password) errors.password = 'Password is required';
+    else if (form.password.length < 6) errors.password = 'Password must be at least 6 characters';
+    if (!form.confirmPassword) errors.confirmPassword = 'Please confirm your password';
+    else if (form.password !== form.confirmPassword) errors.confirmPassword = 'Passwords do not match';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateStep2 = () => {
+    const errors = {};
+    if (!form.name.trim()) errors.name = 'Shop name is required';
+    if (!form.contact.email.trim()) errors['contact.email'] = 'Contact email is required';
+    else if (!/\S+@\S+\.\S+/.test(form.contact.email)) errors['contact.email'] = 'Invalid email format';
+    if (!form.contact.phone.trim()) errors['contact.phone'] = 'Phone number is required';
+    if (!form.address.line1.trim()) errors['address.line1'] = 'Address is required';
+    if (!form.address.city.trim()) errors['address.city'] = 'City is required';
+    if (!form.address.pincode.trim()) errors['address.pincode'] = 'Pincode is required';
+    else if (!/^\d{6}$/.test(form.address.pincode)) errors['address.pincode'] = 'Invalid pincode';
+    if (form.businessType === 'custom' && !form.customBusinessType.trim()) errors.customBusinessType = 'Custom type is required';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleStep1Next = () => {
+    if (validateStep1()) setStep(2);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateStep2()) return;
 
     setLoading(true);
     try {
@@ -205,54 +239,47 @@ export default function SignupPage() {
                 <p className="text-sm text-gray-500 -mt-3 mb-4">This will be your account to manage the shop.</p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Full Name *</label>
+                  <FormField label="Full Name" error={formErrors.adminName} className="sm:col-span-2" required>
                     <input
                       type="text"
                       value={form.adminName}
                       onChange={(e) => handleChange('adminName', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                      className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors.adminName ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                       placeholder="Rajesh Kumar"
                     />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Admin Email Address *</label>
+                  </FormField>
+                  <FormField label="Admin Email" error={formErrors.adminEmail} className="sm:col-span-2" required>
                     <input
                       type="email"
                       value={form.adminEmail}
                       onChange={(e) => handleChange('adminEmail', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                      className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors.adminEmail ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                       placeholder="rajesh@example.com"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Password *</label>
+                  </FormField>
+                  <FormField label="Password" error={formErrors.password} required>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={form.password}
                         onChange={(e) => handleChange('password', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm pr-10"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm pr-10 ${formErrors.password ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="Min. 6 characters"
-                        required
-                        minLength={6}
                       />
                       <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
                       </button>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password *</label>
+                  </FormField>
+                  <FormField label="Confirm Password" error={formErrors.confirmPassword} required>
                     <input
                       type="password"
                       value={form.confirmPassword}
                       onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                      className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors.confirmPassword ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                       placeholder="Re-enter password"
-                      required
                     />
-                  </div>
+                  </FormField>
                 </div>
 
                 <div className="flex items-center justify-between pt-4">
@@ -261,7 +288,7 @@ export default function SignupPage() {
                   </Link>
                   <button
                     type="button"
-                    onClick={() => validateStep1() && setStep(2)}
+                    onClick={handleStep1Next}
                     className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold text-sm flex items-center gap-2 transition-all shadow-sm"
                   >
                     Shop Details <FiArrowRight className="w-4 h-4" />
@@ -281,41 +308,37 @@ export default function SignupPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Shop Name *</label>
+                    <FormField label="Shop Name" error={formErrors.name} className="sm:col-span-2" required>
                       <input
                         type="text"
                         value={form.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        onChange={(e) => { handleChange('name', e.target.value); clearErrors(); }}
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors.name ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="My Shop"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Business Type *</label>
+                    </FormField>
+                    <FormField label="Business Type" error={formErrors.businessType} required>
                       <select
                         value={form.businessType}
                         onChange={(e) => handleChange('businessType', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors.businessType ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                       >
                         {businessTypes.map(bt => (
                           <option key={bt.value} value={bt.value}>{bt.label}</option>
                         ))}
                       </select>
-                    </div>
+                    </FormField>
                     {form.businessType === 'custom' && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Custom Type *</label>
+                      <FormField label="Custom Type" error={formErrors.customBusinessType} required>
                         <input
                           type="text"
                           value={form.customBusinessType}
                           onChange={(e) => handleChange('customBusinessType', e.target.value)}
-                          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                          className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors.customBusinessType ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                           placeholder="e.g. Restaurant"
                         />
-                      </div>
+                      </FormField>
                     )}
-
                   </div>
                 </div>
 
@@ -326,36 +349,33 @@ export default function SignupPage() {
                     <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Contact Information</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Contact Email *</label>
+                    <FormField label="Contact Email" error={formErrors['contact.email']} required>
                       <input
                         type="email"
                         value={form.contact.email}
                         onChange={(e) => handleNestedChange('contact', 'email', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['contact.email'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="shop@example.com"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone Number *</label>
+                    </FormField>
+                    <FormField label="Phone Number" error={formErrors['contact.phone']} required>
                       <input
                         type="tel"
                         value={form.contact.phone}
                         onChange={(e) => handleNestedChange('contact', 'phone', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['contact.phone'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="+919999999999"
                       />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Website</label>
+                    </FormField>
+                    <FormField label="Website" error={formErrors['contact.website']} className="sm:col-span-2">
                       <input
                         type="url"
                         value={form.contact.website}
                         onChange={(e) => handleNestedChange('contact', 'website', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['contact.website'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="https://example.com"
                       />
-                    </div>
+                    </FormField>
                   </div>
                 </div>
 
@@ -366,69 +386,63 @@ export default function SignupPage() {
                     <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Address</h3>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Address Line 1 *</label>
+                    <FormField label="Address Line 1" error={formErrors['address.line1']} className="sm:col-span-2" required>
                       <input
                         type="text"
                         value={form.address.line1}
                         onChange={(e) => handleNestedChange('address', 'line1', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['address.line1'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="Shop no, building"
                       />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Address Line 2</label>
+                    </FormField>
+                    <FormField label="Address Line 2" error={formErrors['address.line2']} className="sm:col-span-2">
                       <input
                         type="text"
                         value={form.address.line2}
                         onChange={(e) => handleNestedChange('address', 'line2', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['address.line2'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="Street, area"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">City *</label>
+                    </FormField>
+                    <FormField label="City" error={formErrors['address.city']} required>
                       <input
                         type="text"
                         value={form.address.city}
                         onChange={(e) => handleNestedChange('address', 'city', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['address.city'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="Mumbai"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">State *</label>
+                    </FormField>
+                    <FormField label="State" error={formErrors['address.state']} required>
                       <select
                         value={form.address.state}
                         onChange={(e) => handleNestedChange('address', 'state', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['address.state'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                       >
                         {indianStates.map(st => (
                           <option key={st} value={st}>{st}</option>
                         ))}
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Pincode *</label>
+                    </FormField>
+                    <FormField label="Pincode" error={formErrors['address.pincode']} required>
                       <input
                         type="text"
                         value={form.address.pincode}
                         onChange={(e) => handleNestedChange('address', 'pincode', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['address.pincode'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="400001"
                         maxLength={6}
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Country</label>
+                    </FormField>
+                    <FormField label="Country" error={formErrors['address.country']}>
                       <input
                         type="text"
                         value={form.address.country}
                         onChange={(e) => handleNestedChange('address', 'country', e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm"
+                        className={`w-full px-4 py-2.5 bg-white border rounded-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${formErrors['address.country'] ? 'border-danger-400 focus:ring-danger-500' : 'border-gray-300'}`}
                         placeholder="India"
                       />
-                    </div>
+                    </FormField>
                   </div>
                 </div>
 

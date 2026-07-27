@@ -91,6 +91,8 @@ const initialState = {
   loading: !!storage.get(TOKEN_KEY), // Start loading if we have a token to verify
   error: null,
   shopFeatures: null, // { features: {...}, subscriptionStatus: 'active'|'trial'|'expired' }
+  shopStatus: null, // 'active'|'disabled'|'inactive'|'suspended'
+  maintenanceMode: false, // Whether the platform is in maintenance mode
   persistSession: null, // rememberMe flag carried through the 2FA flow
 };
 
@@ -132,6 +134,8 @@ const authSlice = createSlice({
           state.refreshToken = action.payload.refreshToken;
           state.isAuthenticated = true;
           state.shopFeatures = action.payload.shopFeatures || null;
+          state.shopStatus = action.payload.shopStatus || null;
+          state.maintenanceMode = action.payload.maintenanceMode || false;
         }
       })
       .addCase(login.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
@@ -145,6 +149,8 @@ const authSlice = createSlice({
         state.persistSession = null;
         state.loading = false;
         state.shopFeatures = action.payload.shopFeatures || null;
+        state.shopStatus = action.payload.shopStatus || null;
+        state.maintenanceMode = action.payload.maintenanceMode || false;
       })
       .addCase(verify2FA.rejected, (state, action) => {
         state.loading = false;
@@ -155,6 +161,8 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.loading = false;
         state.shopFeatures = action.payload.shopFeatures || null;
+        state.shopStatus = action.payload.shopStatus || null;
+        state.maintenanceMode = action.payload.maintenanceMode || false;
       })
       .addCase(getMe.rejected, (state) => {
         state.user = null;
@@ -163,6 +171,8 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.loading = false;
         state.persistSession = null;
+        state.maintenanceMode = false;
+        state.shopStatus = null;
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;

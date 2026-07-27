@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiSearch, FiPlus, FiUsers, FiRefreshCw, FiX, FiEdit2, FiTrash2, FiPhone, FiMail, FiMapPin, FiKey, FiStar, FiShield } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
+import FormField from '../../components/form/FormField';
 
 const departments = ['Sales', 'Operations', 'Accounts', 'Inventory', 'Management', 'IT', 'HR', 'Customer Service', 'Marketing', 'Other'];
 const userRoles = [
@@ -18,6 +19,7 @@ function EmployeeModal({ isOpen, onClose, employee, onSaved }) {
     address: { city: '' }, isActive: true,
     hasLogin: false, loginEmail: '', password: '', userRole: 'staff', priority: 0,
   });
+  const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -46,17 +48,38 @@ function EmployeeModal({ isOpen, onClose, employee, onSaved }) {
         hasLogin: false, loginEmail: '', password: '', userRole: 'staff', priority: 0,
       });
     }
+    setFormErrors({});
   }, [employee, isOpen]);
+
+  const validate = () => {
+    const errors = {};
+    if (!form.name.trim()) errors.name = 'Name is required';
+    if (!form.mobile.trim()) errors.mobile = 'Mobile is required';
+    else if (!/^\d{10,15}$/.test(form.mobile.replace(/[+\-\s]/g, ''))) errors.mobile = 'Invalid mobile number';
+    if (form.email && !/\S+@\S+\.\S+/.test(form.email)) errors.email = 'Invalid email format';
+    if (!form.employeeCode.trim()) errors.employeeCode = 'Employee code is required';
+    if (form.hasLogin && !form.loginEmail.trim()) errors.loginEmail = 'Login email is required';
+    if (form.hasLogin && !employee && !form.password.trim()) errors.password = 'Password is required';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleChange = (field, value) => {
+    setForm(f => ({ ...f, [field]: value }));
+    if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: '' }));
+  };
+
+  const handleNestedChange = (parent, field, value) => {
+    setForm(f => ({ ...f, [parent]: { ...f[parent], [field]: value } }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.hasLogin && !form.loginEmail) { toast.error('Login email is required when login is enabled'); return; }
+    if (!validate()) return;
     setSaving(true);
     try {
       const payload = { ...form };
-      // Only send password if it's set (don't overwrite on edit if empty)
       if (employee && !payload.password) delete payload.password;
-      // Remove empty-string enum fields so Mongoose doesn't reject them
       if (!payload.gender) delete payload.gender;
       if (employee) await apiService.updateEmployee(employee._id, payload);
       else await apiService.createEmployee(payload);
@@ -74,19 +97,19 @@ function EmployeeModal({ isOpen, onClose, employee, onSaved }) {
           {/* Basic Info */}
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Basic Information</h4>
           <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2"><label className="block text-xs font-medium mb-1">Name</label><input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="block text-xs font-medium mb-1">Employee Code</label><input type="text" value={form.employeeCode} onChange={e => setForm(f => ({ ...f, employeeCode: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="block text-xs font-medium mb-1">Mobile</label><input type="text" value={form.mobile} onChange={e => setForm(f => ({ ...f, mobile: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="block text-xs font-medium mb-1">Email</label><input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="block text-xs font-medium mb-1">Department</label>
-              <select value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} className="input-field text-sm">
+            <FormField label="Name" error={formErrors.name} className="col-span-2" required><input type="text" value={form.name} onChange={e => handleChange('name', e.target.value)} className={`input-field text-sm ${formErrors.name ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Employee Code" error={formErrors.employeeCode} required><input type="text" value={form.employeeCode} onChange={e => handleChange('employeeCode', e.target.value)} className={`input-field text-sm ${formErrors.employeeCode ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Mobile" error={formErrors.mobile} required><input type="text" value={form.mobile} onChange={e => handleChange('mobile', e.target.value)} className={`input-field text-sm ${formErrors.mobile ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Email" error={formErrors.email}><input type="email" value={form.email} onChange={e => handleChange('email', e.target.value)} className={`input-field text-sm ${formErrors.email ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Department" error={formErrors.department}>
+              <select value={form.department} onChange={e => handleChange('department', e.target.value)} className={`input-field text-sm ${formErrors.department ? 'input-error' : ''}`}>
                 <option value="">Select</option>
                 {departments.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
-            </div>
-            <div><label className="block text-xs font-medium mb-1">Designation</label><input type="text" value={form.designation} onChange={e => setForm(f => ({ ...f, designation: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="block text-xs font-medium mb-1">Date of Joining</label><input type="date" value={form.doj} onChange={e => setForm(f => ({ ...f, doj: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="block text-xs font-medium mb-1">City</label><input type="text" value={form.address.city} onChange={e => setForm(f => ({ ...f, address: { ...f.address, city: e.target.value } }))} className="input-field text-sm" /></div>
+            </FormField>
+            <FormField label="Designation" error={formErrors.designation}><input type="text" value={form.designation} onChange={e => handleChange('designation', e.target.value)} className={`input-field text-sm ${formErrors.designation ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Date of Joining" error={formErrors.doj}><input type="date" value={form.doj} onChange={e => handleChange('doj', e.target.value)} className={`input-field text-sm ${formErrors.doj ? 'input-error' : ''}`} /></FormField>
+            <FormField label="City" error={formErrors['address.city']}><input type="text" value={form.address.city} onChange={e => setForm(f => ({ ...f, address: { ...f.address, city: e.target.value } }))} className="input-field text-sm" /></FormField>
           </div>
 
           {/* Login Credentials */}
@@ -103,34 +126,26 @@ function EmployeeModal({ isOpen, onClose, employee, onSaved }) {
           {form.hasLogin && (
             <div className="p-3 bg-primary-50 dark:bg-primary-900/10 border border-primary-200 dark:border-primary-800 rounded-lg space-y-3">
               <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="block text-xs font-medium mb-1">Login Email *</label>
+                <FormField label="Login Email" error={formErrors.loginEmail} className="col-span-2" required>
                   <div className="relative">
                     <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input type="email" value={form.loginEmail} onChange={e => setForm(f => ({ ...f, loginEmail: e.target.value }))} className="input-field text-sm pl-9" placeholder="employee@shop.com" required />
+                    <input type="email" value={form.loginEmail} onChange={e => handleChange('loginEmail', e.target.value)} className={`input-field text-sm pl-9 ${formErrors.loginEmail ? 'input-error' : ''}`} placeholder="employee@shop.com" />
                   </div>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-xs font-medium mb-1">
-                    {employee ? 'New Password (leave blank to keep current)' : 'Password *'}
-                  </label>
-                  <input type="text" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} className="input-field text-sm" placeholder={employee ? 'Leave blank to keep current' : 'Default: Employee@123'} />
+                </FormField>
+                <FormField label={employee ? 'New Password (leave blank)' : 'Password'} error={formErrors.password} className="col-span-2">
+                  <input type="text" value={form.password} onChange={e => handleChange('password', e.target.value)} className={`input-field text-sm ${formErrors.password ? 'input-error' : ''}`} placeholder={employee ? 'Leave blank to keep current' : 'Default: Employee@123'} />
                   <p className="text-[10px] text-gray-400 mt-0.5">Default password: Employee@123</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1">Role</label>
-                  <select value={form.userRole} onChange={e => setForm(f => ({ ...f, userRole: e.target.value }))} className="input-field text-sm">
+                </FormField>
+                <FormField label="Role" error={formErrors.userRole}>
+                  <select value={form.userRole} onChange={e => handleChange('userRole', e.target.value)} className={`input-field text-sm ${formErrors.userRole ? 'input-error' : ''}`}>
                     {userRoles.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                   </select>
                   <p className="text-[10px] text-gray-400 mt-0.5">{userRoles.find(r => r.value === form.userRole)?.description}</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1">
-                    <FiStar className="w-3 h-3 inline mr-0.5" /> Priority
-                  </label>
-                  <input type="number" value={form.priority} onChange={e => setForm(f => ({ ...f, priority: parseInt(e.target.value) || 0 }))} className="input-field text-sm" min={0} max={100} />
+                </FormField>
+                <FormField label={<><FiStar className="w-3 h-3 inline mr-0.5" /> Priority</>} error={formErrors.priority}>
+                  <input type="number" value={form.priority} onChange={e => handleChange('priority', parseInt(e.target.value) || 0)} className={`input-field text-sm ${formErrors.priority ? 'input-error' : ''}`} min={0} max={100} />
                   <p className="text-[10px] text-gray-400 mt-0.5">0-100. Higher = more important</p>
-                </div>
+                </FormField>
               </div>
             </div>
           )}

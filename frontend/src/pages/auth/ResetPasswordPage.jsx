@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { FiKey, FiArrowLeft, FiCheckCircle, FiLock, FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import FormField from '../../components/form/FormField';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -15,6 +16,7 @@ export default function ResetPasswordPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -24,32 +26,21 @@ export default function ResetPasswordPage() {
   }, [token]);
 
   const validatePassword = () => {
+    const errors = {};
     if (!password) {
-      setError('Password is required');
-      return false;
+      errors.password = 'Password is required';
+    } else {
+      if (password.length < 6) errors.password = 'Password must be at least 6 characters long';
+      else if (!/[A-Z]/.test(password)) errors.password = 'Must contain at least one uppercase letter';
+      else if (!/[a-z]/.test(password)) errors.password = 'Must contain at least one lowercase letter';
+      else if (!/[0-9]/.test(password)) errors.password = 'Must contain at least one number';
+      else if (!/[@$!%*?&]/.test(password)) errors.password = 'Must contain at least one special character (@$!%*?&)';
     }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return false;
-    }
-    if (!/[A-Z]/.test(password)) {
-      setError('Password must contain at least one uppercase letter');
-      return false;
-    }
-    if (!/[a-z]/.test(password)) {
-      setError('Password must contain at least one lowercase letter');
-      return false;
-    }
-    if (!/[0-9]/.test(password)) {
-      setError('Password must contain at least one number');
-      return false;
-    }
-    if (!/[@$!%*?&]/.test(password)) {
-      setError('Password must contain at least one special character (@$!%*?&)');
-      return false;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    if (!confirmPassword) errors.confirmPassword = 'Please confirm your password';
+    else if (password !== confirmPassword) errors.confirmPassword = 'Passwords do not match';
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setError(errors.password || errors.confirmPassword);
       return false;
     }
     return true;
@@ -135,16 +126,15 @@ export default function ResetPasswordPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4" disabled={!token}>
                 {/* New Password */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">New Password</label>
+                <FormField label="New Password" error={formErrors.password}>
                   <div className="relative">
                     <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
-                      onChange={(e) => { setPassword(e.target.value); setError(''); }}
+                      onChange={(e) => { setPassword(e.target.value); setFormErrors({}); setError(''); }}
                       placeholder="Enter new password"
-                      className="input-field pl-9 pr-9"
+                      className={`input-field pl-9 pr-9 ${formErrors.password ? 'input-error' : ''}`}
                       disabled={!token}
                       autoFocus
                     />
@@ -197,19 +187,18 @@ export default function ResetPasswordPage() {
                       </ul>
                     </div>
                   )}
-                </div>
+                </FormField>
 
                 {/* Confirm Password */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Confirm Password</label>
+                <FormField label="Confirm Password" error={formErrors.confirmPassword}>
                   <div className="relative">
                     <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
-                      onChange={(e) => { setConfirmPassword(e.target.value); setError(''); }}
+                      onChange={(e) => { setConfirmPassword(e.target.value); setFormErrors({}); setError(''); }}
                       placeholder="Confirm new password"
-                      className="input-field pl-9 pr-9"
+                      className={`input-field pl-9 pr-9 ${formErrors.confirmPassword ? 'input-error' : ''}`}
                       disabled={!token}
                     />
                     <button
@@ -228,9 +217,11 @@ export default function ResetPasswordPage() {
                   {confirmPassword && password === confirmPassword && (
                     <p className="mt-1.5 text-xs text-success-600 dark:text-success-400">✓ Passwords match</p>
                   )}
-                </div>
+                </FormField>
 
-                {error && <p className="text-sm text-danger-500 bg-danger-50 dark:bg-danger-900/20 p-3 rounded-lg">{error}</p>}
+                {error && !formErrors.password && !formErrors.confirmPassword && (
+                  <p className="text-sm text-danger-500 bg-danger-50 dark:bg-danger-900/20 p-3 rounded-lg">{error}</p>
+                )}
 
                 <button
                   type="submit"

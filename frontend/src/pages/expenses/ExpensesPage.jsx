@@ -2,21 +2,37 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiSearch, FiPlus, FiDollarSign, FiRefreshCw, FiX, FiEdit2, FiTrash2, FiCheck, FiX as FiXCircle } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
+import FormField from '../../components/form/FormField';
 
 const categories = ['rent', 'salary', 'marketing', 'electricity', 'internet', 'maintenance', 'transport', 'packaging', 'utilities', 'insurance', 'taxes', 'professional_fees', 'office_supplies', 'staff_welfare', 'depreciation', 'miscellaneous'];
 
 function ExpenseModal({ isOpen, onClose, expense, onSaved }) {
   const [form, setForm] = useState({ category: 'miscellaneous', amount: 0, description: '', date: new Date().toISOString().split('T')[0], paymentMethod: 'cash', reference: '', vendor: '', notes: '' });
+  const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (expense) setForm({ category: expense.category, amount: expense.amount, description: expense.description, date: new Date(expense.date).toISOString().split('T')[0], paymentMethod: expense.paymentMethod, reference: expense.reference || '', vendor: expense.vendor || '', notes: expense.notes || '' });
     else setForm({ category: 'miscellaneous', amount: 0, description: '', date: new Date().toISOString().split('T')[0], paymentMethod: 'cash', reference: '', vendor: '', notes: '' });
+    setFormErrors({});
   }, [expense, isOpen]);
+
+  const validate = () => {
+    const errors = {};
+    if (!form.description.trim()) errors.description = 'Description is required';
+    if (!form.amount || form.amount <= 0) errors.amount = 'Valid amount is required';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleChange = (field, value) => {
+    setForm(f => ({ ...f, [field]: value }));
+    if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: '' }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.description || !form.amount || form.amount <= 0) { toast.error('Description and valid amount required'); return; }
+    if (!validate()) return;
     setSaving(true);
     try {
       if (expense) await apiService.updateExpense(expense._id, form);
@@ -33,33 +49,33 @@ function ExpenseModal({ isOpen, onClose, expense, onSaved }) {
         <div className="flex items-center justify-between p-4 border-b"><h3 className="font-semibold">{expense ? 'Edit' : 'New'} Expense</h3><button onClick={onClose} className="p-1 rounded hover:bg-gray-100"><FiX /></button></div>
         <form onSubmit={handleSubmit} className="p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="block text-xs font-medium mb-1">Category *</label>
-              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} className="input-field text-sm">
+            <FormField label="Category" error={formErrors.category}>
+              <select value={form.category} onChange={e => handleChange('category', e.target.value)} className={`input-field text-sm ${formErrors.category ? 'input-error' : ''}`}>
                 {categories.map(c => <option key={c} value={c}>{c.replace(/_/g, ' ')}</option>)}
               </select>
-            </div>
-            <div><label className="block text-xs font-medium mb-1">Amount *</label>
-              <input type="number" value={form.amount} onChange={e => setForm(f => ({ ...f, amount: parseFloat(e.target.value) || 0 }))} className="input-field text-sm" min={0} step="0.01" required />
-            </div>
+            </FormField>
+            <FormField label="Amount" error={formErrors.amount} required>
+              <input type="number" value={form.amount} onChange={e => handleChange('amount', parseFloat(e.target.value) || 0)} className={`input-field text-sm ${formErrors.amount ? 'input-error' : ''}`} min={0} step="0.01" />
+            </FormField>
           </div>
-          <div><label className="block text-xs font-medium mb-1">Description *</label>
-            <input type="text" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className="input-field text-sm" required />
-          </div>
+          <FormField label="Description" error={formErrors.description} required>
+            <input type="text" value={form.description} onChange={e => handleChange('description', e.target.value)} className={`input-field text-sm ${formErrors.description ? 'input-error' : ''}`} />
+          </FormField>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="block text-xs font-medium mb-1">Date</label>
-              <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} className="input-field text-sm" />
-            </div>
-            <div><label className="block text-xs font-medium mb-1">Payment Method</label>
-              <select value={form.paymentMethod} onChange={e => setForm(f => ({ ...f, paymentMethod: e.target.value }))} className="input-field text-sm">
+            <FormField label="Date" error={formErrors.date}>
+              <input type="date" value={form.date} onChange={e => handleChange('date', e.target.value)} className={`input-field text-sm ${formErrors.date ? 'input-error' : ''}`} />
+            </FormField>
+            <FormField label="Payment Method" error={formErrors.paymentMethod}>
+              <select value={form.paymentMethod} onChange={e => handleChange('paymentMethod', e.target.value)} className={`input-field text-sm ${formErrors.paymentMethod ? 'input-error' : ''}`}>
                 {['cash', 'bank_transfer', 'cheque', 'upi', 'card', 'credit'].map(m => <option key={m} value={m}>{m.replace(/_/g, ' ')}</option>)}
               </select>
-            </div>
+            </FormField>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="block text-xs font-medium mb-1">Vendor</label><input type="text" value={form.vendor} onChange={e => setForm(f => ({ ...f, vendor: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="block text-xs font-medium mb-1">Reference</label><input type="text" value={form.reference} onChange={e => setForm(f => ({ ...f, reference: e.target.value }))} className="input-field text-sm" /></div>
+            <FormField label="Vendor" error={formErrors.vendor}><input type="text" value={form.vendor} onChange={e => handleChange('vendor', e.target.value)} className={`input-field text-sm ${formErrors.vendor ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Reference" error={formErrors.reference}><input type="text" value={form.reference} onChange={e => handleChange('reference', e.target.value)} className={`input-field text-sm ${formErrors.reference ? 'input-error' : ''}`} /></FormField>
           </div>
-          <div><label className="block text-xs font-medium mb-1">Notes</label><textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="input-field text-sm w-full" rows={2} /></div>
+          <FormField label="Notes" error={formErrors.notes}><textarea value={form.notes} onChange={e => handleChange('notes', e.target.value)} className={`input-field text-sm w-full ${formErrors.notes ? 'input-error' : ''}`} rows={2} /></FormField>
           <div className="flex gap-3 pt-4 border-t"><button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button><button type="submit" disabled={saving} className="btn-primary flex-1">{saving ? 'Saving...' : expense ? 'Update' : 'Create'}</button></div>
         </form>
       </div>

@@ -186,15 +186,27 @@ exports.login = async (req, res, next) => {
 
     // Fetch shop features for feature-based access control
     let shopFeatures = null;
+    let shopStatus = null;
     if (user.shopId) {
       const shopId = user.shopId?._id || user.shopId;
-      const shop = await Shop.findById(shopId).select('features subscription.status');
+      const shop = await Shop.findById(shopId).select('features subscription.status status disabledByMaintenance');
       if (shop) {
         shopFeatures = {
           features: shop.features,
           subscriptionStatus: shop.subscription?.status || 'trial',
         };
+        shopStatus = shop.status;
       }
+    }
+
+    // Fetch maintenance mode status
+    let maintenanceMode = false;
+    try {
+      const PlatformConfig = require('../models/PlatformConfig');
+      const config = await PlatformConfig.getConfig();
+      maintenanceMode = config.maintenanceMode || false;
+    } catch (e) {
+      // Ignore if platform config is not available
     }
 
     res.json({
@@ -204,6 +216,8 @@ exports.login = async (req, res, next) => {
       refreshToken,
       user: sanitizeUser(user),
       shopFeatures,
+      shopStatus,
+      maintenanceMode,
     });
   } catch (error) {
     next(error);
@@ -253,15 +267,27 @@ exports.verify2FA = async (req, res, next) => {
 
     // Fetch shop features for feature-based access control
     let shopFeatures = null;
+    let shopStatus = null;
     if (user.shopId) {
       const shopId = user.shopId?._id || user.shopId;
-      const shop = await Shop.findById(shopId).select('features subscription.status');
+      const shop = await Shop.findById(shopId).select('features subscription.status status disabledByMaintenance');
       if (shop) {
         shopFeatures = {
           features: shop.features,
           subscriptionStatus: shop.subscription?.status || 'trial',
         };
+        shopStatus = shop.status;
       }
+    }
+
+    // Fetch maintenance mode status
+    let maintenanceMode = false;
+    try {
+      const PlatformConfig = require('../models/PlatformConfig');
+      const config = await PlatformConfig.getConfig();
+      maintenanceMode = config.maintenanceMode || false;
+    } catch (e) {
+      // Ignore if platform config is not available
     }
 
     res.json({
@@ -271,6 +297,8 @@ exports.verify2FA = async (req, res, next) => {
       refreshToken,
       user: sanitizeUser(user),
       shopFeatures,
+      shopStatus,
+      maintenanceMode,
     });
   } catch (error) {
     next(error);
@@ -336,23 +364,41 @@ exports.logout = async (req, res, next) => {
 exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId)
-      .populate('shopId', 'name businessType logo')
+      .populate('shopId', 'name businessType logo status')
       .populate('branchId', 'name');
 
     // Fetch shop features so the frontend can determine which modules are accessible
     let shopFeatures = null;
+    let shopStatus = null;
     if (user.shopId) {
       const shopId = user.shopId?._id || user.shopId;
-      const shop = await Shop.findById(shopId).select('features subscription.status');
+      const shop = await Shop.findById(shopId).select('features subscription.status status disabledByMaintenance');
       if (shop) {
         shopFeatures = {
           features: shop.features,
           subscriptionStatus: shop.subscription?.status || 'trial',
         };
+        shopStatus = shop.status;
       }
     }
 
-    res.json({ success: true, user: sanitizeUser(user), shopFeatures });
+    // Fetch maintenance mode status from platform config
+    let maintenanceMode = false;
+    try {
+      const PlatformConfig = require('../models/PlatformConfig');
+      const config = await PlatformConfig.getConfig();
+      maintenanceMode = config.maintenanceMode || false;
+    } catch (e) {
+      // Ignore if platform config is not available
+    }
+
+    res.json({
+      success: true,
+      user: sanitizeUser(user),
+      shopFeatures,
+      shopStatus,
+      maintenanceMode,
+    });
   } catch (error) {
     next(error);
   }

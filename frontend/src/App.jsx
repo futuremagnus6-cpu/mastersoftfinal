@@ -1,6 +1,7 @@
 import React, { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { FiAlertTriangle } from 'react-icons/fi';
 
 import { getMe } from './store/slices/authSlice';
 
@@ -52,28 +53,57 @@ const PageLoader = () => (
   </div>
 );
 
-// Protected Route Component
+// Protected Route Component with Maintenance Check
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
-  const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, loading, maintenanceMode } = useSelector((state) => state.auth);
 
   if (loading) return <PageLoader />;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  // If maintenance mode is ON and user is not super_admin, show maintenance page
+  if (maintenanceMode && user?.role !== 'super_admin') {
+    return <MaintenancePage />;
+  }
+  
   if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
     return <Navigate to="/login" replace />;
   }
   return children;
 };
 
+// ─── Maintenance Page ───
+function MaintenancePage() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+      <div className="max-w-md w-full text-center">
+        <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+          <FiAlertTriangle className="w-10 h-10 text-amber-500" />
+        </div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Under Maintenance</h1>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">
+          The site is currently under maintenance. We'll be back shortly. Please check back later.
+        </p>
+        <div className="w-16 h-1 bg-amber-400 rounded-full mx-auto" />
+      </div>
+    </div>
+  );
+}
+
 // ─── Root Route ───
 // Shows the public LandingPage for unauthenticated users, 
 // and the protected AppLayout for authenticated users.
 function RootRoute() {
-  const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated, user, loading, maintenanceMode } = useSelector((state) => state.auth);
 
   if (loading) return <PageLoader />;
 
   if (!isAuthenticated) {
     return <LandingPage />;
+  }
+
+  // If maintenance mode is ON and user is not super_admin, show maintenance page
+  if (maintenanceMode && user?.role !== 'super_admin') {
+    return <MaintenancePage />;
   }
 
   // Redirect super_admin to their dedicated dashboard
@@ -83,6 +113,8 @@ function RootRoute() {
 
   return <AppLayout />;
 }
+
+
 
 export default function App() {
   const dispatch = useDispatch();

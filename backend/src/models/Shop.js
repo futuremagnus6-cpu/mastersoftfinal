@@ -257,6 +257,7 @@ const shopSchema = new mongoose.Schema({
     enum: ['active', 'inactive', 'suspended', 'disabled'],
     default: 'active',
   },
+  disabledByMaintenance: { type: Boolean, default: false },
   activatedAt: { type: Date },
   suspendedAt: { type: Date },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

@@ -247,6 +247,7 @@ function A4Preview({ config, shop }) {
 
   const cols = config.productColumns || {};
   const showCol = (key) => cols[key] !== false;
+  const logoUrl = shop?.logo;
 
   return (
     <div className="w-full bg-white dark:bg-gray-900 shadow-lg rounded-lg overflow-hidden border dark:border-gray-700 relative">
@@ -260,7 +261,12 @@ function A4Preview({ config, shop }) {
             {config.showCustomerGstin && <div className="text-[9px] font-semibold mt-0.5">GSTIN: {shop?.gstin || '27ABCDE1234F1Z5'}</div>}
           </div>
           <div className="text-right">
-            <div className="text-[8px] font-semibold text-gray-600">{shop?.shopName || 'Shop'}</div>
+            {config.showLogo && logoUrl && (
+              <img src={logoUrl} alt="Shop Logo" className="w-14 h-14 object-contain ml-auto mb-1" />
+            )}
+            {config.showLogo && !logoUrl && (
+              <div className="text-[8px] font-semibold text-gray-600">{shop?.shopName || 'Shop'}</div>
+            )}
             <div className="text-xs font-bold uppercase tracking-wider">{config.invoiceTitle || 'Tax Invoice'}</div>
             <div className="text-[9px] text-gray-500">Invoice #: INV-202607-001</div>
             <div className="text-[9px] text-gray-500">Date: 23 Jul 2026</div>
@@ -701,6 +707,7 @@ export default function SettingsPage() {
                   result[key] = merge(obj[key], defaults[key]);
                 } else {
                   result[key] = obj[key];
+                }
               }
             });
             return result;
@@ -899,6 +906,7 @@ export default function SettingsPage() {
       gstin: generalForm.gstin || '27ABCDE1234F1Z5',
       phone: generalForm.phone || '+91 98765 43210',
       email: generalForm.email || 'store@futuremagnus.com',
+      logo: generalForm.logo || '',
     };
     thermalPrint(createDemoOrder(), shop, printConfig);
   }, [generalForm, printConfig, createDemoOrder]);
@@ -910,6 +918,7 @@ export default function SettingsPage() {
       gstin: generalForm.gstin || '27ABCDE1234F1Z5',
       phone: generalForm.phone || '+91 98765 43210',
       email: generalForm.email || 'store@futuremagnus.com',
+      logo: generalForm.logo || '',
     };
     standardBillPrint(createDemoOrder(), shop, printConfig);
   }, [generalForm, printConfig, createDemoOrder]);

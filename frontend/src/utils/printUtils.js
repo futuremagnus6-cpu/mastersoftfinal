@@ -71,13 +71,14 @@ const DEFAULT_PRINT_CONFIG = {
 };
 
 function buildShopInfo(shop) {
-  if (!shop) return { name: 'Shop', address: '', gstin: '', phone: '', email: '' };
+  if (!shop) return { name: 'Shop', address: '', gstin: '', phone: '', email: '', logo: '' };
   return {
     name: shop.name || shop.shopName || 'Shop',
     address: shop.address || shop.shopAddress || '',
     gstin: shop.gstin || shop.gstNo || shop.taxId || '',
     phone: shop.phone || shop.mobile || shop.contact || '',
     email: shop.email || '',
+    logo: shop.logo || '',
   };
 }
 
@@ -396,7 +397,7 @@ export function standardBillPrint(order, shop, printConfig) {
         ` : ''}
       </div>
       <div class="invoice-title">
-        ${st.showLogo ? `<div class="store-label">${shopInfo.name || 'Shop'}</div>` : ''}
+        ${st.showLogo ? (shopInfo.logo ? `<img src="${shopInfo.logo}" alt="Logo" style="max-width:70px;max-height:70px;object-fit:contain;margin-bottom:4px;" />` : `<div class="store-label">${shopInfo.name || 'Shop'}</div>`) : ''}
         <h2>${st.invoiceTitle || 'Tax Invoice'}</h2>
         <p><strong>Invoice #:</strong> ${order?.invoiceNumber || order?.orderNumber || 'N/A'}</p>
         <p><strong>Order #:</strong> ${order?.orderNumber || 'N/A'}</p>
@@ -579,6 +580,7 @@ export function downloadPdf(order, shop, printConfig) {
         ${st.showCompanyDetails ? `${shopInfo.address ? `<p>${shopInfo.address}</p>` : ''}${shopInfo.phone ? `<p>📞 ${shopInfo.phone}</p>` : ''}${shopInfo.gstin ? `<p><strong>GSTIN:</strong> ${shopInfo.gstin}</p>` : ''}` : ''}
       </div>
       <div class="invoice-title">
+        ${st.showLogo ? (shopInfo.logo ? `<img src="${shopInfo.logo}" alt="Logo" style="max-width:70px;max-height:70px;object-fit:contain;margin-bottom:4px;" />` : `<div class="store-label" style="font-size:12px;font-weight:600;color:#374151;">${shopInfo.name || 'Shop'}</div>`) : ''}
         <h2>${st.invoiceTitle || 'Tax Invoice'}</h2>
         <p><strong>Invoice #:</strong> ${order?.invoiceNumber || order?.orderNumber || 'N/A'}</p>
         <p><strong>Date:</strong> ${fmtDate(order?.createdAt)}</p>

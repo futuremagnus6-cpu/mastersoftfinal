@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiSearch, FiPlus, FiTruck, FiRefreshCw, FiX, FiEdit2, FiTrash2, FiPhone, FiMail, FiMapPin, FiDollarSign } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
+import FormField from '../../components/form/FormField';
 
 function SupplierModal({ isOpen, onClose, supplier, onSaved }) {
   const [form, setForm] = useState({ name: '', company: '', mobile: '', email: '', gstin: '', pan: '', address: { line1: '', city: '', state: '', pincode: '' }, creditLimit: 0, paymentTerms: 'immediate', sendEmailNotifications: true, notes: '' });
+  const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -17,10 +19,35 @@ function SupplierModal({ isOpen, onClose, supplier, onSaved }) {
     } else {
       setForm({ name: '', company: '', mobile: '', email: '', gstin: '', pan: '', address: { line1: '', city: '', state: '', pincode: '' }, creditLimit: 0, paymentTerms: 'immediate', sendEmailNotifications: true, notes: '' });
     }
+    setFormErrors({});
   }, [supplier, isOpen]);
+
+  const validate = () => {
+    const errors = {};
+    if (!form.name.trim()) errors.name = 'Name is required';
+    if (!form.mobile.trim()) errors.mobile = 'Mobile is required';
+    else if (!/^\d{10,15}$/.test(form.mobile.replace(/[+\-\s]/g, ''))) errors.mobile = 'Invalid mobile number';
+    if (form.email && !/\S+@\S+\.\S+/.test(form.email)) errors.email = 'Invalid email format';
+    if (form.gstin && !/^[0-9A-Z]{15}$/.test(form.gstin)) errors.gstin = 'GSTIN must be 15 characters';
+    if (form.pan && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(form.pan)) errors.pan = 'Invalid PAN format';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleChange = (field, value) => {
+    setForm(f => ({ ...f, [field]: value }));
+    if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: '' }));
+  };
+
+  const handleNestedChange = (parent, field, value) => {
+    setForm(f => ({ ...f, [parent]: { ...f[parent], [field]: value } }));
+    const key = `${parent}.${field}`;
+    if (formErrors[key]) setFormErrors(prev => ({ ...prev, [key]: '' }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
     setSaving(true);
     try {
       if (supplier) await apiService.updateSupplier(supplier._id, form);
@@ -37,27 +64,27 @@ function SupplierModal({ isOpen, onClose, supplier, onSaved }) {
         <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white dark:bg-gray-800"><h3 className="font-semibold">{supplier ? 'Edit' : 'New'} Supplier</h3><button onClick={onClose} className="p-1 rounded hover:bg-gray-100"><FiX /></button></div>
         <form onSubmit={handleSubmit} className="p-4 space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-medium block mb-1">Name</label><input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="text-xs font-medium block mb-1">Company</label><input type="text" value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="text-xs font-medium block mb-1">Mobile</label><input type="text" value={form.mobile} onChange={e => setForm(f => ({ ...f, mobile: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="text-xs font-medium block mb-1">Email</label><input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="text-xs font-medium block mb-1">GSTIN</label><input type="text" value={form.gstin} onChange={e => setForm(f => ({ ...f, gstin: e.target.value }))} className="input-field text-sm" /></div>
-            <div><label className="text-xs font-medium block mb-1">PAN</label><input type="text" value={form.pan} onChange={e => setForm(f => ({ ...f, pan: e.target.value }))} className="input-field text-sm" /></div>
+            <FormField label="Name" error={formErrors.name} required><input type="text" value={form.name} onChange={e => handleChange('name', e.target.value)} className={`input-field text-sm ${formErrors.name ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Company" error={formErrors.company}><input type="text" value={form.company} onChange={e => handleChange('company', e.target.value)} className={`input-field text-sm ${formErrors.company ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Mobile" error={formErrors.mobile} required><input type="text" value={form.mobile} onChange={e => handleChange('mobile', e.target.value)} className={`input-field text-sm ${formErrors.mobile ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Email" error={formErrors.email}><input type="email" value={form.email} onChange={e => handleChange('email', e.target.value)} className={`input-field text-sm ${formErrors.email ? 'input-error' : ''}`} /></FormField>
+            <FormField label="GSTIN" error={formErrors.gstin}><input type="text" value={form.gstin} onChange={e => handleChange('gstin', e.target.value)} className={`input-field text-sm ${formErrors.gstin ? 'input-error' : ''}`} /></FormField>
+            <FormField label="PAN" error={formErrors.pan}><input type="text" value={form.pan} onChange={e => handleChange('pan', e.target.value)} className={`input-field text-sm ${formErrors.pan ? 'input-error' : ''}`} /></FormField>
           </div>
-          <div><label className="text-xs font-medium block mb-1">Address</label>
+          <FormField label="Address" error={formErrors['address.line1'] || formErrors['address.city']}>
             <div className="grid grid-cols-2 gap-2">
-              <input type="text" value={form.address.line1} onChange={e => setForm(f => ({ ...f, address: { ...f.address, line1: e.target.value } }))} placeholder="Line 1" className="input-field text-sm col-span-2" />
-              <input type="text" value={form.address.city} onChange={e => setForm(f => ({ ...f, address: { ...f.address, city: e.target.value } }))} placeholder="City" className="input-field text-sm" />
-              <input type="text" value={form.address.state} onChange={e => setForm(f => ({ ...f, address: { ...f.address, state: e.target.value } }))} placeholder="State" className="input-field text-sm" />
+              <input type="text" value={form.address.line1} onChange={e => handleNestedChange('address', 'line1', e.target.value)} placeholder="Line 1" className={`input-field text-sm col-span-2 ${formErrors['address.line1'] ? 'input-error' : ''}`} />
+              <input type="text" value={form.address.city} onChange={e => handleNestedChange('address', 'city', e.target.value)} placeholder="City" className={`input-field text-sm ${formErrors['address.city'] ? 'input-error' : ''}`} />
+              <input type="text" value={form.address.state} onChange={e => handleNestedChange('address', 'state', e.target.value)} placeholder="State" className="input-field text-sm" />
             </div>
-          </div>
+          </FormField>
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-xs font-medium block mb-1">Credit Limit</label><input type="number" value={form.creditLimit} onChange={e => setForm(f => ({ ...f, creditLimit: parseFloat(e.target.value) || 0 }))} className="input-field text-sm" /></div>
-            <div><label className="text-xs font-medium block mb-1">Payment Terms</label>
-              <select value={form.paymentTerms} onChange={e => setForm(f => ({ ...f, paymentTerms: e.target.value }))} className="input-field text-sm">
+            <FormField label="Credit Limit" error={formErrors.creditLimit}><input type="number" value={form.creditLimit} onChange={e => handleChange('creditLimit', parseFloat(e.target.value) || 0)} className={`input-field text-sm ${formErrors.creditLimit ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Payment Terms" error={formErrors.paymentTerms}>
+              <select value={form.paymentTerms} onChange={e => handleChange('paymentTerms', e.target.value)} className={`input-field text-sm ${formErrors.paymentTerms ? 'input-error' : ''}`}>
                 <option value="immediate">Immediate</option><option value="7_days">7 Days</option><option value="15_days">15 Days</option><option value="30_days">30 Days</option><option value="45_days">45 Days</option><option value="60_days">60 Days</option>
               </select>
-            </div>
+            </FormField>
           </div>
           <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
             <div>
@@ -69,7 +96,7 @@ function SupplierModal({ isOpen, onClose, supplier, onSaved }) {
               <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-500 peer-checked:bg-primary-600" />
             </label>
           </div>
-          <div><label className="text-xs font-medium block mb-1">Notes</label><textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="input-field text-sm w-full" rows={2} /></div>
+          <FormField label="Notes" error={formErrors.notes}><textarea value={form.notes} onChange={e => handleChange('notes', e.target.value)} className={`input-field text-sm w-full ${formErrors.notes ? 'input-error' : ''}`} rows={2} /></FormField>
           <div className="flex gap-3 pt-4 border-t"><button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button><button type="submit" disabled={saving} className="btn-primary flex-1">{saving ? 'Saving...' : 'Save'}</button></div>
         </form>
       </div>

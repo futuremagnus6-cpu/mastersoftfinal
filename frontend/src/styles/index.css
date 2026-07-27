@@ -38,6 +38,11 @@
            dark:focus:ring-primary-500 dark:placeholder:text-gray-500
            transition-all duration-200;
   }
+  .input-field.input-error {
+    @apply border-danger-400 dark:border-danger-500
+           focus:ring-danger-500 focus:border-danger-500
+           dark:focus:ring-danger-500;
+  }
   .card {
     @apply bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm;
   }

@@ -3,7 +3,7 @@ import {
   FiShield, FiGlobe, FiMail, FiClock, FiDollarSign,
   FiRefreshCw, FiSave, FiServer, FiDatabase, FiLock,
   FiEye, FiEyeOff, FiCopy, FiCheck, FiSend, FiMessageSquare,
-  FiUsers, FiAlertCircle,
+  FiUsers, FiAlertCircle, FiImage, FiAlertTriangle,
 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -88,6 +88,8 @@ function ApiKeyDisplay({ label, value, onRegenerate }) {
 export default function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showMaintenanceConfirm, setShowMaintenanceConfirm] = useState(false);
+  const [maintenancePendingAction, setMaintenancePendingAction] = useState(null); // 'enable' or 'disable'
   const [announcementSubject, setAnnouncementSubject] = useState('');
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [announcementType, setAnnouncementType] = useState('general');
@@ -97,6 +99,7 @@ export default function SettingsPage() {
     platformName: 'Future Magnus Business OS',
     supportEmail: 'support@futuremagnus.com',
     supportPhone: '+91-9999999999',
+    logo: '',
     defaultCurrency: 'INR',
     timezone: 'Asia/Kolkata',
     dateFormat: 'DD/MM/YYYY',
@@ -125,6 +128,7 @@ export default function SettingsPage() {
           platformName: remote.platformName || 'Future Magnus Business OS',
           supportEmail: remote.supportEmail || 'support@futuremagnus.com',
           supportPhone: remote.supportPhone || '+91-9999999999',
+          logo: remote.logo || '',
           defaultCurrency: remote.defaultCurrency || 'INR',
           timezone: remote.timezone || 'Asia/Kolkata',
           dateFormat: remote.dateFormat || 'DD/MM/YYYY',
@@ -160,6 +164,7 @@ export default function SettingsPage() {
         platformName: settings.platformName,
         supportEmail: settings.supportEmail,
         supportPhone: settings.supportPhone,
+        logo: settings.logo,
         defaultCurrency: settings.defaultCurrency,
         timezone: settings.timezone,
         dateFormat: settings.dateFormat,
@@ -319,6 +324,53 @@ export default function SettingsPage() {
 
       {/* General Settings */}
       <SettingsSection icon={FiGlobe} title="General" description="Basic platform information">
+        <FormField label="Platform Logo" description="Upload logo for header display and browser tab icon">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden flex-shrink-0">
+              {settings.logo ? (
+                <img src={settings.logo} alt="Platform Logo" className="w-full h-full object-cover" />
+              ) : (
+                <FiImage className="w-5 h-5 text-gray-400" />
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const formData = new FormData();
+                  formData.append('file', file);
+                  formData.append('purpose', 'logo');
+                  try {
+                    const res = await apiService.uploadFile(formData);
+                    const url = res.data?.data?.url || res.data?.url;
+                    if (url) {
+                      setSettings(prev => ({ ...prev, logo: url }));
+                      toast.success('Logo uploaded successfully');
+                    } else {
+                      toast.error('Upload completed but no URL returned');
+                    }
+                  } catch (err) {
+                    toast.error(err.response?.data?.message || 'Failed to upload logo');
+                  }
+                  e.target.value = '';
+                }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-50 file:text-primary-600 hover:file:bg-primary-100 dark:file:bg-primary-900/30 dark:file:text-primary-400"
+              />
+              <p className="mt-1 text-xs text-gray-400">Recommended: 200x200px. PNG or JPG.</p>
+            </div>
+            {settings.logo && (
+              <button
+                onClick={() => setSettings(prev => ({ ...prev, logo: '' }))}
+                className="text-xs text-danger-500 hover:text-danger-600 font-medium"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </FormField>
         <FormField label="Platform Name" description="The name displayed across the platform">
           <input
             type="text"
@@ -487,11 +539,25 @@ export default function SettingsPage() {
             <input
               type="checkbox"
               checked={settings.maintenanceMode}
-              onChange={(e) => handleChange('maintenanceMode', e.target.checked)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setMaintenancePendingAction('enable');
+                  setShowMaintenanceConfirm(true);
+                } else {
+                  setMaintenancePendingAction('disable');
+                  setShowMaintenanceConfirm(true);
+                }
+              }}
               className="sr-only peer"
             />
             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600" />
           </label>
+          {settings.maintenanceMode && (
+            <div className="mt-2 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-2">
+              <FiAlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>All shops are currently disabled. Only super admins can access the system.</span>
+            </div>
+          )}
         </FormField>
         <FormField label="Auto Backup" description="Enable automatic database backups">
           <label className="relative inline-flex items-center cursor-pointer">
@@ -538,6 +604,100 @@ export default function SettingsPage() {
           {saving ? 'Saving...' : 'Save Settings'}
         </button>
       </div>
+
+      {/* Maintenance Mode Confirmation Modal */}
+      {showMaintenanceConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fade-in" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setShowMaintenanceConfirm(false);
+            setMaintenancePendingAction(null);
+          }
+        }}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className={`p-5 ${maintenancePendingAction === 'enable' ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-green-50 dark:bg-green-900/20'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  maintenancePendingAction === 'enable'
+                    ? 'bg-amber-100 dark:bg-amber-900/30'
+                    : 'bg-green-100 dark:bg-green-900/30'
+                }`}>
+                  {maintenancePendingAction === 'enable' ? (
+                    <FiAlertTriangle className="w-6 h-6 text-amber-500" />
+                  ) : (
+                    <FiCheck className="w-6 h-6 text-green-500" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {maintenancePendingAction === 'enable' ? 'Enable Maintenance Mode?' : 'Disable Maintenance Mode?'}
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-5 space-y-4">
+              {maintenancePendingAction === 'enable' ? (
+                <>
+                  <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                    <FiAlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <p>This will immediately disable ALL active shops. Shop admins and staff will not be able to access the system until maintenance mode is turned off.</p>
+                  </div>
+                  <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
+                      <span>All shop admin accounts remain intact</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
+                      <span>Super admin can still access all areas</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 flex-shrink-0" />
+                      <span>Shops will be automatically re-enabled when maintenance ends</span>
+                    </li>
+                  </ul>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-start gap-2 text-sm text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700 rounded-lg p-3">
+                    <FiCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <p>All shops that were disabled by maintenance mode will be re-enabled and accessible to their admins.</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="px-5 pb-5 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowMaintenanceConfirm(false);
+                  setMaintenancePendingAction(null);
+                }}
+                className="btn-secondary flex-1"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleChange('maintenanceMode', maintenancePendingAction === 'enable');
+                  setShowMaintenanceConfirm(false);
+                  setMaintenancePendingAction(null);
+                }}
+                className={`flex-1 text-white font-medium rounded-lg px-4 py-2.5 text-sm transition-colors ${
+                  maintenancePendingAction === 'enable'
+                    ? 'bg-amber-500 hover:bg-amber-600'
+                    : 'bg-green-500 hover:bg-green-600'
+                }`}
+              >
+                {maintenancePendingAction === 'enable' ? 'Yes, Enable Maintenance' : 'Yes, Disable Maintenance'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

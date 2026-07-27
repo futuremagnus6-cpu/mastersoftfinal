@@ -5,11 +5,13 @@ import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
 import { getAssetUrl, getMainImageUrl } from '../../utils/assets';
 import AiImportModal from './AiImportModal';
+import FormField from '../../components/form/FormField';
 
 const GST_RATES = [0, 5, 12, 18, 28];
 
 function ProductModal({ isOpen, onClose, product, onSave }) {
   const [form, setForm] = useState({ name: '', sku: '', barcode: '', category: '', brand: '', unit: 'pcs', pricing: { mrp: 0, sellingPrice: 0, purchasePrice: 0, gstRate: 18 }, tax: { hsnCode: '' }, inventory: { quantity: 0, minStockLevel: 10 }, description: '', images: [] });
+  const [formErrors, setFormErrors] = useState({});
   const [newImageUrl, setNewImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -21,6 +23,7 @@ function ProductModal({ isOpen, onClose, product, onSave }) {
       setForm({ name: '', sku: `SKU-${Date.now().toString(36).toUpperCase()}`, barcode: '', category: '', brand: '', unit: 'pcs', pricing: { mrp: 0, sellingPrice: 0, purchasePrice: 0, gstRate: 18 }, tax: { hsnCode: '' }, inventory: { quantity: 0, minStockLevel: 10 }, description: '', images: [] });
     }
     setNewImageUrl('');
+    setFormErrors({});
   }, [product, isOpen]);
 
   if (!isOpen) return null;
@@ -89,14 +92,29 @@ function ProductModal({ isOpen, onClose, product, onSave }) {
     await uploadImageFiles(e.dataTransfer?.files);
   };
 
+  const validate = () => {
+    const errors = {};
+    if (!form.name.trim()) errors.name = 'Product name is required';
+    if (!form.sku.trim()) errors.sku = 'SKU is required';
+    if (form.pricing.sellingPrice <= 0) errors['pricing.sellingPrice'] = 'Selling price must be greater than 0';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleChange = (field, value) => {
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
       setForm(f => ({ ...f, [parent]: { ...f[parent], [child]: value } }));
-    } else setForm(f => ({ ...f, [field]: value }));
+      const compound = `${parent}.${child}`;
+      if (formErrors[compound]) setFormErrors(prev => ({ ...prev, [compound]: '' }));
+    } else {
+      setForm(f => ({ ...f, [field]: value }));
+      if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: '' }));
+    }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
     try {
       if (product) await apiService.updateProduct(product._id, form);
       else await apiService.createProduct(form);
@@ -165,21 +183,21 @@ function ProductModal({ isOpen, onClose, product, onSave }) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2"><label className="block text-sm font-medium mb-1">Product Name *</label><input value={form.name} onChange={e => handleChange('name', e.target.value)} className="input-field" required /></div>
-            <div><label className="block text-sm font-medium mb-1">SKU *</label><input value={form.sku} onChange={e => handleChange('sku', e.target.value)} className="input-field" required /></div>
-            <div><label className="block text-sm font-medium mb-1">Barcode</label><input value={form.barcode} onChange={e => handleChange('barcode', e.target.value)} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Category</label><input value={form.category} onChange={e => handleChange('category', e.target.value)} placeholder="Uncategorized" className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Brand</label><input value={form.brand} onChange={e => handleChange('brand', e.target.value)} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">MRP</label><input type="number" value={form.pricing.mrp} onChange={e => handleChange('pricing.mrp', parseFloat(e.target.value) || 0)} className="input-field" min="0" step="0.01" /></div>
-            <div><label className="block text-sm font-medium mb-1">Selling Price *</label><input type="number" value={form.pricing.sellingPrice} onChange={e => handleChange('pricing.sellingPrice', parseFloat(e.target.value) || 0)} className="input-field" required min="0" step="0.01" /></div>
-            <div><label className="block text-sm font-medium mb-1">Purchase Price</label><input type="number" value={form.pricing.purchasePrice} onChange={e => handleChange('pricing.purchasePrice', parseFloat(e.target.value) || 0)} className="input-field" min="0" step="0.01" /></div>
-            <div><label className="block text-sm font-medium mb-1">GST Rate</label><select value={form.pricing.gstRate} onChange={e => handleChange('pricing.gstRate', parseInt(e.target.value))} className="input-field">{GST_RATES.map(r => <option key={r} value={r}>{r}%</option>)}</select></div>
-            <div><label className="block text-sm font-medium mb-1">HSN Code</label><input value={form.tax.hsnCode} onChange={e => handleChange('tax.hsnCode', e.target.value)} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Opening Stock</label><input type="number" value={form.inventory.quantity} onChange={e => handleChange('inventory.quantity', parseInt(e.target.value) || 0)} className="input-field" min="0" /></div>
-            <div><label className="block text-sm font-medium mb-1">Min Stock Level</label><input type="number" value={form.inventory.minStockLevel} onChange={e => handleChange('inventory.minStockLevel', parseInt(e.target.value) || 0)} className="input-field" min="0" /></div>
-            <div><label className="block text-sm font-medium mb-1">Unit</label><select value={form.unit} onChange={e => handleChange('unit', e.target.value)} className="input-field">{['pcs', 'kg', 'g', 'l', 'ml', 'm', 'box', 'pack', 'dozen', 'carton'].map(u => <option key={u} value={u}>{u}</option>)}</select></div>
+            <FormField label="Product Name" error={formErrors.name} className="col-span-2" required><input value={form.name} onChange={e => handleChange('name', e.target.value)} className={`input-field ${formErrors.name ? 'input-error' : ''}`} /></FormField>
+            <FormField label="SKU" error={formErrors.sku} required><input value={form.sku} onChange={e => handleChange('sku', e.target.value)} className={`input-field ${formErrors.sku ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Barcode" error={formErrors.barcode}><input value={form.barcode} onChange={e => handleChange('barcode', e.target.value)} className={`input-field ${formErrors.barcode ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Category" error={formErrors.category}><input value={form.category} onChange={e => handleChange('category', e.target.value)} placeholder="Uncategorized" className={`input-field ${formErrors.category ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Brand" error={formErrors.brand}><input value={form.brand} onChange={e => handleChange('brand', e.target.value)} className={`input-field ${formErrors.brand ? 'input-error' : ''}`} /></FormField>
+            <FormField label="MRP" error={formErrors['pricing.mrp']}><input type="number" value={form.pricing.mrp} onChange={e => handleChange('pricing.mrp', parseFloat(e.target.value) || 0)} className={`input-field ${formErrors['pricing.mrp'] ? 'input-error' : ''}`} min="0" step="0.01" /></FormField>
+            <FormField label="Selling Price" error={formErrors['pricing.sellingPrice']} required><input type="number" value={form.pricing.sellingPrice} onChange={e => handleChange('pricing.sellingPrice', parseFloat(e.target.value) || 0)} className={`input-field ${formErrors['pricing.sellingPrice'] ? 'input-error' : ''}`} min="0" step="0.01" /></FormField>
+            <FormField label="Purchase Price" error={formErrors['pricing.purchasePrice']}><input type="number" value={form.pricing.purchasePrice} onChange={e => handleChange('pricing.purchasePrice', parseFloat(e.target.value) || 0)} className={`input-field ${formErrors['pricing.purchasePrice'] ? 'input-error' : ''}`} min="0" step="0.01" /></FormField>
+            <FormField label="GST Rate" error={formErrors['pricing.gstRate']}><select value={form.pricing.gstRate} onChange={e => handleChange('pricing.gstRate', parseInt(e.target.value))} className={`input-field ${formErrors['pricing.gstRate'] ? 'input-error' : ''}`}>{GST_RATES.map(r => <option key={r} value={r}>{r}%</option>)}</select></FormField>
+            <FormField label="HSN Code" error={formErrors['tax.hsnCode']}><input value={form.tax.hsnCode} onChange={e => handleChange('tax.hsnCode', e.target.value)} className={`input-field ${formErrors['tax.hsnCode'] ? 'input-error' : ''}`} /></FormField>
+            <FormField label="Opening Stock" error={formErrors['inventory.quantity']}><input type="number" value={form.inventory.quantity} onChange={e => handleChange('inventory.quantity', parseInt(e.target.value) || 0)} className={`input-field ${formErrors['inventory.quantity'] ? 'input-error' : ''}`} min="0" /></FormField>
+            <FormField label="Min Stock Level" error={formErrors['inventory.minStockLevel']}><input type="number" value={form.inventory.minStockLevel} onChange={e => handleChange('inventory.minStockLevel', parseInt(e.target.value) || 0)} className={`input-field ${formErrors['inventory.minStockLevel'] ? 'input-error' : ''}`} min="0" /></FormField>
+            <FormField label="Unit" error={formErrors.unit}><select value={form.unit} onChange={e => handleChange('unit', e.target.value)} className={`input-field ${formErrors.unit ? 'input-error' : ''}`}>{['pcs', 'kg', 'g', 'l', 'ml', 'm', 'box', 'pack', 'dozen', 'carton'].map(u => <option key={u} value={u}>{u}</option>)}</select></FormField>
           </div>
-          <div><label className="block text-sm font-medium mb-1">Description</label><textarea value={form.description} onChange={e => handleChange('description', e.target.value)} className="input-field" rows={2} /></div>
+          <FormField label="Description" error={formErrors.description}><textarea value={form.description} onChange={e => handleChange('description', e.target.value)} className={`input-field ${formErrors.description ? 'input-error' : ''}`} rows={2} /></FormField>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={onClose} className="btn-secondary">Cancel</button><button type="submit" className="btn-primary">{product ? 'Update' : 'Create'} Product</button></div>
         </form>
       </div>

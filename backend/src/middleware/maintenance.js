@@ -4,15 +4,15 @@
  * When maintenance mode is enabled, non-super-admin users are blocked
  * from accessing the API. Super admins can still access everything.
  *
- * Maintenance mode status is read from an environment variable:
- *   MAINTENANCE_MODE=true
- *   MAINTENANCE_MESSAGE="We are currently performing scheduled maintenance. Please check back shortly."
- *
- * Or from the system settings if stored in the database.
+ * Maintenance mode status is read from:
+ *   1. PlatformConfig database (set via Super Admin Settings)
+ *   2. MAINTENANCE_MODE environment variable (runtime override)
+ *   3. .maintenance file (legacy file-based flag)
  */
 
 const fs = require('fs');
 const path = require('path');
+const PlatformConfig = require('../models/PlatformConfig');
 
 // Path to maintenance flag file
 const MAINTENANCE_FILE = path.join(__dirname, '..', '..', '.maintenance');
@@ -20,7 +20,7 @@ const MAINTENANCE_FILE = path.join(__dirname, '..', '..', '.maintenance');
 /**
  * Enable maintenance mode
  */
-const enableMaintenance = (message) => {
+const enableMaintenanceFile = (message) => {
   const content = JSON.stringify({
     enabled: true,
     message: message || 'System is under maintenance. Please try again later.',
@@ -32,7 +32,7 @@ const enableMaintenance = (message) => {
 /**
  * Disable maintenance mode
  */
-const disableMaintenance = () => {
+const disableMaintenanceFile = () => {
   try {
     if (fs.existsSync(MAINTENANCE_FILE)) {
       fs.unlinkSync(MAINTENANCE_FILE);
@@ -43,10 +43,10 @@ const disableMaintenance = () => {
 };
 
 /**
- * Check if maintenance mode is enabled
+ * Check if maintenance mode is enabled from all sources
  */
 const isMaintenanceMode = () => {
-  // Check env var first (runtime override)
+  // 1. Check env var first (runtime override)
   if (process.env.MAINTENANCE_MODE === 'true') {
     return {
       enabled: true,
@@ -54,7 +54,7 @@ const isMaintenanceMode = () => {
     };
   }
 
-  // Check maintenance file
+  // 2. Check maintenance file
   try {
     if (fs.existsSync(MAINTENANCE_FILE)) {
       const content = fs.readFileSync(MAINTENANCE_FILE, 'utf-8');
@@ -70,26 +70,44 @@ const isMaintenanceMode = () => {
 /**
  * Express middleware to block requests during maintenance mode
  */
-const maintenanceMiddleware = (req, res, next) => {
+const maintenanceMiddleware = async (req, res, next) => {
   // Skip maintenance check for health endpoint and login
   if (req.path === '/api/health' || req.path === '/api/auth/login' || 
-      req.path === '/api/auth/refresh-token') {
+      req.path === '/api/auth/refresh-token' || req.path === '/api/auth/forgot-password' ||
+      req.path === '/api/auth/reset-password' || req.path === '/api/platform-config/status') {
     return next();
   }
 
-  const maintenance = isMaintenanceMode();
-  if (maintenance.enabled) {
-    // Allow super admins through
+  // Check file/env based maintenance first (fast, no DB call)
+  const fileMaintenance = isMaintenanceMode();
+  if (fileMaintenance.enabled) {
     if (req.user && req.user.role === 'super_admin') {
       return next();
     }
-
     return res.status(503).json({
       success: false,
-      message: maintenance.message || 'System is under maintenance. Please try again later.',
+      message: fileMaintenance.message || 'System is under maintenance. Please try again later.',
       code: 'MAINTENANCE_MODE',
-      retryAfter: 300, // suggest retry after 5 minutes
+      retryAfter: 300,
     });
+  }
+
+  // Check database-based maintenance (from PlatformConfig)
+  try {
+    const config = await PlatformConfig.getConfig();
+    if (config && config.maintenanceMode) {
+      if (req.user && req.user.role === 'super_admin') {
+        return next();
+      }
+      return res.status(503).json({
+        success: false,
+        message: 'The site is currently under maintenance. Please check back later.',
+        code: 'MAINTENANCE_MODE',
+        retryAfter: 300,
+      });
+    }
+  } catch (e) {
+    // If DB is unavailable, continue without maintenance check
   }
 
   next();
@@ -97,7 +115,7 @@ const maintenanceMiddleware = (req, res, next) => {
 
 module.exports = {
   maintenanceMiddleware,
-  enableMaintenance,
-  disableMaintenance,
+  enableMaintenance: enableMaintenanceFile,
+  disableMaintenance: disableMaintenanceFile,
   isMaintenanceMode,
 };

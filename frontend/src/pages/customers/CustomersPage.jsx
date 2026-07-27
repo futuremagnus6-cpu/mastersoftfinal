@@ -2,19 +2,43 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiSearch, FiEdit2, FiTrash2, FiUsers, FiStar, FiCreditCard, FiX, FiRefreshCw } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
+import FormField from '../../components/form/FormField';
 
 function CustomerModal({ isOpen, onClose, customer, onSave }) {
   const [form, setForm] = useState({ name: '', mobile: '', email: '', gstin: '', address: { city: '', state: '' }, creditLimit: 0, notes: '' });
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     if (customer) setForm({ name: customer.name || '', mobile: customer.mobile || '', email: customer.email || '', gstin: customer.gstin || '', address: customer.address || { city: '', state: '' }, creditLimit: customer.creditLimit || 0, notes: customer.notes || '' });
     else setForm({ name: '', mobile: '', email: '', gstin: '', address: { city: '', state: '' }, creditLimit: 0, notes: '' });
+    setFormErrors({});
   }, [customer, isOpen]);
 
   if (!isOpen) return null;
 
+  const validate = () => {
+    const errors = {};
+    if (!form.name.trim()) errors.name = 'Name is required';
+    if (!form.mobile.trim()) errors.mobile = 'Mobile is required';
+    else if (!/^\d{10,15}$/.test(form.mobile.replace(/[+\-\s]/g, ''))) errors.mobile = 'Invalid mobile number';
+    if (form.email && !/\S+@\S+\.\S+/.test(form.email)) errors.email = 'Invalid email format';
+    if (form.gstin && !/^[0-9A-Z]{15}$/.test(form.gstin)) errors.gstin = 'GSTIN must be 15 characters';
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleChange = (field, value) => {
+    setForm(f => ({ ...f, [field]: value }));
+    if (formErrors[field]) setFormErrors(prev => ({ ...prev, [field]: '' }));
+  };
+
+  const handleNestedChange = (parent, field, value) => {
+    setForm(f => ({ ...f, [parent]: { ...f[parent], [field]: value } }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
     try {
       if (customer) await apiService.updateCustomer(customer._id, form);
       else await apiService.createCustomer(form);
@@ -29,14 +53,30 @@ function CustomerModal({ isOpen, onClose, customer, onSave }) {
         <div className="flex items-center justify-between p-4 border-b"><h3 className="text-lg font-semibold">{customer ? 'Edit Customer' : 'New Customer'}</h3><button onClick={onClose} className="p-1 rounded hover:bg-gray-100"><FiX /></button></div>
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2"><label className="block text-sm font-medium mb-1">Name</label><input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Mobile</label><input value={form.mobile} onChange={e => setForm(f => ({ ...f, mobile: e.target.value }))} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Email</label><input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">GSTIN</label><input value={form.gstin} onChange={e => setForm(f => ({ ...f, gstin: e.target.value }))} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">Credit Limit</label><input type="number" value={form.creditLimit} onChange={e => setForm(f => ({ ...f, creditLimit: parseFloat(e.target.value) || 0 }))} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">City</label><input value={form.address.city} onChange={e => setForm(f => ({ ...f, address: { ...f.address, city: e.target.value } }))} className="input-field" /></div>
-            <div><label className="block text-sm font-medium mb-1">State</label><input value={form.address.state} onChange={e => setForm(f => ({ ...f, address: { ...f.address, state: e.target.value } }))} className="input-field" /></div>
-            <div className="col-span-2"><label className="block text-sm font-medium mb-1">Notes</label><textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} className="input-field" rows={2} /></div>
+            <FormField label="Name" error={formErrors.name} className="col-span-2" required>
+              <input value={form.name} onChange={e => handleChange('name', e.target.value)} className={`input-field ${formErrors.name ? 'input-error' : ''}`} />
+            </FormField>
+            <FormField label="Mobile" error={formErrors.mobile} required>
+              <input value={form.mobile} onChange={e => handleChange('mobile', e.target.value)} className={`input-field ${formErrors.mobile ? 'input-error' : ''}`} />
+            </FormField>
+            <FormField label="Email" error={formErrors.email}>
+              <input type="email" value={form.email} onChange={e => handleChange('email', e.target.value)} className={`input-field ${formErrors.email ? 'input-error' : ''}`} />
+            </FormField>
+            <FormField label="GSTIN" error={formErrors.gstin}>
+              <input value={form.gstin} onChange={e => handleChange('gstin', e.target.value)} className={`input-field ${formErrors.gstin ? 'input-error' : ''}`} />
+            </FormField>
+            <FormField label="Credit Limit" error={formErrors.creditLimit}>
+              <input type="number" value={form.creditLimit} onChange={e => handleChange('creditLimit', parseFloat(e.target.value) || 0)} className={`input-field ${formErrors.creditLimit ? 'input-error' : ''}`} />
+            </FormField>
+            <FormField label="City" error={formErrors['address.city']}>
+              <input value={form.address.city} onChange={e => setForm(f => ({ ...f, address: { ...f.address, city: e.target.value } }))} className="input-field" />
+            </FormField>
+            <FormField label="State" error={formErrors['address.state']}>
+              <input value={form.address.state} onChange={e => setForm(f => ({ ...f, address: { ...f.address, state: e.target.value } }))} className="input-field" />
+            </FormField>
+            <FormField label="Notes" error={formErrors.notes} className="col-span-2">
+              <textarea value={form.notes} onChange={e => handleChange('notes', e.target.value)} className={`input-field ${formErrors.notes ? 'input-error' : ''}`} rows={2} />
+            </FormField>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t"><button type="button" onClick={onClose} className="btn-secondary">Cancel</button><button type="submit" className="btn-primary">{customer ? 'Update' : 'Create'} Customer</button></div>
         </form>
