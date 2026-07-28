@@ -755,6 +755,44 @@ exports.extendTrial = async (req, res, next) => {
   }
 };
 
+// @desc    Set/override trial days for a shop (sets trial end to N days from now)
+// @route   PUT /api/shops/:id/set-trial-days
+exports.setTrialDays = async (req, res, next) => {
+  try {
+    const { days } = req.body;
+    if (!days || days < 1 || days > 365) {
+      throw new AppError('Please provide a valid number of days (1-365)', 400);
+    }
+
+    const shop = await Shop.findById(req.params.id);
+
+    if (!shop) {
+      throw new AppError('Shop not found', 404);
+    }
+
+    // Set trial end date to N days from now
+    const newEnd = new Date();
+    newEnd.setDate(newEnd.getDate() + days);
+
+    shop.subscription.status = 'trial';
+    shop.subscription.trialEndsAt = newEnd;
+    await shop.save();
+
+    await AuditLog.create({
+      user: req.userId,
+      action: 'set_trial_days',
+      resource: 'Shop',
+      resourceId: shop._id,
+      description: `Set trial period to ${days} days for shop: ${shop.name}. New trial end: ${newEnd.toISOString()}`,
+      ip: req.ip,
+    });
+
+    res.json({ success: true, message: `Trial set to ${days} days from now`, data: shop });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Send subscription reminder email to shop admin
 // @route   POST /api/shops/:id/send-subscription-reminder
 exports.sendSubscriptionReminder = async (req, res, next) => {

@@ -136,6 +136,7 @@ const apiService = {
   // Trial & Subscription Management (Super Admin)
   closeTrial: (id) => api.put(`/shops/${id}/close-trial`),
   extendTrial: (id, days) => api.put(`/shops/${id}/extend-trial`, { days }),
+  setTrialDays: (id, days) => api.put(`/shops/${id}/set-trial-days`, { days }),
   sendSubscriptionReminder: (id) => api.post(`/shops/${id}/send-subscription-reminder`),
 
   // Recycle Bin (Super Admin)
@@ -308,6 +309,9 @@ const apiService = {
   // Platform Config (Super Admin)
   getPlatformConfig: () => api.get('/platform-config'),
   updatePlatformConfig: (data) => api.put('/platform-config', data),
+
+  // Public Platform Config (no auth required — for landing page, login page, etc.)
+  getPublicPlatformConfig: () => api.get('/platform-config/status'),
 
   // Invoice
   generateOrderInvoice: (orderId) => api.post(`/orders/${orderId}/generate-invoice`),

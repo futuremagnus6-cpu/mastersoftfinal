@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   FiPlus, FiEdit2, FiTrash2, FiRefreshCw, FiX, FiCheck,
-  FiStar, FiUsers, FiPackage, FiLayers, FiHardDrive,
-  FiDollarSign, FiCalendar, FiCreditCard,
+  FiStar, FiDollarSign, FiCalendar, FiCreditCard,
 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -28,23 +27,19 @@ function FeatureToggle({ label, value, onChange }) {
 
 // ─── Plan Modal ───
 function PlanModal({ plan, onClose, onSave }) {
+  const [billingPeriod, setBillingPeriod] = useState(
+    plan?.annualPrice ? 'yearly' : 'monthly'
+  );
   const [form, setForm] = useState({
     name: plan?.name || '',
     description: plan?.description || '',
     monthlyPrice: plan?.monthlyPrice || 0,
-    semiAnnualPrice: plan?.semiAnnualPrice || undefined,
-    annualPrice: plan?.annualPrice || undefined,
+    annualPrice: plan?.annualPrice || 0,
     trialPeriod: plan?.trialPeriod || 14,
     sortOrder: plan?.sortOrder || 0,
     supportLevel: plan?.supportLevel || 'email',
     whiteLabel: plan?.whiteLabel || false,
     apiAccess: plan?.apiAccess || false,
-    limits: {
-      maxUsers: plan?.limits?.maxUsers || 5,
-      maxProducts: plan?.limits?.maxProducts || 1000,
-      maxBranches: plan?.limits?.maxBranches || 1,
-      maxStorage: plan?.limits?.maxStorage || 5,
-    },
     features: {
       pos: plan?.features?.pos ?? true,
       inventory: plan?.features?.inventory ?? true,
@@ -74,10 +69,6 @@ function PlanModal({ plan, onClose, onSave }) {
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleLimitChange = (field, value) => {
-    setForm(prev => ({ ...prev, limits: { ...prev.limits, [field]: parseInt(value) || 0 } }));
   };
 
   const handleFeatureToggle = (feature, value) => {
@@ -167,27 +158,53 @@ function PlanModal({ plan, onClose, onSave }) {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                 <textarea value={form.description} onChange={e => handleChange('description', e.target.value)} className="input-field" rows={2} placeholder="Describe what this plan includes..." />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Monthly Price (₹)
-                  <span className="text-[10px] text-gray-400 font-normal ml-1">/mo</span>
-                </label>
-                <input type="number" value={form.monthlyPrice} onChange={e => handleChange('monthlyPrice', parseFloat(e.target.value) || 0)} className="input-field" min={0} step={0.01} />
+              {/* Billing Period Toggle */}
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Billing Period</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setBillingPeriod('monthly')}
+                    className={`flex-1 py-2.5 text-sm font-medium rounded-lg border-2 transition-all ${
+                      billingPeriod === 'monthly'
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                    }`}
+                  >
+                    <FiCalendar className="w-4 h-4 inline mr-1.5" />
+                    Monthly Plan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBillingPeriod('yearly')}
+                    className={`flex-1 py-2.5 text-sm font-medium rounded-lg border-2 transition-all ${
+                      billingPeriod === 'yearly'
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                        : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                    }`}
+                  >
+                    <FiStar className="w-4 h-4 inline mr-1.5" />
+                    Yearly Plan
+                  </button>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  6-Month Price (₹)
-                  <span className="text-[10px] text-gray-400 font-normal ml-1">leave blank for 5% discount</span>
-                </label>
-                <input type="number" value={form.semiAnnualPrice ?? ''} onChange={e => handleChange('semiAnnualPrice', e.target.value ? parseFloat(e.target.value) : undefined)} className="input-field" min={0} step={0.01} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Annual Price (₹)
-                  <span className="text-[10px] text-gray-400 font-normal ml-1">leave blank for 10% discount</span>
-                </label>
-                <input type="number" value={form.annualPrice ?? ''} onChange={e => handleChange('annualPrice', e.target.value ? parseFloat(e.target.value) : undefined)} className="input-field" min={0} step={0.01} />
-              </div>
+              {billingPeriod === 'monthly' ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Monthly Price (₹)
+                    <span className="text-[10px] text-gray-400 font-normal ml-1">per month</span>
+                  </label>
+                  <input type="number" value={form.monthlyPrice} onChange={e => handleChange('monthlyPrice', parseFloat(e.target.value) || 0)} className="input-field" min={0} step={0.01} />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Yearly Price (₹)
+                    <span className="text-[10px] text-gray-400 font-normal ml-1">per year</span>
+                  </label>
+                  <input type="number" value={form.annualPrice} onChange={e => handleChange('annualPrice', parseFloat(e.target.value) || 0)} className="input-field" min={0} step={0.01} />
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trial Period (days)</label>
                 <input type="number" value={form.trialPeriod} onChange={e => handleChange('trialPeriod', parseInt(e.target.value) || 0)} className="input-field" min={0} />
@@ -213,37 +230,6 @@ function PlanModal({ plan, onClose, onSave }) {
                   <input type="checkbox" checked={form.whiteLabel} onChange={e => handleChange('whiteLabel', e.target.checked)} className="w-4 h-4 text-primary-600 rounded" />
                   <span className="text-sm text-gray-700 dark:text-gray-300">White Label</span>
                 </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Limits */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Limits</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  <FiUsers className="w-3.5 h-3.5 inline mr-1" /> Max Users
-                </label>
-                <input type="number" value={form.limits.maxUsers} onChange={e => handleLimitChange('maxUsers', e.target.value)} className="input-field" min={1} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  <FiPackage className="w-3.5 h-3.5 inline mr-1" /> Max Products
-                </label>
-                <input type="number" value={form.limits.maxProducts} onChange={e => handleLimitChange('maxProducts', e.target.value)} className="input-field" min={1} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  <FiLayers className="w-3.5 h-3.5 inline mr-1" /> Max Branches
-                </label>
-                <input type="number" value={form.limits.maxBranches} onChange={e => handleLimitChange('maxBranches', e.target.value)} className="input-field" min={1} />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  <FiHardDrive className="w-3.5 h-3.5 inline mr-1" /> Storage (GB)
-                </label>
-                <input type="number" value={form.limits.maxStorage} onChange={e => handleLimitChange('maxStorage', e.target.value)} className="input-field" min={1} />
               </div>
             </div>
           </div>
@@ -311,34 +297,16 @@ function PlanCard({ plan, onEdit, onDelete }) {
           </div>
         </div>
 
-        <div className="mb-4">
-          <span className="text-3xl font-bold text-gray-900 dark:text-white">{priceFormatted}</span>
+        <div className="mb-4">            <span className="text-3xl font-bold text-gray-900 dark:text-white">{priceFormatted}</span>
           <span className="text-sm text-gray-500 dark:text-gray-400">/month</span>
-          {plan.semiAnnualPrice && (
-            <p className="text-xs text-primary-600 dark:text-primary-400 mt-0.5">
-              ₹{plan.semiAnnualPrice.toLocaleString('en-IN')}/6mo ({(plan.semiAnnualPrice / plan.monthlyPrice / 6 * 100).toFixed(0)}% savings)
-            </p>
-          )}
-          {annualFormatted && (
+          {annualFormatted && plan.monthlyPrice > 0 && (
             <p className="text-xs text-success-600 dark:text-success-400 mt-1">
-              {annualFormatted}/year ({(plan.annualPrice / plan.monthlyPrice / 12 * 100).toFixed(0)}% savings)
+              {annualFormatted}/year (save {Math.round((1 - plan.annualPrice / (plan.monthlyPrice * 12)) * 100)}%)
             </p>
           )}
         </div>
 
         <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <FiUsers className="w-4 h-4" />
-            <span>Up to {plan.limits?.maxUsers || 5} users</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <FiPackage className="w-4 h-4" />
-            <span>Up to {plan.limits?.maxProducts || 1000} products</span>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <FiLayers className="w-4 h-4" />
-            <span>Up to {plan.limits?.maxBranches || 1} branches</span>
-          </div>
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <FiCalendar className="w-4 h-4" />
             <span>{plan.trialPeriod || 14}-day trial</span>

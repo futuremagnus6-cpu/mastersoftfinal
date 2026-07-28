@@ -6,7 +6,7 @@ import {
   FiChevronLeft, FiChevronRight, FiShoppingBag, FiUsers,
   FiDollarSign, FiCheckCircle, FiTrash2,
   FiSend, FiPlusCircle, FiAlertTriangle,
-  FiCreditCard, FiCheck,
+  FiCreditCard, FiCheck, FiEdit3,
 } from 'react-icons/fi';
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -638,6 +638,8 @@ export default function PreShopsPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [extendingShop, setExtendingShop] = useState(null); // shop being extended inline
   const [extendCustomDays, setExtendCustomDays] = useState(7);
+  const [settingTrialShop, setSettingTrialShop] = useState(null); // shop for set trial
+  const [setTrialDays, setSetTrialDays] = useState(14);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [assignShop, setAssignShop] = useState(null);
   const [plans, setPlans] = useState([]);
@@ -681,6 +683,21 @@ export default function PreShopsPage() {
       loadShops();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to extend trial');
+    }
+  };
+
+  const handleSetTrialDays = async (shopId, days) => {
+    if (!days || days < 1) {
+      toast.error('Please enter a valid number of days');
+      return;
+    }
+    try {
+      await apiService.setTrialDays(shopId, days);
+      toast.success(`Trial set to ${days} days for this shop`);
+      setSettingTrialShop(null);
+      loadShops();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to set trial days');
     }
   };
 
@@ -858,6 +875,16 @@ export default function PreShopsPage() {
                             <FiPlusCircle className="w-4 h-4" />
                           </button>
                           <button
+                            onClick={() => {
+                              setSetTrialDays(14);
+                              setSettingTrialShop(settingTrialShop?._id === shop._id ? null : shop);
+                            }}
+                            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-amber-500"
+                            title="Set Trial Days"
+                          >
+                            <FiEdit3 className="w-4 h-4" />
+                          </button>
+                          <button
                             onClick={() => handleSendReminder(shop._id)}
                             className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-blue-500"
                             title="Send Subscription Reminder"
@@ -949,6 +976,65 @@ export default function PreShopsPage() {
               </button>
               <button
                 onClick={() => setExtendingShop(null)}
+                className="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Set Trial Days Popover */}
+      {settingTrialShop && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center" onClick={() => setSettingTrialShop(null)}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-5 min-w-[280px]" onClick={e => e.stopPropagation()}>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Set Trial Days</h3>
+            <p className="text-xs text-gray-500 mb-3">
+              Set trial period for <strong>{settingTrialShop.name}</strong>
+              {settingTrialShop.subscription?.trialEndsAt && (
+                <> — currently ends {new Date(settingTrialShop.subscription.trialEndsAt).toLocaleDateString('en-IN')}</>
+              )}
+            </p>
+            <p className="text-[10px] text-amber-600 dark:text-amber-400 mb-3 flex items-center gap-1">
+              <FiAlertTriangle className="w-3 h-3" />
+              This will override the trial end date and set it to N days from today
+            </p>
+            <div className="flex gap-1.5 mb-3">
+              {[7, 14, 21, 30].map(d => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setSetTrialDays(d)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+                    setTrialDays === d
+                      ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300'
+                      : 'border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {d}d
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={setTrialDays}
+                onChange={e => setSetTrialDays(parseInt(e.target.value) || 1)}
+                className="input-field text-sm py-1.5 px-2 w-20"
+                min={1}
+                max={365}
+              />
+              <span className="text-xs text-gray-400">days from today</span>
+              <div className="flex-1" />
+              <button
+                onClick={() => handleSetTrialDays(settingTrialShop._id, setTrialDays)}
+                className="px-4 py-1.5 text-sm font-medium bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+              >
+                Set
+              </button>
+              <button
+                onClick={() => setSettingTrialShop(null)}
                 className="px-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 transition-colors"
               >
                 Cancel

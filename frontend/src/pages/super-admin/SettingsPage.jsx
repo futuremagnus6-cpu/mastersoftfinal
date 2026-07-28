@@ -31,7 +31,7 @@ function SettingsSection({ icon: Icon, title, description, children }) {
 }
 
 // ─── Form Field ───
-function FormField({ label, description, children }) {
+function FormField({ label, description, error, children }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
       <div className="flex-1">
@@ -40,6 +40,12 @@ function FormField({ label, description, children }) {
       </div>
       <div className="sm:w-72">
         {children}
+        {error && (
+          <p className="mt-1.5 flex items-start gap-1.5 text-xs text-danger-600 dark:text-danger-400">
+            <FiAlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </p>
+        )}
       </div>
     </div>
   );
@@ -90,13 +96,14 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [showMaintenanceConfirm, setShowMaintenanceConfirm] = useState(false);
   const [maintenancePendingAction, setMaintenancePendingAction] = useState(null); // 'enable' or 'disable'
+  const [fieldErrors, setFieldErrors] = useState({});
   const [announcementSubject, setAnnouncementSubject] = useState('');
   const [announcementMessage, setAnnouncementMessage] = useState('');
   const [announcementType, setAnnouncementType] = useState('general');
   const [sendingAnnouncement, setSendingAnnouncement] = useState(false);
   const [announcementResult, setAnnouncementResult] = useState(null);
   const [settings, setSettings] = useState({
-    platformName: 'Future Magnus Business OS',
+    companyBrandName: '',
     supportEmail: 'support@futuremagnus.com',
     supportPhone: '+91-9999999999',
     logo: '',
@@ -123,9 +130,9 @@ export default function SettingsPage() {
     try {
       const res = await apiService.getPlatformConfig();
       const remote = res.data?.data || {};
-      if (remote && remote.platformName) {
+      if (remote && (remote.companyBrandName || remote.platformName)) {
         setSettings({
-          platformName: remote.platformName || 'Future Magnus Business OS',
+          companyBrandName: remote.companyBrandName || remote.platformName || 'Future Magnus Business OS',
           supportEmail: remote.supportEmail || 'support@futuremagnus.com',
           supportPhone: remote.supportPhone || '+91-9999999999',
           logo: remote.logo || '',
@@ -159,9 +166,11 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
+    setFieldErrors({});
     try {
       await apiService.updatePlatformConfig({
-        platformName: settings.platformName,
+        platformName: settings.companyBrandName,
+        companyBrandName: settings.companyBrandName,
         supportEmail: settings.supportEmail,
         supportPhone: settings.supportPhone,
         logo: settings.logo,
@@ -182,7 +191,18 @@ export default function SettingsPage() {
       });
       toast.success('Settings saved successfully');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save settings');
+      const errData = err.response?.data;
+      if (errData?.code === 'VALIDATION_ERROR' && Array.isArray(errData.errors)) {
+        // Show per-field validation errors inline
+        const errors = {};
+        errData.errors.forEach((e) => {
+          if (e.field) errors[e.field] = e.message;
+        });
+        setFieldErrors(errors);
+        toast.error('Please fix the highlighted errors');
+      } else {
+        toast.error(errData?.message || 'Failed to save settings');
+      }
     } finally {
       setSaving(false);
     }
@@ -221,6 +241,14 @@ export default function SettingsPage() {
 
   const handleChange = (field, value) => {
     setSettings(prev => ({ ...prev, [field]: value }));
+    // Clear the field error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
   };
 
   if (loading) {
@@ -371,15 +399,20 @@ export default function SettingsPage() {
             )}
           </div>
         </FormField>
-        <FormField label="Platform Name" description="The name displayed across the platform">
+        <FormField
+          label="Company / Brand Name"
+          description="Your company name shown across the website for branding"
+          error={fieldErrors.companyBrandName || fieldErrors.platformName}
+        >
           <input
             type="text"
-            value={settings.platformName}
-            onChange={(e) => handleChange('platformName', e.target.value)}
+            value={settings.companyBrandName}
+            onChange={(e) => handleChange('companyBrandName', e.target.value)}
             className="input-field"
+            placeholder="e.g. Your Company Name"
           />
         </FormField>
-        <FormField label="Support Email" description="Contact email for support inquiries">
+        <FormField label="Support Email" description="Contact email for support inquiries" error={fieldErrors.supportEmail}>
           <input
             type="email"
             value={settings.supportEmail}
@@ -387,7 +420,7 @@ export default function SettingsPage() {
             className="input-field"
           />
         </FormField>
-        <FormField label="Support Phone" description="Contact phone number">
+        <FormField label="Support Phone" description="Contact phone number" error={fieldErrors.supportPhone}>
           <input
             type="text"
             value={settings.supportPhone}
@@ -395,7 +428,7 @@ export default function SettingsPage() {
             className="input-field"
           />
         </FormField>
-        <FormField label="Default Trial Days" description="Trial period for new shops">
+        <FormField label="Default Trial Days" description="Trial period for new shops" error={fieldErrors.defaultTrialDays}>
           <input
             type="number"
             value={settings.defaultTrialDays}
@@ -448,7 +481,7 @@ export default function SettingsPage() {
 
       {/* Security Settings */}
       <SettingsSection icon={FiLock} title="Security" description="Authentication and access control">
-        <FormField label="Session Timeout" description="Minutes before idle session expires (0 = never)">
+        <FormField label="Session Timeout" description="Minutes before idle session expires (0 = never)" error={fieldErrors.sessionTimeout}>
           <input
             type="number"
             value={settings.sessionTimeout}
@@ -457,7 +490,7 @@ export default function SettingsPage() {
             min={0}
           />
         </FormField>
-        <FormField label="Minimum Password Length" description="Minimum characters required for passwords">
+        <FormField label="Minimum Password Length" description="Minimum characters required for passwords" error={fieldErrors.passwordMinLength}>
           <input
             type="number"
             value={settings.passwordMinLength}
@@ -511,7 +544,7 @@ export default function SettingsPage() {
             toast.success('Webhook secret regenerated');
           }}
         />
-        <FormField label="Rate Limit" description="Maximum API requests per minute">
+        <FormField label="Rate Limit" description="Maximum API requests per minute" error={fieldErrors.rateLimitPerMinute}>
           <input
             type="number"
             value={settings.rateLimitPerMinute}
@@ -520,7 +553,7 @@ export default function SettingsPage() {
             min={1}
           />
         </FormField>
-        <FormField label="Webhook Retry Count" description="Number of retries for failed webhooks">
+        <FormField label="Webhook Retry Count" description="Number of retries for failed webhooks" error={fieldErrors.webhookRetryCount}>
           <input
             type="number"
             value={settings.webhookRetryCount}
@@ -572,7 +605,7 @@ export default function SettingsPage() {
         </FormField>
         {settings.backupEnabled && (
           <>
-            <FormField label="Backup Time" description="Daily backup schedule (24h format)">
+            <FormField label="Backup Time" description="Daily backup schedule (24h format)" error={fieldErrors.backupTime}>
               <input
                 type="time"
                 value={settings.backupTime}
@@ -580,7 +613,7 @@ export default function SettingsPage() {
                 className="input-field"
               />
             </FormField>
-            <FormField label="Retention Period" description="Days to keep backups">
+            <FormField label="Retention Period" description="Days to keep backups" error={fieldErrors.retentionDays}>
               <input
                 type="number"
                 value={settings.retentionDays}

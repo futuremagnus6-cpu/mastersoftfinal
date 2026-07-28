@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { FiAlertTriangle } from 'react-icons/fi';
 
 import { getMe } from './store/slices/authSlice';
+import { usePlatformConfig } from './contexts/PlatformConfigContext';
 
 // Lazy-loaded pages for code splitting
 const LoginPage = lazy(() => import('./pages/auth/LoginPage'));
@@ -119,6 +120,7 @@ function RootRoute() {
 export default function App() {
   const dispatch = useDispatch();
   const { isAuthenticated, token } = useSelector((state) => state.auth);
+  const { platformName } = usePlatformConfig();
 
   // Fetch current user on mount if token exists (but not right after login, since the
   // login thunk already populated user data — avoids a race where a failed getMe()
@@ -128,6 +130,11 @@ export default function App() {
       dispatch(getMe());
     }
   }, [dispatch, token, isAuthenticated]);
+
+  // Set document title dynamically
+  useEffect(() => {
+    document.title = platformName;
+  }, [platformName]);
 
   // Apply saved theme on mount
   useEffect(() => {

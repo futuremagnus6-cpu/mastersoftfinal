@@ -11,6 +11,7 @@ import {
   FiBriefcase, FiShoppingBag, FiSend, FiBox, FiKey,
   FiExternalLink,
 } from 'react-icons/fi';
+import { usePlatformConfig } from '../../contexts/PlatformConfigContext';
 import { apiService } from '../../services/api';
 import { thermalPrint, standardBillPrint } from '../../utils/printUtils';
 
@@ -139,6 +140,7 @@ function SectionHeader({ icon: Icon, title, subtitle, color = 'indigo' }) {
 
 // ─── Thermal Preview Component ───
 function ThermalPreview({ config, shop }) {
+  const { platformName } = usePlatformConfig();
   const width = config.paperWidth === '80mm' ? 'w-[320px]' : 'w-[240px]';
   const align = config.headerAlignment === 'center' ? 'text-center' : config.headerAlignment === 'right' ? 'text-right' : 'text-left';
   const items = [
@@ -231,7 +233,7 @@ function ThermalPreview({ config, shop }) {
           <div className="border-t border-dashed border-gray-300 my-1.5" />
         )}
         <div className="text-gray-500 text-[9px]">{config.footerMessage || 'Thank you for your purchase!'}</div>
-        <div className="text-gray-400 text-[8px] mt-0.5">Future Magnus Business OS</div>
+        <div className="text-gray-400 text-[8px] mt-0.5">{platformName}</div>
       </div>
     </div>
   );

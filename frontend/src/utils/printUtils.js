@@ -168,12 +168,13 @@ function qrSvg(size) {
 // ═══════════════════════════════════════════════════════════
 //  1. THERMAL PRINT — compact receipt for thermal printers
 // ═══════════════════════════════════════════════════════════
-export function thermalPrint(order, shop, printConfig) {
+export function thermalPrint(order, shop, printConfig, platformName) {
   const cfg = mergeConfig(printConfig);
   const th = cfg.thermal;
   const shopInfo = buildShopInfo(shop);
   const items = Array.isArray(order?.items) ? order.items : [];
   const payments = Array.isArray(order?.payments) ? order.payments : [];
+  const brandName = platformName || 'Future Magnus Business OS';
 
   const paperWidth = th.paperWidth || '80mm';
   const paperWidthNum = parseInt(paperWidth, 10);
@@ -281,7 +282,7 @@ export function thermalPrint(order, shop, printConfig) {
 
   <div class="footer">
     ${th.footerMessage ? `${th.footerMessage}<br>` : ''}
-    Future Magnus Business OS
+    ${brandName}
   </div>
 </body></html>`;
 
@@ -298,13 +299,14 @@ export function thermalPrint(order, shop, printConfig) {
 // ═══════════════════════════════════════════════════════════
 //  2. STANDARD BILL — A4 professional tax invoice
 // ═══════════════════════════════════════════════════════════
-export function standardBillPrint(order, shop, printConfig) {
+export function standardBillPrint(order, shop, printConfig, platformName) {
   const cfg = mergeConfig(printConfig);
   const st = cfg.standard;
   const shopInfo = buildShopInfo(shop);
   const items = Array.isArray(order?.items) ? order.items : [];
   const payments = Array.isArray(order?.payments) ? order.payments : [];
   const gstSummary = buildGstSummary(items);
+  const brandName = platformName || 'Future Magnus Business OS';
 
   const totalTaxable = items.reduce((s, i) => s + ((i.taxableAmount || 0) * (i.quantity || 1)), 0);
   const totalCgst = items.reduce((s, i) => s + ((i.gstAmount || 0) / 2) * (i.quantity || 1), 0);
@@ -510,7 +512,7 @@ export function standardBillPrint(order, shop, printConfig) {
 //  3. DOWNLOAD PDF — Generates a PDF of the standard bill
 //     Uses html2pdf.js with PDF config settings.
 // ═══════════════════════════════════════════════════════════
-export function downloadPdf(order, shop, printConfig) {
+export function downloadPdf(order, shop, printConfig, platformName) {
   const cfg = mergeConfig(printConfig);
   const st = cfg.standard;
   const pd = cfg.pdf;
@@ -518,6 +520,7 @@ export function downloadPdf(order, shop, printConfig) {
   const items = Array.isArray(order?.items) ? order.items : [];
   const payments = Array.isArray(order?.payments) ? order.payments : [];
   const gstSummary = buildGstSummary(items);
+  const brandName = platformName || 'Future Magnus Business OS';
 
   const totalTaxable = items.reduce((s, i) => s + ((i.taxableAmount || 0) * (i.quantity || 1)), 0);
   const totalCgst = items.reduce((s, i) => s + ((i.gstAmount || 0) / 2) * (i.quantity || 1), 0);

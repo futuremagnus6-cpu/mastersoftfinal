@@ -9,6 +9,7 @@ const {
   createShopValidator,
   updateShopValidator,
   extendTrialValidator,
+  setTrialDaysValidator,
   sendAnnouncementValidator,
 } = require('../validators/shop.validators');
 
@@ -52,6 +53,7 @@ router.get('/:id/admin', authorize('super_admin'), shopController.getShopAdmin);
 // Trial management routes (Super Admin only)
 router.put('/:id/close-trial', authorize('super_admin'), shopController.closeTrial);
 router.put('/:id/extend-trial', authorize('super_admin'), extendTrialValidator, shopController.extendTrial);
+router.put('/:id/set-trial-days', authorize('super_admin'), setTrialDaysValidator, shopController.setTrialDays);
 router.post('/:id/send-subscription-reminder', authorize('super_admin'), shopController.sendSubscriptionReminder);
 
 // Announcement / Mass Email (Super Admin only)

@@ -74,6 +74,13 @@ const extendTrialValidator = [
 
 const closeTrialValidator = [validate];
 
+const setTrialDaysValidator = [
+  body('days')
+    .isInt({ min: 1, max: 365 }).withMessage('Days must be an integer between 1 and 365')
+    .toInt(),
+  validate,
+];
+
 const sendAnnouncementValidator = [
   requiredString('subject', { min: 1, max: 200 }),
   requiredString('message', { min: 1, max: 10000 }),
@@ -87,5 +94,6 @@ module.exports = {
   updateShopValidator,
   extendTrialValidator,
   closeTrialValidator,
+  setTrialDaysValidator,
   sendAnnouncementValidator,
 };

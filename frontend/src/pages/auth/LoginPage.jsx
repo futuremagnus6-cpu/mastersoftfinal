@@ -4,11 +4,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { login, clearError, setTwoFactor } from '../../store/slices/authSlice';
 import toast from 'react-hot-toast';
 import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiShield } from 'react-icons/fi';
+import { usePlatformConfig } from '../../contexts/PlatformConfigContext';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, loading, error, requiresTwoFactor, user } = useSelector((state) => state.auth);
+  const { platformName, config } = usePlatformConfig();
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -59,12 +61,15 @@ export default function LoginPage() {
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
-        <div className="relative flex flex-col justify-center px-16">
-          <div className="mb-8">
-            <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm">
-              <FiShield className="w-8 h-8 text-white" />
+        <div className="relative flex flex-col justify-center px-16">            <div className="mb-8">
+            <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 backdrop-blur-sm overflow-hidden">
+              {config.logo ? (
+                <img src={config.logo} alt={platformName} className="w-full h-full object-cover rounded-2xl" />
+              ) : (
+                <FiShield className="w-8 h-8 text-white" />
+              )}
             </div>
-            <h1 className="text-4xl font-bold text-white mb-3">Future Magnus<br />Business OS</h1>
+            <h1 className="text-4xl font-bold text-white mb-3">{platformName}</h1>
             <p className="text-primary-100 text-lg">Complete Business Management Platform</p>
           </div>
           <div className="space-y-6">
@@ -92,10 +97,14 @@ export default function LoginPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md animate-fade-in">
           <div className="text-center mb-8 lg:hidden">
-            <div className="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <FiShield className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden">
+              {config.logo ? (
+                <img src={config.logo} alt={platformName} className="w-full h-full object-cover rounded-2xl" />
+              ) : (
+                <FiShield className="w-7 h-7 text-white" />
+              )}
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Future Magnus</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{platformName}</h2>
             <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to your account</p>
           </div>
 

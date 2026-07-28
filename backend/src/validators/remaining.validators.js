@@ -178,6 +178,7 @@ const updateShopSettingsValidator = [
 
 const updatePlatformConfigValidator = [
   optionalString('platformName', { max: 200 }),
+  optionalString('companyBrandName', { max: 200 }),
   optionalEmail('supportEmail'),
   optionalString('supportPhone', { max: 20 }),
   currency('defaultCurrency'),

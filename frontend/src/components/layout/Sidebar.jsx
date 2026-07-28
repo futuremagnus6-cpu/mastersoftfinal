@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi';
 import { getEnabledMenuItems } from '../../utils/features';
 import { apiService } from '../../services/api';
+import { usePlatformConfig } from '../../contexts/PlatformConfigContext';
 
 const shopMenuItems = [
   { path: '/', icon: FiGrid, label: 'Dashboard', roles: ['shop_admin', 'manager', 'staff'] },
@@ -47,6 +48,7 @@ const superAdminMenuItems = [
 
 export default function Sidebar({ collapsed, onToggle, onNavClick }) {
   const { user, shopFeatures } = useSelector((state) => state.auth);
+  const { platformName, config } = usePlatformConfig();
   const location = useLocation();
   const isSuperAdmin = user?.role === 'super_admin';
   const isAuthenticated = !!user;
@@ -98,18 +100,26 @@ export default function Sidebar({ collapsed, onToggle, onNavClick }) {
       >
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
-              <FiShield className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {config.logo ? (
+                <img src={config.logo} alt={platformName} className="w-full h-full object-cover" />
+              ) : (
+                <FiShield className="w-4 h-4 text-white" />
+              )}
             </div>
             <div className="text-left">
-              <p className="text-sm font-bold text-gray-900 dark:text-white">FutureMagnus</p>
-              <p className="text-[10px] text-gray-500 dark:text-gray-400 -mt-0.5">Business OS</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-white">{platformName.length > 15 ? platformName.substring(0, 14) + '…' : platformName}</p>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 -mt-0.5">{platformName.includes('OS') ? 'Business OS' : ''}</p>
             </div>
           </div>
         )}
         {collapsed && (
-          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
-            <FiShield className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {config.logo ? (
+              <img src={config.logo} alt={platformName} className="w-full h-full object-cover" />
+            ) : (
+              <FiShield className="w-4 h-4 text-white" />
+            )}
           </div>
         )}
       </button>

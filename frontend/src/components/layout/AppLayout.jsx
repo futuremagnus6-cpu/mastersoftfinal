@@ -2,10 +2,12 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
+import { usePlatformConfig } from '../../contexts/PlatformConfigContext';
 
 export default function AppLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { platformName } = usePlatformConfig();
   // Refs for swipe gesture tracking
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
@@ -86,7 +88,7 @@ export default function AppLayout() {
         {/* Footer */}
         <footer className="border-t dark:border-gray-700 bg-white dark:bg-gray-800 px-6 py-3">
           <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
-            <p>&copy; {new Date().getFullYear()} Future Magnus Business OS. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} {platformName}. All rights reserved.</p>
             <p>v2.0</p>
           </div>
         </footer>

@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import App from './App';
+import { PlatformConfigProvider } from './contexts/PlatformConfigContext';
 import { store } from './store';
 import { injectStore } from './services/api';
 import './styles/index.css';
@@ -17,6 +18,7 @@ import './i18n';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Provider store={store}>
+      <PlatformConfigProvider>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <App />
         <Toaster
@@ -29,6 +31,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           }}
         />
       </BrowserRouter>
+      </PlatformConfigProvider>
     </Provider>
   </React.StrictMode>
 );

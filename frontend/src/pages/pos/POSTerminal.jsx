@@ -11,6 +11,7 @@ import {
 import { apiService } from '../../services/api';
 import toast from 'react-hot-toast';
 import { getMainImageUrl } from '../../utils/assets';
+import { usePlatformConfig } from '../../contexts/PlatformConfigContext';
 import { thermalPrint, standardBillPrint, downloadPdf } from '../../utils/printUtils';
 
 // ─── Constants ───
@@ -714,7 +715,7 @@ function ShareDropdown({ order, shopInfo, printConfig }) {
       label: 'PDF',
       icon: '📄',
       action: () => {
-        downloadPdf(order, shopInfo, printConfig);
+        downloadPdf(order, shopInfo, printConfig, platformName);
         setOpen(false);
       },
     },
@@ -891,13 +892,13 @@ function ReceiptModal({ isOpen, onClose, order, shopInfo, printConfig }) {
         <div className="p-4 border-t dark:border-gray-700 flex gap-2 flex-wrap">
           <ShareDropdown order={safeOrder} shopInfo={shopInfo} printConfig={printConfig} />
           <button
-            onClick={() => thermalPrint(safeOrder, shopInfo, printConfig)}
+            onClick={() => thermalPrint(safeOrder, shopInfo, printConfig, platformName)}
             className="btn-secondary flex-1 flex items-center justify-center gap-2 text-xs"
           >
             <FiPrinter className="w-3.5 h-3.5" /> Thermal
           </button>
           <button
-            onClick={() => standardBillPrint(safeOrder, shopInfo, printConfig)}
+            onClick={() => standardBillPrint(safeOrder, shopInfo, printConfig, platformName)}
             className="btn-secondary flex-1 flex items-center justify-center gap-2 text-xs"
           >
             <FiFileText className="w-3.5 h-3.5" /> Standard Bill
@@ -915,6 +916,7 @@ function ReceiptModal({ isOpen, onClose, order, shopInfo, printConfig }) {
 export default function POSTerminal() {
   const navigate = useNavigate();
   const searchRef = useRef(null);
+  const { platformName } = usePlatformConfig();
 
   // States
   const [viewMode, setViewMode] = useState('grid'); // grid | list
@@ -1170,7 +1172,7 @@ export default function POSTerminal() {
       setAdditionalCustomers([]);
       toast.success(`Order ${order.orderNumber || ''} created successfully`);
       if (printConfig?.thermal?.autoPrintAfterPayment) {
-        thermalPrint(order, shopInfo, printConfig);
+        thermalPrint(order, shopInfo, printConfig, platformName);
       }
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || 'Failed to create order');

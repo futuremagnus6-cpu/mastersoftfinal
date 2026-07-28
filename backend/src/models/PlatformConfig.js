@@ -6,6 +6,7 @@ const platformConfigSchema = new mongoose.Schema({
 
   // General
   platformName: { type: String, default: 'Future Magnus Business OS' },
+  companyBrandName: { type: String, default: '' },
   supportEmail: { type: String, default: 'support@futuremagnus.com' },
   supportPhone: { type: String, default: '+91-9999999999' },
   logo: { type: String, default: '' },

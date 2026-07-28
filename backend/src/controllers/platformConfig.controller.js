@@ -22,6 +22,8 @@ exports.getPublicStatus = async (req, res, next) => {
       data: {
         maintenanceMode: config.maintenanceMode || false,
         platformName: config.platformName || 'Future Magnus Business OS',
+        companyBrandName: config.companyBrandName || '',
+        logo: config.logo || '',
       },
     });
   } catch (error) { next(error); }
@@ -32,7 +34,7 @@ exports.getPublicStatus = async (req, res, next) => {
 exports.updateConfig = async (req, res, next) => {
   try {
     const allowedFields = [
-      'platformName', 'supportEmail', 'supportPhone',
+      'platformName', 'companyBrandName', 'supportEmail', 'supportPhone',
       'logo',
       'defaultCurrency', 'timezone', 'dateFormat',
       'allowRegistration', 'defaultTrialDays', 'maxShopsPerAdmin',

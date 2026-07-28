@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { usePlatformConfig } from '../contexts/PlatformConfigContext';
 import {
   FiShield, FiShoppingBag, FiBox, FiUsers, FiBarChart2,
   FiDollarSign, FiLayers, FiTruck, FiPackage, FiGift,
@@ -166,6 +167,8 @@ function ScrollToTop() {
 function LandingNavbar({ onGetStarted }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { platformName, config } = usePlatformConfig();
+  const shortName = platformName.replace(' Business OS', '').replace(' OS', '') || 'Magnus';
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -198,11 +201,15 @@ function LandingNavbar({ onGetStarted }) {
             className="flex items-center gap-3"
             whileHover={{ scale: 1.02 }}
           >
-            <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/25">
-              <FiShield className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg shadow-primary-500/25 overflow-hidden">
+              {config.logo ? (
+                <img src={config.logo} alt={shortName} className="w-full h-full object-cover" />
+              ) : (
+                <FiShield className="w-5 h-5 text-white" />
+              )}
             </div>
             <div>
-              <span className="text-lg font-bold text-gray-900 dark:text-white">Magnus</span>
+              <span className="text-lg font-bold text-gray-900 dark:text-white">{shortName}</span>
               <span className="text-lg font-light text-gray-500 dark:text-gray-400 ml-1">OS</span>
             </div>
           </motion.div>
@@ -409,6 +416,8 @@ export default function LandingPage() {
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 400], [1, 0.95]);
+  const { platformName, config } = usePlatformConfig();
+  const shortName = platformName.replace(' Business OS', '').replace(' OS', '') || 'Magnus';
   
   const features = [
     { icon: FiShoppingBag, title: 'Point of Sale', description: 'Fast and intuitive POS terminal with barcode scanning, multi-payment support, and offline mode for uninterrupted sales.' },
@@ -775,10 +784,14 @@ export default function LandingPage() {
             {/* Company */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/25">
-                  <FiShield className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/25 overflow-hidden">
+                  {config.logo ? (
+                    <img src={config.logo} alt={shortName} className="w-full h-full object-cover" />
+                  ) : (
+                    <FiShield className="w-4 h-4 text-white" />
+                  )}
                 </div>
-                <span className="text-lg font-bold text-white">Future Magnus OS</span>
+                <span className="text-lg font-bold text-white">{shortName} OS</span>
               </div>
               <p className="text-sm text-gray-400 leading-relaxed mb-4">
                 India's most comprehensive business management platform. Powering 10,000+ businesses across 50+ cities.
@@ -861,7 +874,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span>&copy; {new Date().getFullYear()} Future Magnus Business OS. All rights reserved.</span>
+                <span>&copy; {new Date().getFullYear()} {platformName}. All rights reserved.</span>
               </div>
               <div className="flex items-center gap-6 text-sm text-gray-500">
                 <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
