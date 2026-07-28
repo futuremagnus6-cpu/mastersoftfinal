@@ -50,4 +50,7 @@ router.route('/:id')
 
 router.put('/:id/stock', authorizePermission('products', 'update'), updateStockValidator, productController.updateStock);
 
+router.post('/generate-barcodes', authorizePermission('products', 'read'), productController.generateBarcodes);
+router.post('/scan-deduct', authorizePermission('products', 'update'), productController.scanAndDeduct);
+
 module.exports = router;

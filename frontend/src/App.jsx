@@ -33,6 +33,8 @@ const SuppliersPage = lazy(() => import('./pages/suppliers/SuppliersPage'));
 const AlertsPage = lazy(() => import('./pages/settings/AlertsPage'));
 const ReportsPage = lazy(() => import('./pages/reports/ReportsPage'));
 const CrmPage = lazy(() => import('./pages/crm/CrmPage'));
+const BarcodeScannerPage = lazy(() => import('./pages/shop-admin/BarcodeScannerPage'));
+const BarcodeLabelsPage = lazy(() => import('./pages/shop-admin/BarcodeLabelsPage'));
 
 const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
 const ShopBillingPage = lazy(() => import('./pages/shop-admin/ShopBillingPage'));
@@ -176,6 +178,8 @@ export default function App() {
 
           <Route path="reports" element={<ReportsPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="barcode-scanner" element={<BarcodeScannerPage />} />
+          <Route path="barcode-labels" element={<BarcodeLabelsPage />} />
           <Route path="billing" element={<ShopBillingPage />} />
           <Route path="chat" element={<ChatPage />} />
         </Route>

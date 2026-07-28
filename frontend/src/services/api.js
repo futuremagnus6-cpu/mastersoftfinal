@@ -157,6 +157,10 @@ const apiService = {
   getShopDashboard: () => api.get('/dashboard/shop'),
   getSuperAdminDashboard: () => api.get('/dashboard/super-admin'),
 
+  // Barcode
+  generateBarcodes: (data) => api.post('/products/generate-barcodes', data),
+  scanAndDeduct: (data) => api.post('/products/scan-deduct', data),
+
   // Products
   getProducts: (params) => api.get('/products', { params }),
   getProduct: (id) => api.get(`/products/${id}`),

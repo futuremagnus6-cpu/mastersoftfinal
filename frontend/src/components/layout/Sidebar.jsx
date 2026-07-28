@@ -7,7 +7,7 @@ import {
   FiSettings,  FiUserCheck, FiAlertCircle,
   FiLogOut, FiChevronDown, FiChevronLeft, FiShield,
   FiTrendingUp, FiLayers, FiClock, FiTrash2,
-  FiMessageSquare,
+  FiMessageSquare, FiCamera, FiTag,
 } from 'react-icons/fi';
 import { getEnabledMenuItems } from '../../utils/features';
 import { apiService } from '../../services/api';
@@ -28,6 +28,8 @@ const shopMenuItems = [
   { path: '/employees', icon: FiUsers, label: 'Employees', roles: ['shop_admin'], feature: 'employees' },
 
   { path: '/reports', icon: FiBarChart2, label: 'Reports', roles: ['shop_admin', 'manager'] },
+  { path: '/barcode-scanner', icon: FiCamera, label: 'Barcode Scanner', roles: ['shop_admin', 'manager', 'staff'], feature: 'barcodeScanner' },
+  { path: '/barcode-labels', icon: FiTag, label: 'Barcode Labels', roles: ['shop_admin', 'manager'], feature: 'barcodeScanner' },
   { path: '/alerts', icon: FiAlertCircle, label: 'Alerts', roles: ['shop_admin', 'manager'] },
   { path: '/billing', icon: FiDollarSign, label: 'Billing', roles: ['shop_admin'] },
   { path: '/settings', icon: FiSettings, label: 'Settings', roles: ['shop_admin'] },

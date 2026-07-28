@@ -158,7 +158,8 @@ function PlanModal({ plan, onClose, onSave }) {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                 <textarea value={form.description} onChange={e => handleChange('description', e.target.value)} className="input-field" rows={2} placeholder="Describe what this plan includes..." />
               </div>
-              {/* Billing Period Toggle */}
+
+              {/* Billing Period Toggle — highlights the active price field */}
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Billing Period</label>
                 <div className="flex gap-2">
@@ -188,23 +189,28 @@ function PlanModal({ plan, onClose, onSave }) {
                   </button>
                 </div>
               </div>
-              {billingPeriod === 'monthly' ? (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Monthly Price (₹)
-                    <span className="text-[10px] text-gray-400 font-normal ml-1">per month</span>
-                  </label>
-                  <input type="number" value={form.monthlyPrice} onChange={e => handleChange('monthlyPrice', parseFloat(e.target.value) || 0)} className="input-field" min={0} step={0.01} />
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Yearly Price (₹)
-                    <span className="text-[10px] text-gray-400 font-normal ml-1">per year</span>
-                  </label>
-                  <input type="number" value={form.annualPrice} onChange={e => handleChange('annualPrice', parseFloat(e.target.value) || 0)} className="input-field" min={0} step={0.01} />
-                </div>
-              )}
+              <div className={`p-3 rounded-lg border-2 transition-all ${
+                billingPeriod === 'monthly'
+                  ? 'border-primary-300 bg-primary-50/50 dark:bg-primary-900/10 dark:border-primary-700'
+                  : 'border-transparent'
+              }`}>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Monthly Price (₹)
+                  <span className="text-[10px] text-gray-400 font-normal ml-1">per month</span>
+                </label>
+                <input type="number" value={form.monthlyPrice} onChange={e => handleChange('monthlyPrice', parseFloat(e.target.value) || 0)} className="input-field" min={0} step={0.01} />
+              </div>
+              <div className={`p-3 rounded-lg border-2 transition-all ${
+                billingPeriod === 'yearly'
+                  ? 'border-primary-300 bg-primary-50/50 dark:bg-primary-900/10 dark:border-primary-700'
+                  : 'border-transparent'
+              }`}>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Yearly Price (₹)
+                  <span className="text-[10px] text-gray-400 font-normal ml-1">per year</span>
+                </label>
+                <input type="number" value={form.annualPrice} onChange={e => handleChange('annualPrice', parseFloat(e.target.value) || 0)} className="input-field" min={0} step={0.01} />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Trial Period (days)</label>
                 <input type="number" value={form.trialPeriod} onChange={e => handleChange('trialPeriod', parseInt(e.target.value) || 0)} className="input-field" min={0} />
@@ -273,8 +279,11 @@ function PlanModal({ plan, onClose, onSave }) {
 
 // ─── Plan Card ───
 function PlanCard({ plan, onEdit, onDelete }) {
-  const priceFormatted = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(plan.monthlyPrice);
-  const annualFormatted = plan.annualPrice ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(plan.annualPrice) : null;
+  const isYearlyPlan = plan.annualPrice > 0;
+  const fmt = (n) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
+  const mainPrice = isYearlyPlan ? fmt(plan.annualPrice) : fmt(plan.monthlyPrice);
+  const mainLabel = isYearlyPlan ? '/year' : '/month';
+  const secondaryPrice = isYearlyPlan && plan.monthlyPrice > 0 ? fmt(plan.monthlyPrice) : null;
   const featuresList = Object.entries(plan.features || {}).filter(([, v]) => v).map(([k]) => k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()));
 
   return (
@@ -297,11 +306,12 @@ function PlanCard({ plan, onEdit, onDelete }) {
           </div>
         </div>
 
-        <div className="mb-4">            <span className="text-3xl font-bold text-gray-900 dark:text-white">{priceFormatted}</span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">/month</span>
-          {annualFormatted && plan.monthlyPrice > 0 && (
-            <p className="text-xs text-success-600 dark:text-success-400 mt-1">
-              {annualFormatted}/year (save {Math.round((1 - plan.annualPrice / (plan.monthlyPrice * 12)) * 100)}%)
+        <div className="mb-4">
+          <span className="text-3xl font-bold text-gray-900 dark:text-white">{mainPrice}</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">{mainLabel}</span>
+          {secondaryPrice && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {secondaryPrice}/month
             </p>
           )}
         </div>

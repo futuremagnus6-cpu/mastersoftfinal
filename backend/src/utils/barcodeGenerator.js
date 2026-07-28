@@ -1,6 +1,7 @@
 /**
  * Barcode & QR Code Generation Utilities
  * Generates barcodes, QR codes for UPI payments, and shelf labels.
+ * v2.0 — Added GS1-128 smart barcode encoding/decoding
  */
 
 const JsBarcode = require('jsbarcode');
@@ -16,11 +17,234 @@ if (!fs.existsSync(BARCODE_DIR)) {
   fs.mkdirSync(BARCODE_DIR, { recursive: true });
 }
 
+// ═══════════════════════════════════════════════════════════════
+//  GS1 Application Identifier (AI) Reference
+// ═══════════════════════════════════════════════════════════════
+// Standard GS1 AIs for structured barcode data.
+// Format: (AI)DATA — e.g. (01)08901234567890(15)260731
+const GS1_AI = {
+  // Product Identification
+  '01': { label: 'GTIN', length: 14, description: 'Global Trade Item Number (product ID)' },
+  '02': { label: 'GTIN (Content)', length: 14, description: 'GTIN of trade items inside a logistic unit' },
+  
+  // Dates (YYMMDD format)
+  '11': { label: 'Prod Date', length: 6, description: 'Production / Manufacturing date' },
+  '15': { label: 'Expiry Date', length: 6, description: 'Best Before / Expiry date' },
+  '17': { label: 'Use By', length: 6, description: 'Use by / Sell by date' },
+  '10': { label: 'Batch', length: null, description: 'Batch / Lot number (alphanumeric)' },
+  '21': { label: 'Serial', length: null, description: 'Serial number' },
+  
+  // Pricing
+  '8005': { label: 'Selling Price', length: 6, description: 'Selling price in paise (e.g., 25000 = ₹250)' },
+  '8007': { label: 'IBV', length: null, description: 'International Bank/VAT Number' },
+  
+  // Measurements
+  '30': { label: 'Quantity', length: null, description: 'Varaible quantity count' },
+  '37': { label: 'Count', length: null, description: 'Number of units contained' },
+  
+  // Manufacturing
+  '8004': { label: 'Mfg Unit', length: null, description: 'Manufacturing unit / plant ID' },
+  
+  // MRP
+  '3922': { label: 'Amount', length: null, description: 'Amount payable with ISO currency code' },
+};
+
+// AI patterns for parsing — sorted by AI length (longest first for greedy matching)
+const AI_PATTERNS = Object.keys(GS1_AI)
+  .sort((a, b) => b.length - a.length)
+  .map(ai => ({
+    ai,
+    ...GS1_AI[ai],
+  }));
+
+/**
+ * Encode structured product data into a GS1-128 barcode string.
+ * @param {Object} data - Structured data to encode
+ * @param {string} data.gtin - 14-digit GTIN / product code
+ * @param {string} data.batchNumber - Batch/lot number
+ * @param {string|Date} data.expiryDate - Expiry date (YYMMDD or Date)
+ * @param {string|Date} data.mfgDate - Manufacturing date (YYMMDD or Date)
+ * @param {number} data.sellingPrice - Selling price in rupees
+ * @param {number} data.mrp - MRP in rupees
+ * @param {string} data.serialNumber - Serial number
+ * @param {string} data.mfgUnit - Manufacturing unit ID
+ * @returns {string} GS1-128 encoded barcode string
+ */
+function encodeGS1Barcode(data = {}) {
+  const parts = [];
+
+  // Helper to format date as YYMMDD
+  const formatDate = (d) => {
+    if (!d) return null;
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return null;
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    return `${yy}${mm}${dd}`;
+  };
+
+  // GTIN (01) — pad/trim to 14 digits
+  if (data.gtin) {
+    const gtin = data.gtin.replace(/\D/g, '').padStart(14, '0').slice(0, 14);
+    parts.push(`(01)${gtin}`);
+  } else if (data.barcode) {
+    // Use existing barcode as GTIN
+    const gtin = data.barcode.replace(/\D/g, '').padStart(14, '0').slice(0, 14);
+    parts.push(`(01)${gtin}`);
+  }
+
+  // Manufacturing date (11)
+  const mfgStr = formatDate(data.mfgDate || data.manufacturingDate);
+  if (mfgStr) parts.push(`(11)${mfgStr}`);
+
+  // Expiry date (15)
+  const expStr = formatDate(data.expiryDate || data.expDate);
+  if (expStr) parts.push(`(15)${expStr}`);
+
+  // Batch number (10)
+  if (data.batchNumber) {
+    // Max 20 chars alphanumeric
+    const batch = String(data.batchNumber).replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 20);
+    if (batch) parts.push(`(10)${batch}`);
+  }
+
+  // Manufacturing unit (8004)
+  if (data.mfgUnit) {
+    const unit = String(data.mfgUnit).replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 20);
+    if (unit) parts.push(`(8004)${unit}`);
+  }
+
+  // Selling price (8005) — in paise, 6 digits
+  if (data.sellingPrice) {
+    const paise = Math.round(parseFloat(data.sellingPrice) * 100);
+    const priceStr = String(paise).padStart(6, '0').slice(0, 6);
+    parts.push(`(8005)${priceStr}`);
+  }
+
+  // Serial number (21)
+  if (data.serialNumber) {
+    const serial = String(data.serialNumber).replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 20);
+    if (serial) parts.push(`(21)${serial}`);
+  }
+
+  return parts.join('');
+}
+
+/**
+ * Parse a GS1-128 barcode string into structured data.
+ * @param {string} barcodeStr - The full barcode string with (AI)data format
+ * @returns {Object} Parsed data with decoded fields
+ */
+function parseGS1Barcode(barcodeStr) {
+  if (!barcodeStr || typeof barcodeStr !== 'string') return null;
+
+  const result = {
+    raw: barcodeStr,
+    isValidGS1: false,
+    gtin: null,
+    batchNumber: null,
+    expiryDate: null,
+    mfgDate: null,
+    sellingPrice: null,
+    serialNumber: null,
+    mfgUnit: null,
+    parsedFields: [],
+  };
+
+  // Check if this looks like a GS1 barcode (has (AI) patterns)
+  const hasAIPattern = /\(\d{2,4}\)/.test(barcodeStr);
+  if (!hasAIPattern) return { ...result, isValidGS1: false };
+
+  result.isValidGS1 = true;
+
+  // Extract all (AI)data segments
+  const aiRegex = /\((\d{2,4})\)([^()]*)/g;
+  let match;
+
+  while ((match = aiRegex.exec(barcodeStr)) !== null) {
+    const ai = match[1];
+    const value = match[2].trim();
+    const aiInfo = GS1_AI[ai];
+
+    result.parsedFields.push({
+      ai,
+      label: aiInfo?.label || 'Unknown',
+      value,
+      description: aiInfo?.description || '',
+    });
+
+    switch (ai) {
+      case '01': // GTIN
+        result.gtin = value.replace(/^0+/, '') || value; // Remove leading zeros
+        break;
+      case '10': // Batch
+        result.batchNumber = value;
+        break;
+      case '11': // Manufacturing date
+        result.mfgDate = parseGS1Date(value);
+        result.mfgDateRaw = value;
+        break;
+      case '15': // Expiry date
+        result.expiryDate = parseGS1Date(value);
+        result.expiryDateRaw = value;
+        break;
+      case '17': // Use by
+        result.useByDate = parseGS1Date(value);
+        break;
+      case '21': // Serial
+        result.serialNumber = value;
+        break;
+      case '30': // Quantity
+        result.quantity = parseInt(value, 10) || null;
+        break;
+      case '8004': // Manufacturing unit
+        result.mfgUnit = value;
+        break;
+      case '8005': // Selling price (paise → rupees)
+        result.sellingPrice = parseFloat(value) / 100;
+        result.sellingPriceRaw = value;
+        break;
+      case '8007': // IBV
+        result.ibv = value;
+        break;
+      case '3922': // Amount
+        result.amountPayable = value;
+        break;
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Parse a GS1 date string (YYMMDD) into a Date object.
+ * Handles past/future century wrapping (50+ years = 1900s).
+ */
+function parseGS1Date(yymmdd) {
+  if (!yymmdd || yymmdd.length !== 6) return null;
+  const yy = parseInt(yymmdd.slice(0, 2), 10);
+  const mm = parseInt(yymmdd.slice(2, 4), 10) - 1;
+  const dd = parseInt(yymmdd.slice(4, 6), 10);
+  // Assume 2000s if yy < 50, else 1900s
+  const fullYear = yy < 50 ? 2000 + yy : 1900 + yy;
+  const date = new Date(fullYear, mm, dd);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Check if a barcode string is a GS1-128 formatted barcode.
+ */
+function isGS1Barcode(barcodeStr) {
+  if (!barcodeStr) return false;
+  return /\(\d{2,4}\)/.test(barcodeStr);
+}
+
 /**
  * Generate a CODE128 barcode for a product
- * @param {string} code - The barcode value (typically SKU or product code)
+ * @param {string} code - The barcode value
  * @param {Object} options - Barcode options
- * @returns {Promise<string>} Path to generated barcode image
+ * @returns {Promise<Object>} Generated barcode info
  */
 async function generateBarcode(code, options = {}) {
   const {
@@ -45,7 +269,8 @@ async function generateBarcode(code, options = {}) {
       lineColor: '#000000',
     });
 
-    const fileName = `barcode-${code.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.png`;
+    const safeCode = code.replace(/[^a-zA-Z0-9]/g, '-').slice(0, 50);
+    const fileName = `barcode-${safeCode}-${Date.now()}.png`;
     const filePath = path.join(BARCODE_DIR, fileName);
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(filePath, buffer);
@@ -58,8 +283,6 @@ async function generateBarcode(code, options = {}) {
 
 /**
  * Generate EAN-13 barcode (for retail products)
- * @param {string} ean - 13-digit EAN code
- * @returns {Promise<Object>} Generated barcode info
  */
 async function generateEAN13(ean) {
   if (!/^\d{13}$/.test(ean)) {
@@ -69,10 +292,7 @@ async function generateEAN13(ean) {
 }
 
 /**
- * Generate a QR code for a value (can be URL, text, etc.)
- * @param {string} data - Data to encode in QR
- * @param {Object} options - QR code options
- * @returns {Promise<Object>} Generated QR code info
+ * Generate a QR code
  */
 async function generateQRCode(data, options = {}) {
   const { width = 300, margin = 4, color = { dark: '#000000', light: '#ffffff' } } = options;
@@ -97,13 +317,10 @@ async function generateQRCode(data, options = {}) {
 
 /**
  * Generate UPI QR code for payment
- * UPI format: upi://pay?pa=<vpa>&pn=<name>&am=<amount>&tn=<note>&cu=INR
- * @param {Object} paymentInfo - Payment details
- * @returns {Promise<Object>} Generated QR code info
  */
 async function generateUPIQRCode(paymentInfo) {
   const {
-    vpa, // UPI VPA/ID (e.g., shopname@upi)
+    vpa,
     name = 'Payment',
     amount = 0,
     note = 'Bill Payment',
@@ -115,9 +332,7 @@ async function generateUPIQRCode(paymentInfo) {
     throw new Error('UPI VPA (Virtual Payment Address) is required');
   }
 
-  // Build UPI deep link
   let upiUrl = `upi://pay?pa=${encodeURIComponent(vpa)}&pn=${encodeURIComponent(name)}&am=${amount}&tn=${encodeURIComponent(note)}&cu=INR`;
-
   if (merchantCode) upiUrl += `&mc=${merchantCode}`;
   if (transactionId) upiUrl += `&tr=${transactionId}`;
 
@@ -126,37 +341,62 @@ async function generateUPIQRCode(paymentInfo) {
 
 /**
  * Generate shelf label PDF with barcode, price, and product name
- * @param {Array} products - Array of products to print labels for
- * @returns {Promise<Object>} Generated PDF info
+ * Supports different label templates.
  */
-async function generateShelfLabels(products) {
+async function generateShelfLabels(products, template = 'standard') {
   const PDFDocument = require('pdfkit');
-  const doc = new PDFDocument({ size: [200, 100], margin: 5 });
 
-  const fileName = `shelf-labels-${Date.now()}.pdf`;
+  let labelWidth = 200, labelHeight = 100;
+  if (template === 'price-tag') { labelWidth = 150; labelHeight = 80; }
+  if (template === 'batch') { labelWidth = 250; labelHeight = 120; }
+
+  const doc = new PDFDocument({ size: [labelWidth, labelHeight], margin: 5 });
+
+  const fileName = `labels-${template}-${Date.now()}.pdf`;
   const filePath = path.join(BARCODE_DIR, fileName);
   const stream = fs.createWriteStream(filePath);
 
   doc.pipe(stream);
 
   for (const product of products) {
-    // Generate barcode for this product
-    const canvas = createCanvas(180, 40);
-    JsBarcode(canvas, product.barcode || product.sku, {
+    const codeToEncode = product.gs1Barcode || product.barcode || product.sku;
+    const displayCode = product.barcode || product.sku || '';
+
+    // Generate barcode image
+    const canvas = createCanvas(labelWidth - 20, 40);
+    JsBarcode(canvas, codeToEncode, {
       format: 'CODE128',
       width: 1,
       height: 30,
-      displayValue: true,
+      displayValue: template !== 'price-tag',
       fontSize: 8,
       margin: 0,
     });
 
     const barcodeBuffer = canvas.toBuffer('image/png');
+    const yOffset = template === 'price-tag' ? 5 : 5;
 
-    doc.image(barcodeBuffer, 10, 5, { width: 180 });
-    doc.fontSize(10).text(product.name, 10, 50, { width: 180, align: 'center' });
-    doc.fontSize(12).text(`₹${product.pricing?.sellingPrice || product.sellingPrice || 0}`, 10, 68, { width: 180, align: 'center' });
-    doc.fontSize(7).text(`MRP: ₹${product.pricing?.mrp || product.mrp || 0}`, 10, 85, { width: 180, align: 'center' });
+    if (template === 'batch') {
+      // ─── Batch Label Template ───
+      doc.image(barcodeBuffer, 10, yOffset, { width: labelWidth - 20 });
+      doc.fontSize(10).text(product.name, 10, 48, { width: labelWidth - 20, align: 'center' });
+      doc.fontSize(8).text(`Batch: ${product.batchNumber || '-'}`, 10, 62, { width: labelWidth - 20, align: 'center' });
+      doc.fontSize(8).text(`Mfg: ${product.mfgDate ? new Date(product.mfgDate).toLocaleDateString('en-IN') : '-'}`, 10, 74, { width: labelWidth - 20, align: 'center' });
+      doc.fontSize(8).text(`Exp: ${product.expiryDate ? new Date(product.expiryDate).toLocaleDateString('en-IN') : '-'}`, 10, 82, { width: labelWidth - 20, align: 'center' });
+      doc.fontSize(10).text(`₹${product.pricing?.sellingPrice || product.sellingPrice || 0}`, 10, 92, { width: labelWidth - 20, align: 'center' });
+    } else if (template === 'price-tag') {
+      // ─── Price Tag Template ───
+      doc.fontSize(18).text(`₹${product.pricing?.sellingPrice || product.sellingPrice || 0}`, 10, yOffset + 5, { width: labelWidth - 20, align: 'center' });
+      doc.fontSize(8).text(product.name.substring(0, 25), 10, yOffset + 28, { width: labelWidth - 20, align: 'center' });
+      doc.image(barcodeBuffer, 10, yOffset + 38, { width: Math.min(labelWidth - 20, 130) });
+      doc.fontSize(6).text(`MRP: ₹${product.pricing?.mrp || product.mrp || 0}`, 10, yOffset + 72, { width: labelWidth - 20, align: 'center' });
+    } else {
+      // ─── Standard Shelf Label Template ───
+      doc.image(barcodeBuffer, 10, yOffset, { width: labelWidth - 20 });
+      doc.fontSize(10).text(product.name, 10, 48, { width: labelWidth - 20, align: 'center' });
+      doc.fontSize(12).text(`₹${product.pricing?.sellingPrice || product.sellingPrice || 0}`, 10, 64, { width: labelWidth - 20, align: 'center' });
+      doc.fontSize(7).text(`MRP: ₹${product.pricing?.mrp || product.mrp || 0}`, 10, 82, { width: labelWidth - 20, align: 'center' });
+    }
 
     if (products.indexOf(product) < products.length - 1) {
       doc.addPage();
@@ -172,23 +412,18 @@ async function generateShelfLabels(products) {
 }
 
 /**
- * Generate bulk barcodes for multiple products and return as PDF
- * @param {Array} products - Products to generate barcodes for
- * @returns {Promise<Object>} Generated PDF info
+ * Generate bulk barcodes PDF for multiple products
  */
 async function generateBulkBarcodes(products) {
-  return generateShelfLabels(products);
+  return generateShelfLabels(products, 'standard');
 }
 
 /**
  * Validate a barcode using checksum (for EAN-13)
- * @param {string} barcode - Barcode to validate
- * @returns {boolean}
  */
 function validateBarcode(barcode) {
   if (!barcode || barcode.length < 8) return false;
 
-  // For EAN-13, validate checksum
   if (barcode.length === 13 && /^\d{13}$/.test(barcode)) {
     const digits = barcode.split('').map(Number);
     const checkDigit = digits[12];
@@ -200,7 +435,7 @@ function validateBarcode(barcode) {
     return checkDigit === calculatedCheck;
   }
 
-  return true; // Non-EAN barcodes pass basic validation
+  return true;
 }
 
 module.exports = {
@@ -211,4 +446,8 @@ module.exports = {
   generateShelfLabels,
   generateBulkBarcodes,
   validateBarcode,
+  encodeGS1Barcode,
+  parseGS1Barcode,
+  isGS1Barcode,
+  GS1_AI,
 };

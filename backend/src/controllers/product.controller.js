@@ -788,6 +788,307 @@ exports.exportProducts = async (req, res, next) => {
   }
 };
 
+// @desc    Generate barcodes for selected products (supports GS1 smart barcodes)
+// @route   POST /api/products/generate-barcodes
+exports.generateBarcodes = async (req, res, next) => {
+  try {
+    const { productIds, type = 'code128', template = 'standard', encodeFields = [] } = req.body;
+
+    if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
+      throw new AppError('Please provide an array of product IDs', 400);
+    }
+
+    const query = scopeQuery({ _id: { $in: productIds } }, req);
+    const products = await Product.find(query).lean();
+
+    if (products.length === 0) {
+      throw new AppError('No products found', 404);
+    }
+
+    const { generateBarcode, generateBulkBarcodes, generateShelfLabels, encodeGS1Barcode } = require('../utils/barcodeGenerator');
+
+    const isSmart = encodeFields && encodeFields.length > 0;
+
+    // Generate individual barcodes for each product
+    const barcodes = [];
+    for (const product of products) {
+      let codeToEncode;
+      let gs1Data = null;
+
+      if (isSmart) {
+        // Build GS1-128 smart barcode with selected data fields
+        const gs1Payload = {};
+        
+        // Always include product identifier
+        if (encodeFields.includes('gtin')) gs1Payload.gtin = product.barcode || product.sku;
+        
+        if (encodeFields.includes('expiry')) {
+          // Use first batch's expiry date, or fallback
+          const batch = product.batches?.[0];
+          gs1Payload.expiryDate = batch?.expDate;
+        }
+        
+        if (encodeFields.includes('batch')) {
+          const batch = product.batches?.[0];
+          gs1Payload.batchNumber = batch?.batchNumber || `BATCH-${Date.now().toString(36).toUpperCase()}`;
+        }
+        
+        if (encodeFields.includes('mfgDate')) {
+          const batch = product.batches?.[0];
+          gs1Payload.mfgDate = batch?.mfgDate;
+        }
+        
+        if (encodeFields.includes('mfgUnit')) {
+          gs1Payload.mfgUnit = product.inventory?.location || 'MAIN';
+        }
+        
+        if (encodeFields.includes('price')) {
+          gs1Payload.sellingPrice = product.pricing?.sellingPrice;
+        }
+        
+        if (encodeFields.includes('mrp')) {
+          gs1Payload.mrp = product.pricing?.mrp;
+        }
+
+        // Also encode default barcode/SKU for fallback lookup
+        if (!encodeFields.includes('gtin')) {
+          gs1Payload.gtin = product.barcode || product.sku;
+        }
+
+        codeToEncode = encodeGS1Barcode(gs1Payload);
+        gs1Data = gs1Payload;
+      } else {
+        codeToEncode = product.barcode || product.sku;
+      }
+
+      if (!codeToEncode) {
+        barcodes.push({
+          productId: product._id,
+          name: product.name,
+          sku: product.sku,
+          barcode: null,
+          gs1Data: null,
+          error: 'No barcode or SKU assigned to this product',
+        });
+        continue;
+      }
+
+      try {
+        const format = type === 'ean13' ? 'EAN13' : 'CODE128';
+        const result = await generateBarcode(codeToEncode, {
+          format,
+          width: 350,
+          height: isSmart ? 100 : 80,
+          fontSize: isSmart ? 12 : 16,
+        });
+        barcodes.push({
+          productId: product._id,
+          name: product.name,
+          sku: product.sku,
+          barcode: isSmart ? codeToEncode : (product.barcode || product.sku),
+          gs1Data: isSmart ? gs1Data : null,
+          isSmart,
+          displayCode: isSmart ? product.barcode || product.sku : codeToEncode,
+          imageUrl: result.url,
+          filePath: result.filePath,
+        });
+      } catch (err) {
+        barcodes.push({
+          productId: product._id,
+          name: product.name,
+          sku: product.sku,
+          barcode: codeToEncode,
+          error: err.message,
+        });
+      }
+    }
+
+    // Also generate a combined PDF for all products with selected template
+    let pdfUrl = null;
+    try {
+      // Prepare products with GS1 barcode data for PDF generation
+      const pdfProducts = products.map((p, i) => {
+        const bar = barcodes[i];
+        return {
+          ...p,
+          gs1Barcode: bar?.barcode || p.barcode || p.sku,
+          batchNumber: p.batches?.[0]?.batchNumber,
+          expiryDate: p.batches?.[0]?.expDate,
+          mfgDate: p.batches?.[0]?.mfgDate,
+        };
+      });
+
+      const supportedTemplates = ['standard', 'batch', 'price-tag'];
+      const pdfTemplate = supportedTemplates.includes(template) ? template : 'standard';
+      const pdfResult = await generateShelfLabels(pdfProducts, pdfTemplate);
+      pdfUrl = pdfResult.url;
+    } catch (err) {
+      // PDF generation is optional
+    }
+
+    res.json({
+      success: true,
+      data: {
+        barcodes,
+        pdfUrl,
+        isSmart,
+        template,
+        total: barcodes.length,
+        generated: barcodes.filter(b => b.imageUrl).length,
+        failed: barcodes.filter(b => b.error).length,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Scan and deduct stock via barcode (supports GS1 smart barcodes)
+// @route   POST /api/products/scan-deduct
+exports.scanAndDeduct = async (req, res, next) => {
+  try {
+    let { barcode, quantity = 1, reason, batchNumber } = req.body;
+
+    if (!barcode || !barcode.trim()) {
+      throw new AppError('Barcode is required', 400);
+    }
+
+    const rawBarcode = barcode.trim();
+    
+    // Try to parse as GS1 smart barcode first
+    const { parseGS1Barcode, isGS1Barcode } = require('../utils/barcodeGenerator');
+    let gs1Parsed = null;
+    let searchBarcode = rawBarcode;
+    
+    if (isGS1Barcode(rawBarcode)) {
+      gs1Parsed = parseGS1Barcode(rawBarcode);
+      
+      // Use the GTIN from GS1 data to look up the product
+      if (gs1Parsed?.gtin) {
+        searchBarcode = gs1Parsed.gtin;
+      }
+      
+      // Extract batch/expiry from GS1 data
+      if (gs1Parsed?.batchNumber) {
+        batchNumber = batchNumber || gs1Parsed.batchNumber;
+      }
+      
+      // Extract price from GS1 data if available (can be used for verification)
+      const gs1Price = gs1Parsed?.sellingPrice;
+      
+      // Build a rich reason from GS1 data
+      if (gs1Parsed?.parsedFields?.length > 0) {
+        const gs1Details = gs1Parsed.parsedFields
+          .filter(f => f.value)
+          .map(f => `${f.label}: ${f.value}`)
+          .join(', ');
+        reason = reason || `Smart scan [${gs1Details}]`;
+      }
+    }
+
+    // Search by the extracted barcode value
+    // Try exact barcode match first, then by GTIN pattern
+    let query = scopeQuery({ barcode: searchBarcode }, req);
+    let product = await Product.findOne(query);
+
+    // If not found and it's a GS1 barcode, try without leading zeros on GTIN
+    if (!product && gs1Parsed?.gtin) {
+      const cleanGtin = gs1Parsed.gtin.replace(/^0+/, '');
+      query = scopeQuery({ $or: [
+        { barcode: cleanGtin },
+        { sku: cleanGtin },
+      ]}, req);
+      product = await Product.findOne(query);
+    }
+    
+    // Try by raw barcode string (in case someone stored the full GS1 string)
+    if (!product) {
+      query = scopeQuery({ barcode: rawBarcode }, req);
+      product = await Product.findOne(query);
+    }
+
+    if (!product) {
+      throw new AppError('No product found with this barcode', 404);
+    }
+
+    const deductQty = Math.max(1, parseInt(quantity) || 1);
+    const previousStock = product.inventory.quantity;
+
+    if (previousStock < deductQty) {
+      throw new AppError(`Insufficient stock. Available: ${previousStock}, Requested: ${deductQty}`, 400);
+    }
+
+    // Deduct from batch if batch tracking is enabled and batch specified
+    let batchDeduction = null;
+    if (product.batchTracking && product.batches?.length > 0) {
+      if (batchNumber) {
+        // Find matching batch
+        const batchIndex = product.batches.findIndex(b => b.batchNumber === batchNumber);
+        if (batchIndex >= 0) {
+          const batch = product.batches[batchIndex];
+          const batchQty = Math.min(deductQty, batch.quantity);
+          product.batches[batchIndex].quantity = Math.max(0, batch.quantity - batchQty);
+          batchDeduction = {
+            batchNumber: batch.batchNumber,
+            batchExpiry: batch.expDate,
+            deductedFromBatch: batchQty,
+          };
+        }
+      }
+    }
+
+    product.inventory.quantity = Math.max(0, previousStock - deductQty);
+    product.updatedBy = req.userId;
+    await product.save();
+
+    const logReason = reason || (gs1Parsed ? `Smart barcode scan` : `Barcode scan deduction (${rawBarcode})`);
+    
+    await InventoryLog.create({
+      shopId: req.shopId,
+      branchId: req.branchId,
+      product: product._id,
+      type: 'stock_adjustment',
+      quantity: -deductQty,
+      previousStock,
+      newStock: product.inventory.quantity,
+      reason: logReason,
+      batchNumber: batchNumber,
+      createdBy: req.userId,
+    });
+
+    res.json({
+      success: true,
+      message: `Deducted ${deductQty} from ${product.name}`,
+      data: {
+        product: {
+          _id: product._id,
+          name: product.name,
+          sku: product.sku,
+          barcode: product.barcode,
+          quantity: product.inventory.quantity,
+          previousStock,
+          sellingPrice: product.pricing?.sellingPrice,
+          batchTracking: product.batchTracking,
+          batches: product.batches,
+        },
+        gs1Parsed: gs1Parsed ? {
+          isValidGS1: gs1Parsed.isValidGS1,
+          gtin: gs1Parsed.gtin,
+          batchNumber: gs1Parsed.batchNumber,
+          expiryDate: gs1Parsed.expiryDate,
+          mfgDate: gs1Parsed.mfgDate,
+          sellingPrice: gs1Parsed.sellingPrice,
+          mfgUnit: gs1Parsed.mfgUnit,
+          parsedFields: gs1Parsed.parsedFields,
+        } : null,
+        batchDeduction,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ─── AI Product Import ───
 
 // @desc    Upload and AI-extract products from PDF/image

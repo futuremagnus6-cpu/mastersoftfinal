@@ -663,7 +663,7 @@ function getReceiptText(order) {
 }
 
 // ─── Share Dropdown ───
-function ShareDropdown({ order, shopInfo, printConfig }) {
+function ShareDropdown({ order, shopInfo, printConfig, platformName }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -765,7 +765,7 @@ function ShareDropdown({ order, shopInfo, printConfig }) {
 }
 
 // ─── Receipt Modal ───
-function ReceiptModal({ isOpen, onClose, order, shopInfo, printConfig }) {
+function ReceiptModal({ isOpen, onClose, order, shopInfo, printConfig, platformName }) {
   if (!isOpen || !order) return null;
 
   // Guard against malformed order data (prevents blank page crashes)
@@ -890,7 +890,7 @@ function ReceiptModal({ isOpen, onClose, order, shopInfo, printConfig }) {
 
         {/* Actions */}
         <div className="p-4 border-t dark:border-gray-700 flex gap-2 flex-wrap">
-          <ShareDropdown order={safeOrder} shopInfo={shopInfo} printConfig={printConfig} />
+          <ShareDropdown order={safeOrder} shopInfo={shopInfo} printConfig={printConfig} platformName={platformName} />
           <button
             onClick={() => thermalPrint(safeOrder, shopInfo, printConfig, platformName)}
             className="btn-secondary flex-1 flex items-center justify-center gap-2 text-xs"
@@ -1544,6 +1544,7 @@ export default function POSTerminal() {
         order={lastOrder}
         shopInfo={shopInfo}
         printConfig={printConfig}
+        platformName={platformName}
       />
     </div>
   );
