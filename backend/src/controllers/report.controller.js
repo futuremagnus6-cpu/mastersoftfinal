@@ -9,7 +9,15 @@ exports.getSalesReport = async (req, res, next) => {
   try {
     const { startDate, endDate, groupBy = 'day' } = req.query;
     const query = scopeQuery({ status: 'completed' }, req);
-    if (startDate || endDate) { query.createdAt = {}; if (startDate) query.createdAt.$gte = new Date(startDate); if (endDate) query.createdAt.$lte = new Date(endDate); }
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
     let dateFormat;
     if (groupBy === 'day') dateFormat = { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
     else if (groupBy === 'month') dateFormat = { $dateToString: { format: '%Y-%m', date: '$createdAt' } };
@@ -40,7 +48,15 @@ exports.getGstReport = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
     const query = scopeQuery({ status: 'completed' }, req);
-    if (startDate || endDate) { query.createdAt = {}; if (startDate) query.createdAt.$gte = new Date(startDate); if (endDate) query.createdAt.$lte = new Date(endDate); }
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
     const report = await Order.aggregate([
       { $match: query },
       { $group: { _id: '$gstInvoiceType', orders: { $sum: 1 }, taxable: { $sum: { $subtract: ['$subtotal', '$totalDiscount'] } }, cgst: { $sum: '$totalCgst' }, sgst: { $sum: '$totalSgst' }, igst: { $sum: '$totalIgst' }, totalGst: { $sum: '$totalGst' } } },
@@ -54,7 +70,15 @@ exports.getProfitLoss = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
     const dateQuery = {};
-    if (startDate || endDate) { dateQuery.createdAt = {}; if (startDate) dateQuery.createdAt.$gte = new Date(startDate); if (endDate) dateQuery.createdAt.$lte = new Date(endDate); }
+    if (startDate || endDate) {
+      dateQuery.createdAt = {};
+      if (startDate) dateQuery.createdAt.$gte = new Date(startDate);
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        dateQuery.createdAt.$lte = end;
+      }
+    }
     const [sales, expenses, purchases, customerCount] = await Promise.all([
       Order.aggregate([{ $match: { ...scopeQuery({ status: 'completed' }, req), ...dateQuery } }, { $group: { _id: null, revenue: { $sum: '$grandTotal' }, cost: { $sum: { $sum: { $map: { input: '$items', as: 'item', in: { $multiply: ['$$item.quantity', { $ifNull: ['$$item.sellingPrice', 0] }] } } } } }, gst: { $sum: '$totalGst' }, orders: { $sum: 1 } } }]),
       Expense.aggregate([{ $match: { ...scopeQuery({}, req), ...dateQuery } }, { $group: { _id: null, total: { $sum: '$amount' }, count: { $sum: 1 } } }]),

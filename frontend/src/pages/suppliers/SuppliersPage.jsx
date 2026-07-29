@@ -54,7 +54,21 @@ function SupplierModal({ isOpen, onClose, supplier, onSaved }) {
       else await apiService.createSupplier(form);
       toast.success(supplier ? 'Supplier updated' : 'Supplier created');
       onSaved?.(); onClose();
-    } catch (err) { toast.error('Failed to save'); } finally { setSaving(false); }
+    } catch (err) {
+      const data = err.response?.data;
+      if (data?.code === 'VALIDATION_ERROR' && data?.errors) {
+        const fieldErrors = {};
+        const fieldMap = { orderDate: 'invoiceDate' };
+        data.errors.forEach(e => {
+          const frontendField = fieldMap[e.field] || e.field;
+          fieldErrors[frontendField] = e.message;
+        });
+        setFormErrors(fieldErrors);
+        toast.error('Please fix the highlighted fields');
+      } else {
+        toast.error(data?.message || 'Failed to save');
+      }
+    } finally { setSaving(false); }
   };
 
   if (!isOpen) return null;

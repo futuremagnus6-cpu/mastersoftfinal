@@ -7,6 +7,7 @@ const statusColors = { draft: 'badge-info', sent: 'badge-warning', partial_recei
 
 function PurchaseModal({ isOpen, onClose, onSaved }) {
   const [form, setForm] = useState({ supplier: '', invoiceNumber: '', invoiceDate: '', items: [], notes: '', paymentDueDate: '' });
+  const [formErrors, setFormErrors] = useState({});
   const [suppliers, setSuppliers] = useState([]);
   const [products, setProducts] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -15,10 +16,16 @@ function PurchaseModal({ isOpen, onClose, onSaved }) {
     if (!isOpen) return;
     apiService.getSuppliers({ limit: 100 }).then(r => setSuppliers(r.data?.data || [])).catch(() => {});
     apiService.getProducts({ limit: 100 }).then(r => setProducts(r.data?.data || [])).catch(() => {});
-    if (isOpen) setForm({ supplier: '', invoiceNumber: '', invoiceDate: new Date().toISOString().split('T')[0], items: [{ product: '', quantity: 1, unitPrice: 0 }], notes: '', paymentDueDate: '' });
+    if (isOpen) {
+      setForm({ supplier: '', invoiceNumber: '', invoiceDate: new Date().toISOString().split('T')[0], items: [{ product: '', quantity: 1, unitPrice: 0 }], notes: '', paymentDueDate: '' });
+      setFormErrors({});
+    }
   }, [isOpen]);
 
-  const addItem = () => setForm(f => ({ ...f, items: [...f.items, { product: '', quantity: 1, unitPrice: 0 }] }));
+  const addItem = () => {
+    setForm(f => ({ ...f, items: [...f.items, { product: '', quantity: 1, unitPrice: 0 }] }));
+    if (formErrors.items) setFormErrors(prev => ({ ...prev, items: '' }));
+  };
   const updateItem = (i, field, value) => {
     const items = [...form.items];
     items[i] = { ...items[i], [field]: value };
@@ -27,18 +34,59 @@ function PurchaseModal({ isOpen, onClose, onSaved }) {
       if (p) items[i].unitPrice = p.pricing?.purchasePrice || 0;
     }
     setForm(f => ({ ...f, items }));
+    // Clear item-level errors when user fixes them
+    const key = `items.${i}.${field}`;
+    if (formErrors[key]) setFormErrors(prev => ({ ...prev, [key]: '' }));
   };
   const removeItem = (i) => setForm(f => ({ ...f, items: f.items.filter((_, j) => j !== i) }));
 
+  const validate = () => {
+    const errors = {};
+    if (!form.supplier) errors.supplier = 'Please select a supplier';
+    if (!form.invoiceDate) errors.invoiceDate = 'Invoice date is required';
+    if (form.items.length === 0) errors.items = 'At least one item is required';
+    form.items.forEach((item, i) => {
+      if (!item.product) errors[`items.${i}.product`] = 'Select a product';
+      if (!item.quantity || item.quantity <= 0) errors[`items.${i}.quantity`] = 'Qty must be > 0';
+      if (!item.unitPrice || item.unitPrice < 0) errors[`items.${i}.unitPrice`] = 'Enter a valid price';
+    });
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormErrors({});
+    if (!validate()) return;
     setSaving(true);
     try {
-      await apiService.createPurchase(form);
+      // Map frontend field names to what backend expects
+      const payload = {
+        ...form,
+        orderDate: form.invoiceDate,
+        expectedDelivery: form.paymentDueDate || undefined,
+      };
+      await apiService.createPurchase(payload);
       toast.success('Purchase order created');
       onSaved?.();
       onClose();
-    } catch (err) { toast.error(err.response?.data?.message || 'Failed to create'); } finally { setSaving(false); }
+    } catch (err) {
+      const data = err.response?.data;
+      // Show backend validation errors on specific fields
+      if (data?.code === 'VALIDATION_ERROR' && data?.errors) {
+        const fieldErrors = {};
+        // Map backend field names to frontend field names
+        const fieldMap = { orderDate: 'invoiceDate', expectedDelivery: 'paymentDueDate' };
+        data.errors.forEach(e => {
+          const frontendField = fieldMap[e.field] || e.field;
+          fieldErrors[frontendField] = e.message;
+        });
+        setFormErrors(fieldErrors);
+        toast.error('Please fix the highlighted fields');
+      } else {
+        toast.error(data?.message || 'Failed to create purchase');
+      }
+    } finally { setSaving(false); }
   };
 
   if (!isOpen) return null;
@@ -52,16 +100,18 @@ function PurchaseModal({ isOpen, onClose, onSaved }) {
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div><label className="block text-xs font-medium mb-1">Supplier *</label>
-              <select value={form.supplier} onChange={e => setForm(f => ({ ...f, supplier: e.target.value }))} className="input-field text-sm">
+              <select value={form.supplier} onChange={e => { setForm(f => ({ ...f, supplier: e.target.value })); if (formErrors.supplier) setFormErrors(prev => ({ ...prev, supplier: '' })); }} className={`input-field text-sm ${formErrors.supplier ? 'input-error' : ''}`}>
                 <option value="">Select supplier</option>
                 {suppliers.map(s => <option key={s._id} value={s._id}>{s.name} ({s.company || '-'})</option>)}
               </select>
+              {formErrors.supplier && <p className="text-xs text-danger-500 mt-1">{formErrors.supplier}</p>}
             </div>
             <div><label className="block text-xs font-medium mb-1">Invoice Number</label>
               <input type="text" value={form.invoiceNumber} onChange={e => setForm(f => ({ ...f, invoiceNumber: e.target.value }))} className="input-field text-sm" placeholder="INV-001" />
             </div>
-            <div><label className="block text-xs font-medium mb-1">Invoice Date</label>
-              <input type="date" value={form.invoiceDate} onChange={e => setForm(f => ({ ...f, invoiceDate: e.target.value }))} className="input-field text-sm" />
+            <div><label className="block text-xs font-medium mb-1">Invoice Date *</label>
+              <input type="date" value={form.invoiceDate} onChange={e => { setForm(f => ({ ...f, invoiceDate: e.target.value })); if (formErrors.invoiceDate) setFormErrors(prev => ({ ...prev, invoiceDate: '' })); }} className={`input-field text-sm ${formErrors.invoiceDate ? 'input-error' : ''}`} />
+              {formErrors.invoiceDate && <p className="text-xs text-danger-500 mt-1">{formErrors.invoiceDate}</p>}
             </div>
             <div><label className="block text-xs font-medium mb-1">Payment Due</label>
               <input type="date" value={form.paymentDueDate} onChange={e => setForm(f => ({ ...f, paymentDueDate: e.target.value }))} className="input-field text-sm" />
@@ -70,15 +120,27 @@ function PurchaseModal({ isOpen, onClose, onSaved }) {
 
           {/* Items */}
           <div><label className="block text-xs font-medium mb-2">Items *</label>
+            {formErrors.items && <p className="text-xs text-danger-500 mb-2">{formErrors.items}</p>}
             {form.items.map((item, i) => (
-              <div key={i} className="flex items-center gap-2 mb-2">
-                <select value={item.product} onChange={e => updateItem(i, 'product', e.target.value)} className="input-field text-sm flex-1">
-                  <option value="">Select product</option>
-                  {products.map(p => <option key={p._id} value={p._id}>{p.name} (₹{p.pricing?.purchasePrice || 0})</option>)}
-                </select>
-                <input type="number" value={item.quantity} onChange={e => updateItem(i, 'quantity', parseInt(e.target.value) || 0)} className="input-field text-sm w-20 text-center" min={1} placeholder="Qty" />
-                <input type="number" value={item.unitPrice} onChange={e => updateItem(i, 'unitPrice', parseFloat(e.target.value) || 0)} className="input-field text-sm w-24 text-right" min={0} step="0.01" placeholder="Price" />
-                {form.items.length > 1 && <button type="button" onClick={() => removeItem(i)} className="text-danger-400"><FiX className="w-4 h-4" /></button>}
+              <div key={i} className="mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <select value={item.product} onChange={e => updateItem(i, 'product', e.target.value)} className={`input-field text-sm w-full ${formErrors[`items.${i}.product`] ? 'input-error' : ''}`}>
+                      <option value="">Select product</option>
+                      {products.map(p => <option key={p._id} value={p._id}>{p.name} (₹{p.pricing?.purchasePrice || 0})</option>)}
+                    </select>
+                    {formErrors[`items.${i}.product`] && <p className="text-xs text-danger-500 mt-0.5">{formErrors[`items.${i}.product`]}</p>}
+                  </div>
+                  <div className="w-20">
+                    <input type="number" value={item.quantity} onChange={e => { updateItem(i, 'quantity', parseInt(e.target.value) || 0); if (formErrors[`items.${i}.quantity`]) setFormErrors(prev => ({ ...prev, [`items.${i}.quantity`]: '' })); }} className={`input-field text-sm w-full text-center ${formErrors[`items.${i}.quantity`] ? 'input-error' : ''}`} min={1} placeholder="Qty" />
+                    {formErrors[`items.${i}.quantity`] && <p className="text-xs text-danger-500 mt-0.5">{formErrors[`items.${i}.quantity`]}</p>}
+                  </div>
+                  <div className="w-24">
+                    <input type="number" value={item.unitPrice} onChange={e => { updateItem(i, 'unitPrice', parseFloat(e.target.value) || 0); if (formErrors[`items.${i}.unitPrice`]) setFormErrors(prev => ({ ...prev, [`items.${i}.unitPrice`]: '' })); }} className={`input-field text-sm w-full text-right ${formErrors[`items.${i}.unitPrice`] ? 'input-error' : ''}`} min={0} step="0.01" placeholder="Price" />
+                    {formErrors[`items.${i}.unitPrice`] && <p className="text-xs text-danger-500 mt-0.5">{formErrors[`items.${i}.unitPrice`]}</p>}
+                  </div>
+                  {form.items.length > 1 && <button type="button" onClick={() => removeItem(i)} className="text-danger-400 flex-shrink-0"><FiX className="w-4 h-4" /></button>}
+                </div>
               </div>
             ))}
             <button type="button" onClick={addItem} className="btn-secondary text-xs mt-1"><FiPlus className="w-3 h-3 inline mr-1" /> Add Item</button>

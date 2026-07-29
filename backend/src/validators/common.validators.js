@@ -44,7 +44,7 @@ const requiredEmail = (field = 'email') =>
 /** Optional email */
 const optionalEmail = (field = 'email') =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .trim()
     .isEmail()
     .withMessage(`Please provide a valid ${field}`)
@@ -64,7 +64,7 @@ const requiredPhone = (field = 'phone') =>
 /** Optional phone */
 const optionalPhone = (field = 'phone') =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .trim()
     .matches(/^\+?[\d\s\-()]{7,20}$/)
     .withMessage(`Please provide a valid ${field} number`);
@@ -81,7 +81,7 @@ const requiredUrl = (field = 'url') =>
 /** Optional URL */
 const optionalUrl = (field = 'url') =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .trim()
     .isURL()
     .withMessage(`Please provide a valid ${field}`);
@@ -97,7 +97,7 @@ const requiredBoolean = (field) =>
 /** Optional boolean */
 const optionalBoolean = (field) =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .isBoolean()
     .withMessage(`${field} must be a boolean`);
 
@@ -116,7 +116,7 @@ const requiredNumber = (field, { min, max } = {}) => {
 /** Optional number (float) */
 const optionalNumber = (field, { min, max } = {}) => {
   let chain = body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .isFloat()
     .withMessage(`${field} must be a number`);
   if (min !== undefined) chain = chain.isFloat({ min }).withMessage(`${field} must be at least ${min}`);
@@ -139,7 +139,7 @@ const requiredInt = (field, { min, max } = {}) => {
 /** Optional integer */
 const optionalInt = (field, { min, max } = {}) => {
   let chain = body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .isInt()
     .withMessage(`${field} must be an integer`);
   if (min !== undefined) chain = chain.isInt({ min }).withMessage(`${field} must be at least ${min}`);
@@ -159,7 +159,7 @@ const requiredEnum = (field, values) =>
 /** Optional enum */
 const optionalEnum = (field, values) =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .trim()
     .isIn(values)
     .withMessage(`${field} must be one of: ${values.join(', ')}`);
@@ -175,7 +175,7 @@ const requiredDate = (field) =>
 /** Optional ISO date */
 const optionalDate = (field) =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .isISO8601()
     .withMessage(`${field} must be a valid ISO 8601 date`);
 
@@ -190,7 +190,7 @@ const requiredObject = (field) =>
 /** Optional object */
 const optionalObject = (field) =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .isObject()
     .withMessage(`${field} must be an object`);
 
@@ -209,7 +209,7 @@ const requiredArray = (field, { minLen, maxLen } = {}) => {
 /** Optional array */
 const optionalArray = (field, { minLen, maxLen } = {}) => {
   let chain = body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .isArray()
     .withMessage(`${field} must be an array`);
   if (minLen !== undefined) chain = chain.isArray({ min: minLen });
@@ -220,7 +220,7 @@ const optionalArray = (field, { minLen, maxLen } = {}) => {
 /** GSTIN format (Indian) */
 const gstin = (field = 'gstin') =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .trim()
     .matches(/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/)
     .withMessage('Invalid GSTIN format');
@@ -228,7 +228,7 @@ const gstin = (field = 'gstin') =>
 /** PAN format (Indian) */
 const pan = (field = 'pan') =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .trim()
     .matches(/^[A-Z]{5}\d{4}[A-Z]{1}$/)
     .withMessage('Invalid PAN format');
@@ -236,7 +236,7 @@ const pan = (field = 'pan') =>
 /** Pincode (Indian) */
 const pincode = (field = 'pincode') =>
   body(field)
-    .optional({ values: 'null' })
+    .optional({ values: 'falsy' })
     .trim()
     .matches(/^\d{6}$/)
     .withMessage('Pincode must be a 6-digit number');
