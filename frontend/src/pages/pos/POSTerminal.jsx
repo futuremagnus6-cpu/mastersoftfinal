@@ -1284,7 +1284,7 @@ export default function POSTerminal() {
       </div>
 
       {/* ─── RIGHT: Cart Area ─── */}
-      <div className="w-full lg:w-96 xl:w-[420px] bg-white dark:bg-gray-800 border-t lg:border-t-0 lg:border-l dark:border-gray-700 flex flex-col">
+      <div className="w-full lg:w-96 xl:w-[420px] bg-white dark:bg-gray-800 border-t lg:border-t-0 lg:border-l dark:border-gray-700 flex flex-col max-h-[45vh] lg:max-h-none">
         {/* Cart Header */}
         <div className="p-3 border-b dark:border-gray-700 flex items-center justify-between">
           <div className="flex items-center gap-2">

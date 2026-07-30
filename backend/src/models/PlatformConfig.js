@@ -48,6 +48,9 @@ const platformConfigSchema = new mongoose.Schema({
 
   webhookRetryCount: { type: Number, default: 3 },
 
+  // Billing
+  billingEnabled: { type: Boolean, default: true },
+
   // Maintenance
   maintenanceMode: { type: Boolean, default: false },
   backupEnabled: { type: Boolean, default: true },

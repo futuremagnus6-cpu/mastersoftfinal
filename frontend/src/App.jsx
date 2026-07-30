@@ -74,6 +74,15 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   return children;
 };
 
+// ─── Billing Route Guard ───
+function BillingRouteGuard({ children }) {
+  const { config } = usePlatformConfig();
+  if (config.billingEnabled === false) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
 // ─── Maintenance Page ───
 function MaintenancePage() {
   return (
@@ -180,7 +189,7 @@ export default function App() {
           <Route path="settings" element={<SettingsPage />} />
           <Route path="barcode-scanner" element={<BarcodeScannerPage />} />
           <Route path="barcode-labels" element={<BarcodeLabelsPage />} />
-          <Route path="billing" element={<ShopBillingPage />} />
+          <Route path="billing" element={<BillingRouteGuard><ShopBillingPage /></BillingRouteGuard>} />
           <Route path="chat" element={<ChatPage />} />
         </Route>
 

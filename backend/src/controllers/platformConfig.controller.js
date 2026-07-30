@@ -24,6 +24,7 @@ exports.getPublicStatus = async (req, res, next) => {
         platformName: config.platformName || 'Future Magnus Business OS',
         companyBrandName: config.companyBrandName || '',
         logo: config.logo || '',
+        billingEnabled: config.billingEnabled ?? true,
       },
     });
   } catch (error) { next(error); }
@@ -45,6 +46,7 @@ exports.updateConfig = async (req, res, next) => {
       'publicRateLimitMax', 'publicRateLimitWindow',
       'apiRateLimitMax', 'apiRateLimitWindow',
       'webhookRetryCount',
+      'billingEnabled',
       'maintenanceMode', 'backupEnabled', 'backupTime', 'retentionDays',
     ];
 

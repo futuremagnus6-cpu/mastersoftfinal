@@ -117,6 +117,7 @@ export default function SettingsPage() {
     passwordMinLength: 8,
     twoFactorRequired: false,
     backupEnabled: true,
+    billingEnabled: true,
     backupTime: '02:00',
     retentionDays: 30,
     rateLimitPerMinute: 60,
@@ -150,6 +151,7 @@ export default function SettingsPage() {
           retentionDays: remote.retentionDays || 30,
           rateLimitPerMinute: remote.rateLimitPerMinute || 60,
           webhookRetryCount: remote.webhookRetryCount || 3,
+          billingEnabled: remote.billingEnabled ?? true,
           apiKey: settings.apiKey,
           webhookSecret: settings.webhookSecret,
         });
@@ -188,6 +190,7 @@ export default function SettingsPage() {
         retentionDays: settings.retentionDays,
         rateLimitPerMinute: settings.rateLimitPerMinute,
         webhookRetryCount: settings.webhookRetryCount,
+        billingEnabled: settings.billingEnabled,
       });
       toast.success('Settings saved successfully');
     } catch (err) {
@@ -280,14 +283,6 @@ export default function SettingsPage() {
             Configure global platform settings and preferences
           </p>
         </div>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="btn-primary flex items-center gap-2"
-        >
-          <FiSave className="w-4 h-4" />
-          {saving ? 'Saving...' : 'Save Settings'}
-        </button>
       </div>
 
       {/* Send Announcement / Mass Email */}
@@ -437,6 +432,23 @@ export default function SettingsPage() {
             min={0}
             max={90}
           />
+        </FormField>
+        <FormField label="Enable Billing" description="Show billing tab to shop admins. Disable to hide billing from all shops.">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.billingEnabled}
+              onChange={(e) => handleChange('billingEnabled', e.target.checked)}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600" />
+          </label>
+          {!settings.billingEnabled && (
+            <div className="mt-2 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-2">
+              <FiAlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>Billing tab is hidden from all shop admins.</span>
+            </div>
+          )}
         </FormField>
       </SettingsSection>
 

@@ -84,7 +84,13 @@ export default function Sidebar({ collapsed, onToggle, onNavClick }) {
   // Filter menu items by user role and subscription features
   let filteredItems = menuItems.filter((item) => item.roles.includes(user?.role));
   if (!isSuperAdmin) {
+    // Filter by shop subscription features
     filteredItems = getEnabledMenuItems(filteredItems, shopFeatures);
+
+    // Filter by global platform config
+    if (config.billingEnabled === false) {
+      filteredItems = filteredItems.filter((item) => item.path !== '/billing');
+    }
   }
 
   return (
